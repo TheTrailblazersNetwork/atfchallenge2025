@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ATFChallenge2025 - Patient Booking System
 
-## Getting Started
+A full-stack patient appointment booking application built as a monorepo using Next.js (frontend) and Express (backend).
 
-First, run the development server:
+🌐 **Frontend**: Next.js 15 (App Router)  
+🔧 **Backend**: Node.js + Express  
+📦 **Monorepo**: Powered by `pnpm` workspaces  
+🚫 **Turbopack Disabled**: Known issue on Windows with pnpm (see notes)  
+🚀 **Goal**: Clean separation, scalable architecture, easy onboarding.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🧩 Project Structure
+
+```
+atfchallenge2025/
+├── frontend/ # Next.js frontend
+│   ├── app/ # Pages, layout, route handlers
+│   ├── components/ # Reusable UI
+│   ├── lib/ # Utilities, auth, db
+│   └── ...
+│
+├── backend/ # Express backend
+│   ├── src/
+│   │   ├── routes/ # API endpoints
+│   │   ├── controllers/ # Route logic
+│   │   ├── services/ # Business logic
+│   │   ├── models/ # Data types
+│   │   ├── middleware/ # Auth, logging, 
+│   │   ├── utils/ # Helpers
+│   │   └── server.ts # Entry point
+│   └── ...
+│
+├── pnpm-workspace.yaml # Defines pnpm workspaces
+├── package.json # Root scripts (e.g., pnpm dev)
+├── tsconfig.json # Root TypeScript config
+└── README.md # You are here!
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Clone the Repository
 
-## Learn More
+```bash
+git clone https://github.com/TheTrailblazersNetwork/atfchallenge2025.git
+cd atfchallenge2025
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Install Dependencies
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This is a pnpm-based monorepo. Install globally if needed:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install -g pnpm
+```
 
-## Deploy on Vercel
+Then install all dependencies:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This installs dependencies for both frontend and backend. 
+
+---
+
+## 🛠️ Development
+
+### Start Both Servers
+
+```bash
+pnpm dev
+```
+
+This runs:
+
+- Frontend: `next dev` → http://localhost:3000  
+- Backend: `ts-node-dev` → http://localhost:5000
+
+### Start Individually
+
+```bash
+# Only frontend
+pnpm --filter frontend dev
+
+# Only backend
+pnpm --filter backend dev
+```
+
+---
+
+## 💼 Adding New Dependencies
+
+**Frontend-only package**:
+
+```bash
+pnpm --filter frontend add <package-name>
+```
+
+**Backend-only package**:
+
+```bash
+pnpm --filter backend add <package-name>
+```
+
+**Tool used across projects**:
+
+```bash
+pnpm add -w <package-name>
+```
