@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import pool from './config/db'; 
 import authRoutes from './routes/auth.routes';
 import patientRoutes from './routes/patient.routes';
+import passwordResetRoutes from './routes/passwordReset.routes'; 
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', passwordResetRoutes); 
 app.use('/api/patients', patientRoutes); 
 
 // Health check route
