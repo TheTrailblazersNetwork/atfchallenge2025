@@ -18,3 +18,15 @@ export const login = async (req: Request, res: Response) => {
     res.status(401).json({ error: error.message });
   }
 };
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully'
+        }); 
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+    

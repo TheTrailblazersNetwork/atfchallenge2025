@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import pool from './config/db'; 
 import authRoutes from './routes/auth.routes';
+import patientRoutes from './routes/patient.routes';
 
 dotenv.config();
 
@@ -14,7 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/patients', patientRoutes); 
 
 // Health check route
 app.get('/api/health', (req, res) => {
