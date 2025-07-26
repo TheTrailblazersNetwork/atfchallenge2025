@@ -1,9 +1,10 @@
 import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { sendCommunication } from '../config/email'; // Add this import
 
 const SALT_ROUNDS = 10;
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key'; // Added fallback
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
 
 // Define interfaces for better type safety
 interface PatientData {
@@ -11,10 +12,10 @@ interface PatientData {
   last_name: string;
   gender: string;
   dob: string;
-  phone_number: string;
   email: string;
+  phone_number: string;
+  preferred_contact: 'email' | 'sms'; //  more specific
   password: string;
-  preferred_contact: string;
 }
 
 interface LoginData {
@@ -23,11 +24,12 @@ interface LoginData {
 }
 
 interface PatientResult {
-  id: number;
+  id: string; // Changed to string  using UUID
   email: string;
   first_name: string;
   last_name: string;
-  // Add other fields as needed
+  phone_number: string;
+  preferred_contact: 'email' | 'sms';
 }
 
 export const registerPatient = async (data: PatientData) => {
@@ -42,16 +44,40 @@ export const registerPatient = async (data: PatientData) => {
     preferred_contact,
   } = data;
 
-  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-  
-  const result = await pool.query(
-    `INSERT INTO patients (
-      first_name, last_name, gender, dob, phone_number, email, password_hash, preferred_contact
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, email, first_name, last_name`,
-    [first_name, last_name, gender, dob, phone_number, email, hashedPassword, preferred_contact]
-  );
+  try {
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    
+    const result = await pool.query(
+      `INSERT INTO patients (
+        first_name, last_name, gender, dob, phone_number, email, password_hash, preferred_contact
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, email, first_name, last_name, phone_number, preferred_contact`,
+      [first_name, last_name, gender, dob, phone_number, email, hashedPassword, preferred_contact]
+    );
 
-  return { message: 'Signup successful', patient: result.rows[0] };
+    const patient = result.rows[0];
+
+    // Send welcome communication based on user's preference
+    await sendCommunication(
+      patient.email,
+      patient.phone_number,
+      patient.preferred_contact,
+      'welcome',
+      { firstName: patient.first_name }
+    );
+
+    return { 
+      message: 'Signup successful', 
+      patient: {
+        id: patient.id,
+        email: patient.email,
+        first_name: patient.first_name,
+        last_name: patient.last_name
+      }
+    };
+  } catch (error) {
+    console.error('Error in registerPatient:', error);
+    throw error;
+  }
 };
 
 export const loginPatient = async (data: LoginData) => {
@@ -68,7 +94,6 @@ export const loginPatient = async (data: LoginData) => {
   const match = await bcrypt.compare(password, user.password_hash);
   if (!match) throw new Error('Invalid credentials');
 
-  // Ensure JWT_SECRET is defined
   if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
@@ -77,9 +102,13 @@ export const loginPatient = async (data: LoginData) => {
     { id: user.id, email: user.email }, 
     JWT_SECRET, 
     {
-      expiresIn: '1h', // Token expiration time
+      expiresIn: '1h',
     }
   );
 
-  return { message: 'Login successful', token, user: { id: user.id, email: user.email } };
-}; 
+  return { 
+    message: 'Login successful', 
+    token, 
+    user: { id: user.id, email: user.email } 
+  };
+};

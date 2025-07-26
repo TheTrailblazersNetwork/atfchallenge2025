@@ -1,31 +1,26 @@
 import { Request, Response } from 'express';
-import { generateResetToken, validateResetToken, resetPassword } from '../services/passwordReset.service';
-import { sendPasswordResetEmail } from '../config/email';
+import { 
+  generateResetToken,  // This is your existing function
+  validateResetToken, 
+  resetPassword 
+} from '../services/passwordReset.service';
 
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
-    const { email } = req.body;
+    const { identifier } = req.body; // This could be email or phone
 
-    if (!email) {
+    if (!identifier) {
       return res.status(400).json({
         success: false,
-        error: 'Email is required'
+        error: 'Email or phone number is required'
       });
     }
 
-    // Generate reset token
-    const token = await generateResetToken(email);
+    // For now, just use email-based reset (your existing function)
+    // Later you can implement phone-based reset
+    const token = await generateResetToken(identifier);
     
-    if (token) {
-      // Send email (in development, this logs to console)
-      const emailSent = await sendPasswordResetEmail(email, token);
-      
-      if (!emailSent) {
-        console.warn('Failed to send password reset email');
-      }
-    }
-
-    // Always return success to prevent email enumeration
+    // Always return success to prevent user enumeration
     res.status(200).json({
       success: true,
       message: 'If an account with that email exists, a password reset link has been sent'

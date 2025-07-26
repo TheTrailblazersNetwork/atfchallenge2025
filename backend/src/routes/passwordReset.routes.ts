@@ -9,6 +9,9 @@ import { validate, forgotPasswordValidation, resetPasswordValidation } from '../
 
 const router: Router = express.Router();
 
+// Flexible password reset - accepts email or phone
+router.post('/forgot-password', validate(forgotPasswordValidation), forgotPassword);
+
 // Forgot password - request reset link
 router.post('/forgot-password', validate(forgotPasswordValidation), forgotPassword);
 
