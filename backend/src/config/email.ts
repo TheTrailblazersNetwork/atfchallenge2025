@@ -1,29 +1,28 @@
 import nodemailer from 'nodemailer';
 
 const createTransporter = () => {
-  // For development - console logging (we are using this mock-message-id for testing now, 
-  // will substitute with real email service in the commented For production section)
-  if (process.env.NODE_ENV === 'development') {
-    return {
-      sendMail: async (mailOptions: any) => {
-        console.log('📧 EMAIL WOULD BE SENT:');
-        console.log('To:', mailOptions.to);
-        console.log('Subject:', mailOptions.subject);
-        console.log('Body:', mailOptions.html);
-        console.log('---');
-        return { messageId: 'mock-message-id' };
-      }
-    };
-  }
+  // For development - console logging (mock-message-id for testing)
+//   if (process.env.NODE_ENV === 'development') {
+//     return {
+//       sendMail: async (mailOptions: any) => {
+//         console.log('📧 EMAIL WOULD BE SENT:');
+//         console.log('To:', mailOptions.to);
+//         console.log('Subject:', mailOptions.subject);
+//         console.log('Body:', mailOptions.html);
+//         console.log('---');
+//         return { messageId: 'mock-message-id' };
+//       }
+//     };
+//   }
 
   // For production - Gmail SMTP example
-//   return nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//       user: process.env.EMAIL_USER,
-//       pass: process.env.EMAIL_PASS // Use App Password for Gmail
-//     }
-//   });
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS 
+    }
+  });
 };
 
 export const sendPasswordResetEmail = async (email: string, resetToken: string) => {
