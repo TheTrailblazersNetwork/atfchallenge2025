@@ -14,6 +14,7 @@ import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export function SignupForm({
   className,
@@ -27,6 +28,10 @@ export function SignupForm({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
+
+  // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -112,29 +117,71 @@ export function SignupForm({
                   disabled={isLoading}
                 />
               </div>
-              <div className="grid gap-3">
+              <div className="space-y-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                 </div>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
+                <Label
+                  htmlFor="password"
+                  className="flex border pr-2 rounded-md shadow"
+                >
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    className="border-0 shadow-none"
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Your password"
+                    required
+                    disabled={isLoading}
+                  />
+                  {showPassword ? (
+                    <EyeOff
+                      size={20}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="cursor-pointer text-muted-foreground"
+                    />
+                  ) : (
+                    <Eye
+                      size={20}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="cursor-pointer text-muted-foreground"
+                    />
+                  )}
+                </Label>
               </div>
-              <div className="grid gap-3">
+              <div className="space-y-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Re-Enter Password</Label>
                 </div>
-                <Input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
+                <Label
+                  htmlFor="password2"
+                  className="flex border pr-2 rounded-md shadow"
+                >
+                  <Input
+                    id="password2"
+                    type={showPasswordConfirm ? "text" : "password"}
+                    value={confirmPassword}
+                    className="border-0 shadow-none"
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-Enter confirm password"
+                    required
+                    disabled={isLoading}
+                  />
+                  {showPasswordConfirm ? (
+                    <EyeOff
+                      size={20}
+                      onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                      className="cursor-pointer text-muted-foreground"
+                    />
+                  ) : (
+                    <Eye
+                      size={20}
+                      onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                      className="cursor-pointer text-muted-foreground"
+                    />
+                  )}
+                </Label>
               </div>
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full" disabled={isLoading}>

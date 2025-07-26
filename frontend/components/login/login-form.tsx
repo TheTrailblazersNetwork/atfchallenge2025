@@ -14,6 +14,7 @@ import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from 'lucide-react'
 
 export function LoginForm({
   className,
@@ -23,6 +24,7 @@ export function LoginForm({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Loading state
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -82,15 +84,28 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
-                  required
-                  disabled={isLoading}
-                />
+                <div>
+                  <Label
+                    htmlFor="password"
+                    className="flex border pr-2 rounded-md shadow"
+                  >
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      className="border-0 shadow-none"
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Your password"
+                      required
+                      disabled={isLoading}
+                    />
+                    {showPassword ? (
+                      <EyeOff size={20} onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-muted-foreground" />
+                    ) : (
+                      <Eye size={20} onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-muted-foreground" />
+                    )}
+                  </Label>
+                </div>
               </div>
               <div className="flex flex-col gap-3">
                 <Button
