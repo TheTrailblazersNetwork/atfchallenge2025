@@ -30,6 +30,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { Checkbox } from "../ui/checkbox";
 
 export function SignupForm({
   className,
@@ -39,9 +40,11 @@ export function SignupForm({
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("male");
+  const [date, setDate] = useState<Date>();
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
-  const [date, setDate] = useState<Date>();
+  const [comms, setComms] = useState("email");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
@@ -131,7 +134,12 @@ export function SignupForm({
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-3">
                   <Label htmlFor="gender">Gender</Label>
-                  <Select required disabled={isLoading}>
+                  <Select
+                    required
+                    disabled={isLoading}
+                    defaultValue={gender}
+                    onValueChange={setGender}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Gender" />
                     </SelectTrigger>
@@ -194,6 +202,22 @@ export function SignupForm({
                     required
                     disabled={isLoading}
                   />
+                </div>
+                <div className="col-span-full flex items-center gap-2">
+                  <Checkbox
+                    id="prefer"
+                    checked={comms === "email"}
+                    onCheckedChange={(checked) =>
+                      setComms(checked ? "email" : "sms")
+                    }
+                  />{" "}
+                  <Label
+                    htmlFor="prefer"
+                    className="text-xs text-muted-foreground gap-0"
+                  >
+                    Use email as preferred communications. <br />{comms.toLocaleUpperCase()} is your
+                    preferred communication method{" "}
+                  </Label>
                 </div>
               </div>
               <div className="space-y-3">
@@ -275,7 +299,7 @@ export function SignupForm({
                 </Button> */}
               </div>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-2 text-center text-sm">
               Already have an account?{" "}
               <Link href="/login" className="underline underline-offset-4">
                 Login
