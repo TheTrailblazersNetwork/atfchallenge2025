@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "my_health",
@@ -23,6 +24,7 @@ export default function RootLayout({
         className={`${interFont.className} bg-zinc-100 antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

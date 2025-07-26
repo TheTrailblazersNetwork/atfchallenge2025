@@ -30,6 +30,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+import { toast } from "sonner";
 
 export function SignupForm({
   className,
@@ -61,21 +62,24 @@ export function SignupForm({
       first_name: firstName,
       last_name: lastName,
       gender,
-      dob: date ? date.toISOString() : undefined,
+      dob: date
+        ? date.toISOString().slice(0, 10) // yyyy-mm-dd
+        : undefined,
       email,
       phone_number: mobile,
       preferred_contact: comms,
       password,
-    }
+    };
 
     // Basic validation
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.warning("Passwords do not match!", { richColors: true});
       return;
     }
 
     // Show loading state
     setIsLoading(true);
+    const loadingToast = toast.loading("Signing up...", { richColors: true });
 
     // For now: log the data to the console
     const userData = data;
@@ -91,6 +95,7 @@ export function SignupForm({
 
       // Navigate to login now
       router.push("/login");
+      toast.dismiss(loadingToast);
     } catch (error) {
       console.error("Signup failed:", error);
       alert("Something went wrong. Please try again.");
@@ -218,8 +223,8 @@ export function SignupForm({
                     htmlFor="prefer"
                     className="text-xs text-muted-foreground gap-0"
                   >
-                    Use email as preferred communications. <br />{comms.toLocaleUpperCase()} set as
-                    default{" "}
+                    Use email as preferred communications. <br />
+                    {comms.toLocaleUpperCase()} set as default{" "}
                   </Label>
                 </div>
               </div>
@@ -239,6 +244,7 @@ export function SignupForm({
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Your password"
                     required
+                    minLength={6}
                     disabled={isLoading}
                   />
                   {showPassword ? (
@@ -272,6 +278,7 @@ export function SignupForm({
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm password"
                     required
+                    minLength={6}
                     disabled={isLoading}
                   />
                   {showPasswordConfirm ? (
@@ -294,7 +301,7 @@ export function SignupForm({
                 </Label>
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading || !firstName || !lastName || !email || !mobile || !password || !confirmPassword}>
                   {isLoading ? "Signing Up..." : "Sign Up"}
                 </Button>
                 {/* <Button variant="outline" className="w-full" disabled={isLoading}>
