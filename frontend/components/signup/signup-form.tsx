@@ -215,8 +215,8 @@ export function SignupForm({
                     htmlFor="prefer"
                     className="text-xs text-muted-foreground gap-0"
                   >
-                    Use email as preferred communications. <br />{comms.toLocaleUpperCase()} is your
-                    preferred communication method{" "}
+                    Use email as preferred communications. <br />{comms.toLocaleUpperCase()} set as
+                    default{" "}
                   </Label>
                 </div>
               </div>
