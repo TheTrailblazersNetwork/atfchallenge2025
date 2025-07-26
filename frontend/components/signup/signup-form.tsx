@@ -8,6 +8,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import system_data from "@/app/data/system";
@@ -25,6 +40,8 @@ export function SignupForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [date, setDate] = useState<Date>();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
@@ -32,6 +49,9 @@ export function SignupForm({
   // State for password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+  // State for date picker
+  const [open, setOpen] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -84,10 +104,11 @@ export function SignupForm({
             <div className="flex flex-col gap-6">
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-3">
-                  <Label htmlFor="email">First Name</Label>
+                  <Label htmlFor="fname">First Name</Label>
                   <Input
                     type="text"
                     placeholder="John"
+                    id="fname"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
@@ -95,10 +116,11 @@ export function SignupForm({
                   />
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="email">Last Name</Label>
+                  <Label htmlFor="lname">Last Name</Label>
                   <Input
                     type="text"
                     placeholder="Doe"
+                    id="lname"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
@@ -106,16 +128,73 @@ export function SignupForm({
                   />
                 </div>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  type="email"
-                  placeholder="eg. johndoe@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3">
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select required disabled={isLoading}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="dob">Date of Birth</Label>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        id="date"
+                        className="w-full justify-between font-normal"
+                      >
+                        {date ? date.toLocaleDateString() : "Select date"}
+                        <ChevronDown />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                          setDate(date);
+                          setOpen(false);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    type="email"
+                    placeholder="johndoe@gmail.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="tel">Mobile Number</Label>
+                  <Input
+                    type="tel"
+                    placeholder="0244123456"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center">
@@ -171,13 +250,17 @@ export function SignupForm({
                   {showPasswordConfirm ? (
                     <EyeOff
                       size={20}
-                      onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                      onClick={() =>
+                        setShowPasswordConfirm(!showPasswordConfirm)
+                      }
                       className="cursor-pointer text-muted-foreground"
                     />
                   ) : (
                     <Eye
                       size={20}
-                      onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                      onClick={() =>
+                        setShowPasswordConfirm(!showPasswordConfirm)
+                      }
                       className="cursor-pointer text-muted-foreground"
                     />
                   )}
