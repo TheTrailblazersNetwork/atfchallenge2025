@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -30,6 +31,7 @@ export function LoginForm({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
+    const loadingToast = toast.loading("Logging in...", { richColors: true });
 
     const userData = {
       email,
@@ -45,6 +47,7 @@ export function LoginForm({
 
       // Navigate to patients dashboard
       router.push("/dashboard/patients");
+      toast.dismiss(loadingToast);
     } catch (error) {
       console.error("Login failed:", error);
       alert("Something went wrong. Please try again.");
@@ -97,6 +100,7 @@ export function LoginForm({
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Your password"
                       required
+                      minLength={6}
                       disabled={isLoading}
                     />
                     {showPassword ? (
@@ -111,7 +115,7 @@ export function LoginForm({
                 <Button
                   type="submit"
                   className="w-full flex items-center justify-center gap-2"
-                  disabled={isLoading}
+                  disabled={isLoading || !email || !password}
                 >
                   {isLoading ? (
                     <>
