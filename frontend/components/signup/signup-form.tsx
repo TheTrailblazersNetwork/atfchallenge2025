@@ -20,8 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +57,16 @@ export function SignupForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const data = {
+      first_name: firstName,
+      last_name: lastName,
+      gender,
+      dob: date ? date.toISOString() : undefined,
+      email,
+      phone_number: mobile,
+      preferred_contact: comms,
+      password,
+    }
 
     // Basic validation
     if (password !== confirmPassword) {
@@ -69,13 +78,7 @@ export function SignupForm({
     setIsLoading(true);
 
     // For now: log the data to the console
-    const userData = {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-    };
+    const userData = data;
 
     console.log("User signed up with:", userData);
 
@@ -267,7 +270,7 @@ export function SignupForm({
                     value={confirmPassword}
                     className="border-0 shadow-none"
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-Enter confirm password"
+                    placeholder="Confirm password"
                     required
                     disabled={isLoading}
                   />
