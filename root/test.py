@@ -1,3 +1,4 @@
+
 import requests
 
 patients = [
@@ -77,5 +78,6 @@ patients = [
 
 with requests.get(f"http://127.0.0.1:8000/sort/{patients}") as response:
     #print and write json output to sorted.json
-    sorted_patients = response.text
+    print(response.status_code)
+    sorted_patients = response.json()
     print(sorted_patients)
