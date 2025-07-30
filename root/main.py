@@ -40,26 +40,26 @@ system_prompt = f"""
     - 9–10: Critical severity (emergency, life-threatening)
 
     PATIENT INFORMATION:
-    - Patient ID: {{patient_id}}
+    - Appointment ID: {{appointment_id}}
     - Age: {{age}}
     - Gender: {{gender}}
     - Visiting Status: {{visiting_status}}
     - Medical Condition: {{medical_condition}}
+    - Registration Time: {{registration_time}}
 
 
     OUTPUT
     Return a JSON response of all patients with the following structure:
     results:[
-                "patient_id": "{{patient_id}}":
+                "appointment_id": "{{appointment_id}}":
                                      {{
-                                      "request_id": "{str(uuid4())}",
+                                      "appointment_id": "{str(uuid4())}",
                                       "result_status": "APPROVED",
                                       "priority_rank": <integer from 1 (most urgent) to 4 (least urgent)>,
                                       "severity_score": <integer from 1 to 10>,
                                       "scheduled_start": "<scheduled_start_date will be inserted by user, 
                                       but time starts at 8 AM>",
                                       "scheduled_end": "<30 minutes after scheduled_start_datetime>",
-                                      "note": "Kindly be there 30 minutes before appointment time.",
                                     }},
     ]
     Assign:
