@@ -1,10 +1,10 @@
 {
-    "P001": {
-        "priority_rank": 3,
-        "severity_score": 8,
+    "P009": {
+        "priority_rank": 2,
+        "severity_score": 9,
         "scheduled_date": "2025-08-07",
-        "scheduled_start": "08:00",
-        "scheduled_end": "08:30",
+        "scheduled_start": "12:00",
+        "scheduled_end": "12:30",
         "status": "APPROVED"
     },
     "P002": {
@@ -15,12 +15,12 @@
         "scheduled_end": "09:00",
         "status": "APPROVED"
     },
-    "P003": {
-        "priority_rank": 4,
-        "severity_score": 5,
+    "P005": {
+        "priority_rank": 2,
+        "severity_score": 4,
         "scheduled_date": "2025-08-07",
-        "scheduled_start": "09:00",
-        "scheduled_end": "09:30",
+        "scheduled_start": "10:00",
+        "scheduled_end": "10:30",
         "status": "APPROVED"
     },
     "P004": {
@@ -31,20 +31,12 @@
         "scheduled_end": "10:00",
         "status": "APPROVED"
     },
-    "P005": {
-        "priority_rank": 2,
-        "severity_score": 4,
+    "P001": {
+        "priority_rank": 3,
+        "severity_score": 8,
         "scheduled_date": "2025-08-07",
-        "scheduled_start": "10:00",
-        "scheduled_end": "10:30",
-        "status": "APPROVED"
-    },
-    "P006": {
-        "priority_rank": 4,
-        "severity_score": 7,
-        "scheduled_date": "2025-08-07",
-        "scheduled_start": "10:30",
-        "scheduled_end": "11:00",
+        "scheduled_start": "08:00",
+        "scheduled_end": "08:30",
         "status": "APPROVED"
     },
     "P007": {
@@ -55,28 +47,36 @@
         "scheduled_end": "11:30",
         "status": "APPROVED"
     },
-    "P008": {
-        "priority_rank": 4,
-        "severity_score": 6,
-        "scheduled_date": "2025-08-07",
-        "scheduled_start": "11:30",
-        "scheduled_end": "12:00",
-        "status": "APPROVED"
-    },
-    "P009": {
-        "priority_rank": 2,
-        "severity_score": 8,
-        "scheduled_date": "2025-08-07",
-        "scheduled_start": "12:00",
-        "scheduled_end": "12:30",
-        "status": "APPROVED"
-    },
     "P010": {
         "priority_rank": 3,
         "severity_score": 2,
         "scheduled_date": "2025-08-07",
         "scheduled_start": "12:30",
         "scheduled_end": "13:00",
+        "status": "APPROVED"
+    },
+    "P008": {
+        "priority_rank": 4,
+        "severity_score": 8,
+        "scheduled_date": "2025-08-07",
+        "scheduled_start": "11:30",
+        "scheduled_end": "12:00",
+        "status": "APPROVED"
+    },
+    "P006": {
+        "priority_rank": 4,
+        "severity_score": 7,
+        "scheduled_date": "2025-08-07",
+        "scheduled_start": "10:30",
+        "scheduled_end": "11:00",
+        "status": "APPROVED"
+    },
+    "P003": {
+        "priority_rank": 4,
+        "severity_score": 5,
+        "scheduled_date": "2025-08-07",
+        "scheduled_start": "09:00",
+        "scheduled_end": "09:30",
         "status": "APPROVED"
     }
 }

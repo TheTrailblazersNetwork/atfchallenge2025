@@ -77,6 +77,7 @@ system_prompt = f"""
     - The `priority_rank`, `severity_score` Date for `scheduled_start` and `scheduled_end will be provided.
     - Time for each appointment will be 30 minutes and starts at 8 AM.
     Focus on neurological symptoms, potential complications, and urgency indicators specific to neurosurgery patients.
+    
 """
 
 
@@ -119,6 +120,9 @@ async def sort(patients: List[Patient]):
                 patient["status"] = "APPROVED"
             else:
                 patient["status"] = "PENDING"
+        # Group the patients by increasing priority rank and decrease severity score
+        patient_queue["results"] = dict(sorted(patient_queue["results"].items(),
+            key=lambda item: (item[1]["priority_rank"], -item[1]["severity_score"])))
 
         return patient_queue
 
