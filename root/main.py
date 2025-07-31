@@ -4,10 +4,20 @@ import requests
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List
 
 # load environment variables from .env file
 load_dotenv()
 url = os.getenv("LITELLM_ENDPOINT") + "/chat/completions"
+
+
+class Patient(BaseModel):
+    appointment_id: str
+    age: int
+    gender: str
+    visiting_status: str
+    medical_condition: str
 
 # Assign date variable to the next available Thursday
 # This will be used for scheduling the appointment time
@@ -58,13 +68,14 @@ system_prompt = f"""
                "{{appointment_id}}": {{
                                         "priority_rank": {{priority_rank}},
                                         "severity_score": {{severity_score}},
+                                        "scheduled_date": "{{next_available_thursday_date}},
                                         "scheduled_start": "{{scheduled_start}}",
                                         "scheduled_end": "{{scheduled_end}}",
                                       }},
             }}
     Assign:
-    - The `request_id`, `result_status`, `priority_rank`, `severity_score`.
-    - Date for `scheduled_start` and `scheduled_end` will be filled later by the backend.
+    - The `priority_rank`, `severity_score` Date for `scheduled_start` and `scheduled_end will be provided.
+    - Time for each appointment will be 30 minutes and starts at 8 AM.
     Focus on neurological symptoms, potential complications, and urgency indicators specific to neurosurgery patients.
 """
 
@@ -74,7 +85,7 @@ app = FastAPI(title="Test API",
 
 
 @app.post("/sort")
-async def sort(patients):
+async def sort(patients: List[Patient]):
     """Sorts a dict of patients by their condition."""
     data = {
         "model": "groq/llama-3.3-70b-versatile",
