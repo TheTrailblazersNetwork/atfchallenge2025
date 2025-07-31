@@ -68,14 +68,11 @@ system_prompt = f"""
                "{{appointment_id}}": {{
                                         "priority_rank": {{priority_rank}},
                                         "severity_score": {{severity_score}},
-                                        "scheduled_date": "{{next_available_thursday_date}},
-                                        "scheduled_start": "{{scheduled_start}}",
-                                        "scheduled_end": "{{scheduled_end}}",
                                       }},
             }}
     Assign:
     - The `priority_rank`, `severity_score` Date for `scheduled_start` and `scheduled_end will be provided.
-    - Time for each appointment will be 30 minutes and starts at 8 AM.
+    - Time for each appointment will be 30 minutes and starts at 8 AM, Starting from patient with the lowest priority rank.
     Focus on neurological symptoms, potential complications, and urgency indicators specific to neurosurgery patients.
     
 """
@@ -124,7 +121,14 @@ async def sort(patients: List[Patient]):
         patient_queue["results"] = dict(sorted(patient_queue["results"].items(),
             key=lambda item: (item[1]["priority_rank"], -item[1]["severity_score"])))
 
-        return patient_queue
+        # Schedule start and end times for each patient 30 minutes apart, starting from 8 AM using
+        # the next available Thursday date
+        scheduled_start = datetime.strptime(f"{next_available_thursday_date} 08:00", "%Y-%m-%d %H:%M")
+        for patient_id, patient in patient_queue["results"].items():
+            patient["scheduled_start"] = scheduled_start.strftime("%Y-%m-%d %H:%M")
+            patient["scheduled_end"] = (scheduled_start + timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M")
+            scheduled_start += timedelta(minutes=30)
+        return {"results": patient_queue["results"]}
 
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Error communicating with Groq API: {str(e)}")
