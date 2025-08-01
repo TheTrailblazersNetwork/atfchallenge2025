@@ -34,21 +34,48 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string) 
     to: email,
     subject: '🔐 Password Reset Request',
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Password Reset Request</h2>
-        <p>You have requested to reset your password. Click the button below to proceed:</p>
-        <a href="${resetUrl}" 
-           style="background-color: #007bff; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0;">
-          Reset Password
-        </a>
-        <p>If you didn't request this, please ignore this email.</p>
-        <p>This link will expire in 1 hour.</p>
-        <hr>
-        <p style="font-size: 12px; color: #666;">
-          If the button doesn't work, copy this link to your browser:<br>
-          ${resetUrl}
-        </p>
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+          <div style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 32px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: white; letter-spacing: -0.5px;">ATFHEALTH</h1>
+            <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;"> PASSWORD RESET</p>
+          </div>
+          
+          <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
+            <h2 style="margin-top: 0; font-size: 20px; color: white; font-weight: 600;">Hello User,</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              We received a request to reset your password. Click below to securely update your credentials:
+            </p>
+            
+            <a href="${resetUrl}"
+               style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;
+                      text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;
+                      font-size: 16px; margin: 16px 0; border: none; cursor: pointer; transition: all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(139, 92, 246, 0.3)'"
+               onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+              RESET PASSWORD
+            </a>
+            
+            <div style="border-left: 3px solid #8b5cf6; padding-left: 16px; margin: 24px 0;">
+              <p style="margin: 0; color: #a5b4fc; font-weight: 500;">This link expires in 60 minutes</p>
+              <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.6); font-size: 14px;">
+                If you didn't request this, please secure your account immediately.
+              </p>
+            </div>
+            
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 12px; margin-top: 32px;">
+              Can't click the button? Copy this link:<br>
+              <span style="word-break: break-all; color: #a5b4fc;">${resetUrl}</span>
+            </p>
+          </div>
+          
+          <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
+              © ${new Date().getFullYear()} ATFHEALTH | PASSWORD RESET
+            </p>
+          </div>
+        </div>
       </div>
     `
   };
@@ -88,11 +115,46 @@ export const sendCommunication = async (
             to: email,
             subject: '👋 Welcome to Our Healthcare Platform',
             html: `
-              <div style="font-family: Arial, sans-serif;">
-                <h2>Welcome ${data.firstName}!</h2>
-                <p>Thank you for registering with our healthcare platform.</p>
-                <p>Your account has been created successfully.</p>
-                <p>Procced to schedule your medical appointments, feel free to contact us.</p>
+              <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+                  <div style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 32px; text-align: center; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+                    <div style="position: absolute; bottom: -80px; left: -30px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"></div>
+                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px; position: relative;">WELCOME TO ATF<span style="color: #a5b4fc;">HEALTH</span></h1>
+                    <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;">YOUR APPOINTMENT BOOKING JOURNEY BEGINS</p>
+                  </div>
+                  
+                  <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
+                    <h2 style="margin-top: 0; font-size: 24px; color: white; font-weight: 600; letter-spacing: -0.25px;">Hello ${data.firstName},</h2>
+                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+                      Signup successful 🎉 Proceed to schedule your appointments.
+
+                    </p>
+                    
+                    <div style="border-left: 3px solid #8b5cf6; padding-left: 16px; margin: 24px 0;">
+                      <p style="margin: 0; color: #a5b4fc; font-weight: 500; font-size: 18px;">Your Patient profile is now active</p>
+                    </div>
+                    
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login"
+                       style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;
+                              text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;
+                              font-size: 16px; margin: 16px 0; border: none; cursor: pointer; transition: all 0.3s ease;"
+                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(139, 92, 246, 0.3)'"
+                       onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                      LOGIN HERE
+                    </a>
+                    
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-top: 32px;">
+                      Our support network is available 24/7 to assist you
+                    </p>
+                  </div>
+                  
+                  <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
+                    <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
+                      © ${new Date().getFullYear()} ATFHEALTH | KORLE-BU TEACHING HOSPITAL
+                    </p>
+                  </div>
+                </div>
               </div>
             `
           };
