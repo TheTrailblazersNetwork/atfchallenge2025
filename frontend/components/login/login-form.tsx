@@ -14,6 +14,8 @@ import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from 'lucide-react'
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -23,11 +25,13 @@ export function LoginForm({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Loading state
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
+    const loadingToast = toast.loading("Logging in...", { richColors: true });
 
     const userData = {
       email,
@@ -43,6 +47,7 @@ export function LoginForm({
 
       // Navigate to patients dashboard
       router.push("/dashboard/patients");
+      toast.dismiss(loadingToast);
     } catch (error) {
       console.error("Login failed:", error);
       alert("Something went wrong. Please try again.");
@@ -82,21 +87,35 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
-                  required
-                  disabled={isLoading}
-                />
+                <div>
+                  <Label
+                    htmlFor="password"
+                    className="flex border pr-2 rounded-md shadow"
+                  >
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      className="border-0 shadow-none"
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Your password"
+                      required
+                      minLength={6}
+                      disabled={isLoading}
+                    />
+                    {showPassword ? (
+                      <EyeOff size={20} onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-muted-foreground" />
+                    ) : (
+                      <Eye size={20} onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-muted-foreground" />
+                    )}
+                  </Label>
+                </div>
               </div>
               <div className="flex flex-col gap-3">
                 <Button
                   type="submit"
                   className="w-full flex items-center justify-center gap-2"
-                  disabled={isLoading}
+                  disabled={isLoading || !email || !password}
                 >
                   {isLoading ? (
                     <>
