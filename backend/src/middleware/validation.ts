@@ -1,10 +1,10 @@
 import { body, validationResult, ValidationChain } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
-// Generic validation middleware - With ERROR HANDLING
+// Generic validation middleware
 export const validate = (validations: ValidationChain[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    try {  // Add try-catch for better error handling
+    try {
       await Promise.all(validations.map(validation => validation.run(req)));
 
       const errors = validationResult(req);
@@ -77,11 +77,11 @@ export const signupValidation = [
   body('preferred_contact')
     .notEmpty()
     .withMessage('Preferred contact method is required')
-    .isIn(['email', 'sms'])  // Fixed: was 'phone' before, now 'sms'
+    .isIn(['email', 'sms'])
     .withMessage('Preferred contact must be email or sms')
 ];
 
-// Login validation rules - ALL GOOD!
+// Login validation rules
 export const loginValidation = [
   body('email')
     .isEmail()
@@ -95,10 +95,19 @@ export const loginValidation = [
 
 // Add Password Reset validation rules
 export const forgotPasswordValidation = [
-  body('email')
-    .isEmail()
-    .withMessage('Please provide a valid email')
-    .normalizeEmail()
+  body('identifier')
+    .notEmpty()
+    .withMessage('Email or phone number is required')
+    .custom((value) => {
+      // Check if it's a valid email OR a valid phone number
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^(\+233|0)?[2-5]\d{8}$/; // Ghana phone format
+      
+      if (!emailRegex.test(value) && !phoneRegex.test(value)) {
+        throw new Error('Please provide a valid email or phone number');
+      }
+      return true;
+    })
 ];
 
 export const resetPasswordValidation = [
