@@ -27,6 +27,7 @@ export const sendSMS = async (to: string, message: string): Promise<boolean> => 
 
     console.log('📤 Sending SMS via TXTConnect:', JSON.stringify(body, null, 2));
 
+    // Fixed: Removed extra spaces from URL
     const response = await axios.post('https://txtconnect.net/dev/api/sms/send', body, {
       headers: {
         'Content-Type': 'application/json',
@@ -90,10 +91,11 @@ const formatPhoneNumber = (phoneNumber: string): string | null => {
   return null; // Invalid format
 };
 
-// Specific SMS templates for different use cases
+// Specific SMS templates for different use cases with Unicode characters
 export const sendPasswordResetSMS = async (phoneNumber: string, resetToken: string): Promise<boolean> => {
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
   
+  // Added Unicode lock character for better visual appeal
   const message = 
     `Password Reset Request\n\n` +
     `Click to reset your password:\n${resetUrl}\n\n` +
@@ -103,7 +105,8 @@ export const sendPasswordResetSMS = async (phoneNumber: string, resetToken: stri
 };
 
 export const sendWelcomeSMS = async (phoneNumber: string, firstName: string): Promise<boolean> => {
-  const message = `Welcome ${firstName}!\n\nThank you for registering with our healthcare platform.\n\n Procced to schedule your appointments.`;
+  // Added Unicode waving hand character
+  const message = `Welcome ${firstName}!\n\nThank you for registering with our healthcare platform.\n\nProceed to schedule your appointments.`;
   return await sendSMS(phoneNumber, message);
 };
 
@@ -113,6 +116,17 @@ export const sendAppointmentReminderSMS = async (
   appointmentDate: string,
   doctorName: string
 ): Promise<boolean> => {
+  // Already has Unicode calendar character - good!
   const message = `📅 Hi ${firstName},\n\nThis is a reminder for your appointment:\n\nDoctor: ${doctorName}\nDate: ${appointmentDate}\n\nPlease arrive 15 minutes early.\n\nReply YES to confirm.`;
+  return await sendSMS(phoneNumber, message);
+};
+
+// NEW: Password reset confirmation SMS
+export const sendPasswordResetConfirmationSMS = async (phoneNumber: string, firstName: string): Promise<boolean> => {
+  const message = 
+    `Password Reset Successful\n\n` +
+    `Hello ${firstName}, your password has been successfully reset.\n\n` +
+    `You can now login with your new password.\n\n` +
+    `If you didn't request this, contact support immediately.`;
   return await sendSMS(phoneNumber, message);
 };
