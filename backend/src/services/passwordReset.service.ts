@@ -70,7 +70,7 @@ export const generateResetTokenByPhone = async (phoneNumber: string): Promise<st
 
     // Check if user exists and get their communication preferences
     const userResult = await pool.query(
-      'SELECT id, email, phone_number, preferred_contact FROM patients WHERE phone_number = $1',
+      'SELECT id, email, phone_number, preferred_contact, first_name FROM patients WHERE phone_number = $1',
       [formattedPhone]
     );
 
@@ -205,6 +205,14 @@ export const resetPassword = async (token: string, newPassword: string): Promise
 
     const email = tokenResult.rows[0].email;
 
+    // Get user info for confirmation message
+    const userResult = await pool.query(
+      'SELECT id, email, phone_number, preferred_contact, first_name FROM patients WHERE email = $1',
+      [email]
+    );
+
+    const user = userResult.rows[0];
+
     // Hash new password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
@@ -220,6 +228,17 @@ export const resetPassword = async (token: string, newPassword: string): Promise
       'UPDATE password_reset_tokens SET used = true WHERE token = $1',
       [token]
     );
+
+    // Send password reset confirmation based on user's preference
+    if (user) {
+      await sendCommunication(
+        user.email,
+        user.phone_number,
+        user.preferred_contact as 'email' | 'sms',
+        'password_reset_confirmation',
+        { firstName: user.first_name || 'User' }
+      );
+    }
 
     return true;
   } catch (error) {
