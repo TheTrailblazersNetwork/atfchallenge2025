@@ -93,13 +93,17 @@ const formatPhoneNumber = (phoneNumber: string): string | null => {
 // Specific SMS templates for different use cases
 export const sendPasswordResetSMS = async (phoneNumber: string, resetToken: string): Promise<boolean> => {
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
-  const message = `Password Reset: Click to reset your password: ${resetUrl}\n\nThis link expires in 1 hour.`;
+  
+  const message = 
+    `Password Reset Request\n\n` +
+    `Click to reset your password:\n${resetUrl}\n\n` +
+    `Link expires in 1 hour. Ignore if you didn't request this.`;
   
   return await sendSMS(phoneNumber, message);
 };
 
 export const sendWelcomeSMS = async (phoneNumber: string, firstName: string): Promise<boolean> => {
-  const message = `Welcome ${firstName}!\n\nThank you for registering with our healthcare platform. Your health journey starts now!\n\nReply HELP for help.`;
+  const message = `Welcome ${firstName}!\n\nThank you for registering with our healthcare platform.\n\n Procced to schedule your appointments.`;
   return await sendSMS(phoneNumber, message);
 };
 

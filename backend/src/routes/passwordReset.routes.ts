@@ -12,9 +12,6 @@ const router: Router = express.Router();
 // Flexible password reset - accepts email or phone
 router.post('/forgot-password', validate(forgotPasswordValidation), forgotPassword);
 
-// Forgot password - request reset link
-router.post('/forgot-password', validate(forgotPasswordValidation), forgotPassword);
-
 // Validate reset token
 router.get('/reset-password/:token', [
   param('token').notEmpty().withMessage('Token is required')
