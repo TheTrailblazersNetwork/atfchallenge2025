@@ -76,7 +76,7 @@ patients = [
 
 
 
-with requests.post("http://127.0.0.1:8000/sort/", json=patients) as response:
+with requests.post("https://atfchallenge2025.onrender.com/sort/", json=patients) as response:
     #print and write json output to sorted.json
     print(response.status_code)
     sorted_patients = response.json()["results"]
