@@ -18,7 +18,7 @@
 
 ## 📥 Request Format
 
-Send a `POST` request to `/sort` with a dictionary of patients:
+Send a `POST` request to ` https://atfchallenge2025.onrender.com/sort/` with a dictionary of patients:
 
 ```json
 {
