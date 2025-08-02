@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from typing import List
 
 # load environment variables from .env file
-load_dotenv()
+load_dotenv("root/.env")
 url = os.getenv("LITELLM_ENDPOINT") + "/chat/completions"
 
 
