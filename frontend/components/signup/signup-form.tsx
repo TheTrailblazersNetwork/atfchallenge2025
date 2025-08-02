@@ -214,17 +214,15 @@ export function SignupForm({
                 <div className="col-span-full flex items-center gap-2">
                   <Checkbox
                     id="prefer"
-                    checked={comms === "email"}
                     onCheckedChange={(checked) =>
-                      setComms(checked ? "email" : "sms")
+                      setComms(checked ? "sms" : "email")
                     }
                   />{" "}
                   <Label
                     htmlFor="prefer"
                     className="text-xs text-muted-foreground gap-0"
                   >
-                    Use email as preferred communications. <br />
-                    {comms.toLocaleUpperCase()} set as default{" "}
+                    Include SMS notifications<br />
                   </Label>
                 </div>
               </div>

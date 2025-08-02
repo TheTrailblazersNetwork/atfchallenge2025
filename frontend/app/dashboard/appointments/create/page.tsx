@@ -17,7 +17,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const steps = [1, 2, 3];
 
@@ -177,6 +176,32 @@ const page = () => {
               }}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 my-5 gap-5">
+                <div className="grid bg-zinc-100 rounded-lg p-4 gap-4 grid-cols-1 md:grid-cols-3 col-span-full">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Full Name</p>
+                    <p className="text-sm font-medium">John Doe</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Phone Number</p>
+                    <p className="text-sm font-medium">+1234567890</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="text-sm font-medium">testing@gmail.com</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Gender</p>
+                    <p className="text-sm font-medium">Male</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Age</p>
+                    <p className="text-sm font-medium">25 Years</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">Comm. Preference</p>
+                    <p className="text-sm font-medium">Email & SMS</p>
+                  </div>
+                </div>
                 <div className="grid gap-2">
                   <Label>Visiting Status</Label>
                   <Select disabled>
