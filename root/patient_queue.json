@@ -1,72 +1,62 @@
 {
     "P009": {
         "priority_rank": 2,
-        "severity_score": 8,
+        "severity_score": 9,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 08:00",
-        "scheduled_end": "2025-07-31 08:30"
+        "scheduled_date": "2025-08-07"
     },
     "P002": {
         "priority_rank": 2,
         "severity_score": 6,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 08:30",
-        "scheduled_end": "2025-07-31 09:00"
+        "scheduled_date": "2025-08-07"
     },
     "P005": {
         "priority_rank": 2,
         "severity_score": 4,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 09:00",
-        "scheduled_end": "2025-07-31 09:30"
+        "scheduled_date": "2025-08-07"
     },
     "P004": {
         "priority_rank": 3,
         "severity_score": 9,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 09:30",
-        "scheduled_end": "2025-07-31 10:00"
+        "scheduled_date": "2025-08-07"
     },
     "P001": {
         "priority_rank": 3,
         "severity_score": 8,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 10:00",
-        "scheduled_end": "2025-07-31 10:30"
+        "scheduled_date": "2025-08-07"
     },
     "P007": {
         "priority_rank": 3,
         "severity_score": 3,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 10:30",
-        "scheduled_end": "2025-07-31 11:00"
+        "scheduled_date": "2025-08-07"
     },
     "P010": {
         "priority_rank": 3,
         "severity_score": 2,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 11:00",
-        "scheduled_end": "2025-07-31 11:30"
+        "scheduled_date": "2025-08-07"
+    },
+    "P008": {
+        "priority_rank": 4,
+        "severity_score": 8,
+        "status": "APPROVED",
+        "scheduled_date": "2025-08-07"
     },
     "P006": {
         "priority_rank": 4,
         "severity_score": 7,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 11:30",
-        "scheduled_end": "2025-07-31 12:00"
-    },
-    "P008": {
-        "priority_rank": 4,
-        "severity_score": 6,
-        "status": "APPROVED",
-        "scheduled_start": "2025-07-31 12:00",
-        "scheduled_end": "2025-07-31 12:30"
+        "scheduled_date": "2025-08-07"
     },
     "P003": {
         "priority_rank": 4,
         "severity_score": 5,
         "status": "APPROVED",
-        "scheduled_start": "2025-07-31 12:30",
-        "scheduled_end": "2025-07-31 13:00"
+        "scheduled_date": "2025-08-07"
     }
 }

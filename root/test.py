@@ -76,10 +76,9 @@ patients = [
 
 
 
-with requests.post(f"http://127.0.0.1:8000/sort/", json=patients) as response:
+with requests.post("http://127.0.0.1:8000/sort/", json=patients) as response:
     #print and write json output to sorted.json
     print(response.status_code)
     sorted_patients = response.json()["results"]
-
     with open("patient_queue.json", "w") as file:
         json.dump(sorted_patients, file, indent=4)

@@ -30,7 +30,7 @@ else:
     next_available_thursday = today + timedelta(days=days_until_thursday)
 
 next_available_thursday_date = next_available_thursday.strftime("%Y-%m-%d")
-print(next_available_thursday_date)
+
 
 headers = {
     "Authorization": "Bearer " + os.getenv("VIRTUAL_KEY"),
@@ -78,8 +78,9 @@ system_prompt = f"""
 """
 
 
-app = FastAPI(title="Test API",
-              description="Test API")
+app = FastAPI(title="Neurosurgery Triage API",
+              description="This API sorts patients based on their medical conditions and "
+                          "triage priority for a neurosurgery clinic.",)
 
 
 @app.post("/sort")
@@ -94,7 +95,7 @@ async def sort(patients: List[Patient]):
             },
             {
                 "role": "user",
-                "content": f"""{patients}, date: {next_available_thursday_date}"""
+                "content": f"{patients}"
             }
 
         ],
@@ -115,19 +116,12 @@ async def sort(patients: List[Patient]):
         for i, patient in enumerate(patient_queue["results"].values()):
             if i < patient_capacity:  # Approved patients are the first 170 in the queue
                 patient["status"] = "APPROVED"
+                patient["scheduled_date"] = next_available_thursday_date
             else:
                 patient["status"] = "PENDING"
         # Group the patients by increasing priority rank and decrease severity score
         patient_queue["results"] = dict(sorted(patient_queue["results"].items(),
             key=lambda item: (item[1]["priority_rank"], -item[1]["severity_score"])))
-
-        # Schedule start and end times for each patient 30 minutes apart, starting from 8 AM using
-        # the next available Thursday date
-        scheduled_start = datetime.strptime(f"{next_available_thursday_date} 08:00", "%Y-%m-%d %H:%M")
-        for patient_id, patient in patient_queue["results"].items():
-            patient["scheduled_start"] = scheduled_start.strftime("%Y-%m-%d %H:%M")
-            patient["scheduled_end"] = (scheduled_start + timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M")
-            scheduled_start += timedelta(minutes=30)
         return {"results": patient_queue["results"]}
 
     except requests.exceptions.RequestException as e:
