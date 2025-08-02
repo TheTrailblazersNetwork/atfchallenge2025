@@ -2,14 +2,18 @@ import React from "react";
 
 export default function PatientsPage() {
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Welcome to the Patients Dashboard</h2>
-      <p className="text-gray-600">
-        Here you can book your appointments and more..
-      </p>
+    <div className="dashboard-page">
+      <div>
+        <h2 className="text-2xl font-bold">
+          Patient's Dashboard
+        </h2>
+        <p className="text-gray-600">
+          Book Appointments, View Medical Records, and Manage Your Health
+        </p>
+      </div>
 
       {/* Example card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <Card title="Available Doctors" value="4" />
         <Card title="Appointments Today" value="8" />
         <Card title="Pending Requests" value="6" />

@@ -120,3 +120,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* 
+----------------- Dashboard Styles-----------------
+This section styles the dashboard page layout, including grid structure and spacing.
+*/
+.dashboard-page {
+  @apply grid gap-6 py-5 w-full;
+}
