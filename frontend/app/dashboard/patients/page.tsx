@@ -1,17 +1,13 @@
+import DashboardPageHeader from "@/components/dashboard/page-header";
 import React from "react";
 
 export default function PatientsPage() {
   return (
     <div className="dashboard-page">
-      <div>
-        <h2 className="text-2xl font-bold">
-          Patient's Dashboard
-        </h2>
-        <p className="text-gray-600">
-          Book Appointments, View Medical Records, and Manage Your Health
-        </p>
-      </div>
-
+      <DashboardPageHeader
+        title="Patient's Dashboard"
+        subtitle="Book Appointments, View Medical Records, and Manage Your Health"
+      />
       {/* Example card */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <Card title="Available Doctors" value="4" />

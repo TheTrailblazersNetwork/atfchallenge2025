@@ -1,12 +1,14 @@
 import CreateAppointmentSteps from "@/components/dashboard/appointments/create-steps";
+import DashboardPageHeader from "@/components/dashboard/page-header";
 
 const page = () => {
-
   return (
     <div className="dashboard-page">
-      <div>
-        <h2 className="text-2xl text-center font-bold">Book an Appointment</h2>
-      </div>
+      <DashboardPageHeader
+        title="Book an Appointment"
+        className="text-center"
+        subtitle="Schedule your visit in just a few steps."
+      />
       <CreateAppointmentSteps />
     </div>
   );

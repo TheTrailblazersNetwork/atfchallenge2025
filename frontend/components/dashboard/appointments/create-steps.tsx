@@ -38,7 +38,7 @@ const CreateAppointmentSteps = () => {
   };
 
   return (
-    <div className="w-full lg:w-[800px] mx-auto bg-zinc-50 rounded-lg p-5">
+    <div className="w-full lg:w-[800px] mx-auto bg-white rounded-lg p-5 md:p-10 shadow border-2">
       <Stepper defaultValue={activeStep} value={activeStep} className="w-full">
         {steps.map((step) => (
           <StepperItem key={step} step={step} className="not-last:flex-1">
