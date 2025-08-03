@@ -48,25 +48,30 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup className={"h-full"}>
           <SidebarGroupLabel
-            className={"flex items-center justify-center flex-col py-10 my-5 bg-zinc-200"}
+            className={
+              "flex items-center justify-center flex-col py-10 my-5 bg-zinc-200"
+            }
           >
             <Logo />
           </SidebarGroupLabel>
           <SidebarGroupContent className={"h-full"}>
-            <SidebarMenu className={"relative h-full"}>
+            <SidebarMenu className={"relative h-full space-y-1"}>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link
-                      className={clsx("!text-base", {
+                      className={clsx("!text-base !py-5", {
                         "bg-sidebar-accent font-medium":
-                          pathname === item.url || pathname.startsWith(item.url),
+                          pathname === item.url ||
+                          pathname.startsWith(item.url),
                       })}
                       href={item.url}
                     >
                       <item.icon
                         strokeWidth={clsx({
-                          "2px": pathname === item.url,
+                          "2px":
+                            pathname === item.url ||
+                            pathname.startsWith(item.url),
                         })}
                       />
                       <span>{item.title}</span>
@@ -79,7 +84,7 @@ export function AppSidebar() {
                   variant={"outline"}
                   className={"w-full cursor-pointer mt-2"}
                 >
-                    Log Out
+                  Log Out
                 </Button>
               </div>
             </SidebarMenu>

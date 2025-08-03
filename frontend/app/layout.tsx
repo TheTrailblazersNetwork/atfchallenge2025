@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import ReduxProvider from "@/components/Redux-Provider";
 
 export const metadata: Metadata = {
   title: "my_health",
@@ -20,12 +21,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${interFont.className} bg-zinc-100 antialiased`}
-      >
-        {children}
-        <Toaster />
-      </body>
+      <ReduxProvider>
+        <body className={`${interFont.className} bg-zinc-100 antialiased`}>
+          {children}
+          <Toaster />
+        </body>
+      </ReduxProvider>
     </html>
   );
 }
