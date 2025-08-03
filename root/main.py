@@ -18,6 +18,7 @@ class Patient(BaseModel):
     gender: str
     visiting_status: str
     medical_condition: str
+    #Will add time of booking
 
 # Assign date variable to the next available Thursday
 # This will be used for scheduling the appointment time
@@ -112,16 +113,18 @@ async def sort(patients: List[Patient]):
 
         patient_capacity = 5
 
+        # Group the patients by increasing priority rank and decrease severity score
+        patient_queue["results"] = dict(sorted(patient_queue["results"].items(),
+                                               key=lambda item: (item[1]["priority_rank"], -item[1]["severity_score"])))
+
+
         # Add an APPROVED status to first n patient in the queue
         for i, patient in enumerate(patient_queue["results"].values()):
-            if i < patient_capacity:  # Approved patients are the first 170 in the queue
+            if i < patient_capacity:  # Approved patients are the first n in the queue
                 patient["status"] = "APPROVED"
                 patient["scheduled_date"] = next_available_thursday_date
             else:
-                patient["status"] = "PENDING"
-        # Group the patients by increasing priority rank and decrease severity score
-        patient_queue["results"] = dict(sorted(patient_queue["results"].items(),
-            key=lambda item: (item[1]["priority_rank"], -item[1]["severity_score"])))
+                patient["status"] = "REBOOK"
         return {"results": patient_queue["results"]}
 
     except requests.exceptions.RequestException as e:
