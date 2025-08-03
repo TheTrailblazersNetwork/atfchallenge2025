@@ -110,7 +110,7 @@ async def sort(patients: List[Patient]):
         patient_queue = ai_response["choices"][0]["message"]["content"]
         patient_queue = json.loads(patient_queue)
 
-        patient_capacity = 170
+        patient_capacity = 5
 
         # Add an APPROVED status to first n patient in the queue
         for i, patient in enumerate(patient_queue["results"].values()):
