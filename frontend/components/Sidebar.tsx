@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Settings, ClipboardList, Users, Bell } from "lucide-react";
+import { Settings, CalendarClock, House, BellDot } from "lucide-react";
 import Logo from "./Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -21,17 +21,17 @@ const items = [
   {
     title: "Home",
     url: "/dashboard/patients",
-    icon: Users,
+    icon: House,
   },
   {
     title: "Appointments",
     url: "/dashboard/appointments",
-    icon: ClipboardList,
+    icon: CalendarClock,
   },
   {
     title: "Notifications",
     url: "/dashboard/notifications",
-    icon: Bell,
+    icon: BellDot,
   },
   {
     title: "Settings",
@@ -49,7 +49,7 @@ export function AppSidebar() {
         <SidebarGroup className={"h-full"}>
           <SidebarGroupLabel
             className={
-              "flex items-center justify-center flex-col py-10 my-5 bg-zinc-200"
+              "flex items-center justify-center flex-col py-10 my-5"
             }
           >
             <Logo />
@@ -61,7 +61,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       className={clsx("!text-base !py-5", {
-                        "bg-sidebar-accent font-medium":
+                        "bg-sidebar-accent font-medium ":
                           pathname === item.url ||
                           pathname.startsWith(item.url),
                       })}
