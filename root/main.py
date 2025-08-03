@@ -124,7 +124,7 @@ async def sort(patients: List[Patient]):
                 patient["status"] = "APPROVED"
                 patient["scheduled_date"] = next_available_thursday_date
             else:
-                patient["status"] = "REBOOK"
+                patient["status"] = "RESCHEDULE"
         return {"results": patient_queue["results"]}
 
     except requests.exceptions.RequestException as e:
