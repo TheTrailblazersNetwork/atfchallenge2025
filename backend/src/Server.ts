@@ -5,6 +5,8 @@ import pool from './config/db';
 import authRoutes from './routes/auth.routes';
 import patientRoutes from './routes/patient.routes';
 import passwordResetRoutes from './routes/passwordReset.routes'; 
+import appointementRoutes from './routes/appointment.routes';
+import './jobs/batchScheduling.job'; 
 
 dotenv.config();
 
@@ -19,6 +21,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', passwordResetRoutes); 
 app.use('/api/patients', patientRoutes); 
+app.use('/api/appointments', appointementRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

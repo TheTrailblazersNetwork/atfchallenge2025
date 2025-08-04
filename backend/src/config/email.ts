@@ -1,5 +1,12 @@
 import nodemailer from 'nodemailer';
-import { sendSMS, sendPasswordResetSMS, sendWelcomeSMS } from '../services/sms.service';
+import {
+  sendSMS,
+  sendPasswordResetSMS,
+  sendWelcomeSMS,
+  sendPasswordResetConfirmationSMS,
+  sendAppointmentApprovedSMS,
+  sendAppointmentRebookedSMS
+} from '../services/sms.service';
 
 const createTransporter = () => {
   if (process.env.NODE_ENV === 'development') {
@@ -26,9 +33,8 @@ const createTransporter = () => {
 
 export const sendPasswordResetEmail = async (email: string, resetToken: string) => {
   const transporter: any = createTransporter();
-  
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
-  
+
   const mailOptions = {
     from: process.env.EMAIL_FROM || 'noreply@yourapp.com',
     to: email,
@@ -151,13 +157,185 @@ export const sendPasswordResetConfirmationEmail = async (email: string, firstNam
   }
 };
 
-// Unified communication function
+// NEW: Welcome Email Template (Optional, for consistency)
+export const sendWelcomeEmail = async (email: string, firstName: string) => {
+  const transporter: any = createTransporter();
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || 'noreply@yourapp.com',
+    to: email,
+    subject: '👋 Welcome to Our Healthcare Platform',
+    html: `
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+          <div style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 32px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+            <div style="position: absolute; bottom: -80px; left: -30px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"></div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px; position: relative;">WELCOME TO ATF<span style="color: #a5b4fc;">HEALTH</span></h1>
+            <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;">YOUR APPOINTMENT BOOKING JOURNEY BEGINS</p>
+          </div>
+          
+          <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
+            <h2 style="margin-top: 0; font-size: 24px; color: white; font-weight: 600; letter-spacing: -0.25px;">Hello ${firstName},</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              Signup successful 🎉 Proceed to schedule your appointments.
+            </p>
+            
+            <div style="border-left: 3px solid #8b5cf6; padding-left: 16px; margin: 24px 0;">
+              <p style="margin: 0; color: #a5b4fc; font-weight: 500; font-size: 18px;">Your Patient profile is now active</p>
+            </div>
+            
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login"
+               style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;
+                      text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;
+                      font-size: 16px; margin: 16px 0; border: none; cursor: pointer; transition: all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(139, 92, 246, 0.3)'"
+               onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+              LOGIN HERE
+            </a>
+            
+            <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-top: 32px;">
+              Our support network is available 24/7 to assist you
+            </p>
+          </div>
+          
+          <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
+              © ${new Date().getFullYear()} ATFHEALTH | KORLE-BU TEACHING HOSPITAL
+            </p>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('📧 Welcome email sent:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error sending welcome email:', error);
+    return false;
+  }
+};
+
+// NEW: Appointment Approved Email Template
+export const sendAppointmentApprovedEmail = async (email: string, firstName: string, priorityRank: number, severityScore: number) => {
+  const transporter: any = createTransporter();
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || 'noreply@yourapp.com',
+    to: email,
+    subject: '✅ Appointment Approved - ATFHEALTH',
+    html: `
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+          <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 32px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: white; letter-spacing: -0.5px;">ATFHEALTH</h1>
+            <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;">APPOINTMENT APPROVED</p>
+          </div>
+          <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
+            <h2 style="margin-top: 0; font-size: 20px; color: white; font-weight: 600;">Hello ${firstName},</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              ✅ Great news! Your appointment request has been <strong>approved</strong>.
+            </p>
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="margin: 0; color: #34d399; font-weight: 500;">Priority: ${priorityRank} | Severity: ${severityScore}</p>
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              Please check your dashboard or await further instructions regarding the scheduled date and time.
+            </p>
+             <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/patients"
+               style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white;
+                      text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;
+                      font-size: 16px; margin: 16px 0; border: none; cursor: pointer; transition: all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(16, 185, 129, 0.3)'"
+               onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+              VIEW DASHBOARD
+            </a>
+          </div>
+          <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
+              © ${new Date().getFullYear()} ATFHEALTH | APPOINTMENT NOTIFICATION
+            </p>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('📧 Appointment approved email sent:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error sending appointment approved email:', error);
+    return false;
+  }
+};
+
+// NEW: Appointment Rebooked/Waitlisted Email Template
+export const sendAppointmentRebookedEmail = async (email: string, firstName: string, priorityRank: number, severityScore: number) => {
+   const transporter: any = createTransporter();
+   const mailOptions = {
+     from: process.env.EMAIL_FROM || 'noreply@yourapp.com',
+     to: email,
+     subject: '📋 Appointment Status Update - ATFHEALTH',
+     html: `
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+          <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 32px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: white; letter-spacing: -0.5px;">ATFHEALTH</h1>
+            <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;">APPOINTMENT STATUS UPDATE</p>
+          </div>
+          <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
+            <h2 style="margin-top: 0; font-size: 20px; color: white; font-weight: 600;">Hello ${firstName},</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              Your appointment request is currently on the waiting list.
+            </p>
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="margin: 0; color: #fcd34d; font-weight: 500;">Priority: ${priorityRank} | Severity: ${severityScore}</p>
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              We will notify you once a slot becomes available. Thank you for your patience.
+            </p>
+             <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/patients"
+               style="display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: white;
+                      text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;
+                      font-size: 16px; margin: 16px 0; border: none; cursor: pointer; transition: all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(245, 158, 11, 0.3)'"
+               onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+              VIEW DASHBOARD
+            </a>
+          </div>
+          <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
+              © ${new Date().getFullYear()} ATFHEALTH | APPOINTMENT NOTIFICATION
+            </p>
+          </div>
+        </div>
+      </div>
+     `
+   };
+
+   try {
+     const info = await transporter.sendMail(mailOptions);
+     console.log('📧 Appointment rebooked/waitlist email sent:', info.messageId);
+     return true;
+   } catch (error) {
+     console.error('❌ Error sending appointment rebooked email:', error);
+     return false;
+   }
+};
+
+// Unified communication function - UPDATED TYPE DEFINITION AND CASES
 export const sendCommunication = async (
   email: string,
   phoneNumber: string,
   preferredContact: 'email' | 'sms',
-  type: 'password_reset' | 'welcome' | 'appointment_reminder' | 'password_reset_confirmation', // Added new type
-  data: { [key: string]: any } 
+  // --- UPDATE THE TYPE DEFINITION HERE ---
+  type: 'password_reset' | 'welcome' | 'appointment_reminder' | 'password_reset_confirmation' | 'appointment_approved' | 'appointment_rebooked',
+   data: { [key: string]: any } 
 ): Promise<boolean> => {
   
   try {
@@ -169,75 +347,41 @@ export const sendCommunication = async (
           return await sendPasswordResetSMS(phoneNumber, data.token);
         }
         
-      case 'password_reset_confirmation': 
+      case 'password_reset_confirmation':
         if (preferredContact === 'email') {
           return await sendPasswordResetConfirmationEmail(email, data.firstName);
         } else {
-          // Call this function in sms.service.ts
-          const { sendPasswordResetConfirmationSMS } = await import('../services/sms.service');
           return await sendPasswordResetConfirmationSMS(phoneNumber, data.firstName);
         }
         
       case 'welcome':
         if (preferredContact === 'email') {
-          const mailOptions = {
-            from: process.env.EMAIL_FROM || 'noreply@yourapp.com',
-            to: email,
-            subject: '👋 Welcome to Our Healthcare Platform',
-            html: `
-              <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
-                <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
-                  <div style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 32px; text-align: center; position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
-                    <div style="position: absolute; bottom: -80px; left: -30px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%;"></div>
-                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px; position: relative;">WELCOME TO ATF<span style="color: #a5b4fc;">HEALTH</span></h1>
-                    <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;">YOUR APPOINTMENT BOOKING JOURNEY BEGINS</p>
-                  </div>
-                  
-                  <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
-                    <h2 style="margin-top: 0; font-size: 24px; color: white; font-weight: 600; letter-spacing: -0.25px;">Hello ${data.firstName},</h2>
-                    <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
-                      Signup successful 🎉 Proceed to schedule your appointments.
-
-                    </p>
-                    
-                    <div style="border-left: 3px solid #8b5cf6; padding-left: 16px; margin: 24px 0;">
-                      <p style="margin: 0; color: #a5b4fc; font-weight: 500; font-size: 18px;">Your Patient profile is now active</p>
-                    </div>
-                    
-                    <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login"
-                       style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white;
-                              text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;
-                              font-size: 16px; margin: 16px 0; border: none; cursor: pointer; transition: all 0.3s ease;"
-                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(139, 92, 246, 0.3)'"
-                       onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
-                      LOGIN HERE
-                    </a>
-                    
-                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-top: 32px;">
-                      Our support network is available 24/7 to assist you
-                    </p>
-                  </div>
-                  
-                  <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
-                    <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
-                      © ${new Date().getFullYear()} ATFHEALTH | KORLE-BU TEACHING HOSPITAL
-                    </p>
-                  </div>
-                </div>
-              </div>
-            `
-          };
-          
-          const transporter: any = createTransporter();
-          await transporter.sendMail(mailOptions);
-          return true;
+          return await sendWelcomeEmail(email, data.firstName);
         } else {
           return await sendWelcomeSMS(phoneNumber, data.firstName);
         }
         
+      // --- NEW CASES ---
+      case 'appointment_approved':
+        if (preferredContact === 'email') {
+          return await sendAppointmentApprovedEmail(email, data.firstName, data.priorityRank, data.severityScore);
+        } else {
+          // Send SMS for approved appointment
+          return await sendAppointmentApprovedSMS(phoneNumber, data.firstName, data.priorityRank, data.severityScore);
+        }
+
+       case 'appointment_rebooked':
+        if (preferredContact === 'email') {
+          return await sendAppointmentRebookedEmail(email, data.firstName, data.priorityRank, data.severityScore);
+        } else {
+          // Send SMS for rebooked appointment
+          return await sendAppointmentRebookedSMS(phoneNumber, data.firstName, data.priorityRank, data.severityScore);
+        }
+      // --- END NEW CASES ---
+
       case 'appointment_reminder':
-        // Implementation for appointment reminders
+        // Implementation for appointment reminders (existing placeholder)
+        console.log(`[TODO] Implement appointment reminder for ${preferredContact}`);
         return true;
         
       default:

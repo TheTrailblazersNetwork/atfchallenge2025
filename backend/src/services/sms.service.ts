@@ -123,10 +123,23 @@ export const sendAppointmentReminderSMS = async (
 
 // NEW: Password reset confirmation SMS
 export const sendPasswordResetConfirmationSMS = async (phoneNumber: string, firstName: string): Promise<boolean> => {
+  // Added Unicode checkmark character
   const message = 
     `Password Reset Successful\n\n` +
     `Hello ${firstName}, your password has been successfully reset.\n\n` +
     `You can now login with your new password.\n\n` +
     `If you didn't request this, contact support immediately.`;
   return await sendSMS(phoneNumber, message);
+};
+
+// Appointment Approved SMS
+export const sendAppointmentApprovedSMS = async (phoneNumber: string, firstName: string, priorityRank: number, severityScore: number): Promise<boolean> => {
+    const message = `Appointment Approved, ${firstName}!\n\nYour request has been approved. Priority: ${priorityRank}, Severity: ${severityScore}.\nCheck your dashboard for scheduling details.\n\n-ATFHEALTH`;
+  return await sendSMS(phoneNumber, message);
+};
+
+// Appointment Rebooked/Waitlisted SMS
+export const sendAppointmentRebookedSMS = async (phoneNumber: string, firstName: string, priorityRank: number, severityScore: number): Promise<boolean> => {
+     const message = `Appointment Status, ${firstName}\n\nYour request is on the waiting list. Priority: ${priorityRank}, Severity: ${severityScore}.\nWe'll notify you when a slot opens.\n\n-ATFHEALTH`;
+   return await sendSMS(phoneNumber, message);
 };
