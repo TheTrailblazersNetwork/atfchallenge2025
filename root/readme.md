@@ -21,7 +21,7 @@
 Send a `POST` request to ` https://atfchallenge2025.onrender.com/sort/` with a dictionary of patients:
 
 ```json
-{
+[
   "P001": {
     "appointment_id": "P001",
     "age": 72,
@@ -32,7 +32,7 @@ Send a `POST` request to ` https://atfchallenge2025.onrender.com/sort/` with a d
   "P002": {
     "..."
   }
-}
+]
 ```
 
 ---
@@ -60,7 +60,7 @@ Send a `POST` request to ` https://atfchallenge2025.onrender.com/sort/` with a d
 ```bash
 # Clone repo and cd into it
 pip install -r requirements.txt
-uvicorn main:app --reload
+uvicorn root.main:app --reload
 ```
 
 Create a `.env` file:
