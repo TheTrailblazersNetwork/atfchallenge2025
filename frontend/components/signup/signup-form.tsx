@@ -26,11 +26,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import system_data from "@/app/data/system";
 import Link from "next/link";
+import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
+import system_api from "@/app/data/api";
 
 export function SignupForm({
   className,
@@ -48,8 +50,6 @@ export function SignupForm({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Loading state
-
-  // State for password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
@@ -73,34 +73,39 @@ export function SignupForm({
 
     // Basic validation
     if (password !== confirmPassword) {
-      toast.warning("Passwords do not match!", { richColors: true});
+      toast.warning("Passwords do not match!", { richColors: true });
       return;
     }
-
-    // Show loading state
+    
     setIsLoading(true);
     const loadingToast = toast.loading("Signing up...", { richColors: true });
 
-    // For now: log the data to the console
     const userData = data;
-
-    console.log("User signed up with:", userData);
-
-    try {
-      // Later you'll replace this with an actual API call
-      // await fetch('/api/signup', { method: 'POST', body: JSON.stringify(userData) });
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Navigate to login now
-      router.push("/login");
-      toast.dismiss(loadingToast);
-    } catch (error) {
-      console.error("Signup failed:", error);
-      alert("Something went wrong. Please try again.");
-      setIsLoading(false);
-    }
+    axios
+      .post(system_api.patient.signup, userData)
+      .then((res) => {
+        if (res.status === 201) {
+          toast.success("Signup successful! Please login to continue.", {
+            richColors: true,
+          });
+          router.push("/login");
+        } else {
+          toast.error("Signup failed. Please try again.", { richColors: true });
+        }
+      })
+      .catch((err) => {
+        console.error("Signup failed:", err);
+        if (err.response && err.response.data) {
+          toast.error(err.response.data.error, { richColors: true });
+        } else
+          toast.error("Couldn't Sign Up. Please try again", {
+            richColors: true,
+          });
+      })
+      .finally(() => {
+        toast.dismiss(loadingToast);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -222,7 +227,8 @@ export function SignupForm({
                     htmlFor="prefer"
                     className="text-xs text-muted-foreground gap-0"
                   >
-                    Include SMS notifications<br />
+                    Include SMS notifications
+                    <br />
                   </Label>
                 </div>
               </div>
@@ -299,7 +305,21 @@ export function SignupForm({
                 </Label>
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={isLoading || !firstName || !lastName || !email || !mobile || !password || !confirmPassword}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    isLoading ||
+                    !firstName ||
+                    !lastName ||
+                    !gender ||
+                    !date ||
+                    !email ||
+                    !mobile ||
+                    !password ||
+                    !confirmPassword
+                  }
+                >
                   {isLoading ? "Signing Up..." : "Sign Up"}
                 </Button>
                 {/* <Button variant="outline" className="w-full" disabled={isLoading}>
