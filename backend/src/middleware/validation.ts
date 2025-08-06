@@ -143,6 +143,45 @@ export const appointmentValidation = [
     .withMessage('Invalid discharge type')
 ];
 
+export const initiateRegistrationValidation = signupValidation;
+
+export const verifyOtpValidation = [
+  body('email')
+  .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email')
+    .normalizeEmail(),
+
+    body('phone')
+    .notEmpty()
+    .withMessage('Phone number is required')
+    .custom((value) => {
+      const phoneRegex = /^(\+233|0)?[2-5]\d{8}$/; // Ghana phone format
+      
+      if (!phoneRegex.test(value)) {
+        throw new Error('Please provide a valid phone number');
+      }
+      return true;
+    }),
+
+  body('emailOtp')
+    .notEmpty()
+    .withMessage('Email verification code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Email verification code must be 6 digits')
+    .matches(/^\d+$/)
+    .withMessage('Email verification code must be numeric'),
+
+  body('phoneOtp')
+    .notEmpty()
+    .withMessage('SMS verification code is required')
+    .isLength({ min: 6, max: 6 }) //review adjustment length to 6 digits
+    .withMessage('SMS verification code must be 6 digits')
+    .matches(/^\d+$/)
+    .withMessage('SMS verification code must be numeric')
+];
+
 // export const scheduleValidation = [
 //   body('appointment_date')
 //     .notEmpty()

@@ -328,13 +328,66 @@ export const sendAppointmentRebookedEmail = async (email: string, firstName: str
    }
 };
 
+// NEW: Function to send Email Verification OTP
+export const sendEmailVerificationOTP = async (email: string, otp: string): Promise<boolean> => {
+  const transporter: any = createTransporter();
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM || 'noreply@yourapp.com',
+    to: email,
+    subject: '🔐 Verify Your Email Address',
+    html: `
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+          <div style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 32px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: white; letter-spacing: -0.5px;">ATFHEALTH</h1>
+            <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px; letter-spacing: 1px;">EMAIL VERIFICATION</p>
+          </div>
+          
+          <div style="padding: 32px; background: rgba(255, 255, 255, 0.05);">
+            <h2 style="margin-top: 0; font-size: 20px; color: white; font-weight: 600;">Hello,</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              Please use the following code to verify your email address:
+            </p>
+            
+            <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
+              <p style="margin: 0; color: #a5b4fc; font-weight: 700; font-size: 24px; letter-spacing: 8px;">${otp}</p>
+            </div>
+            
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+              This code expires in ${process.env.OTP_EXPIRY_MINUTES || '15'} minutes. If you didn't request this, please ignore this email.
+            </p>
+          </div>
+          
+          <div style="padding: 16px; text-align: center; background: rgba(0, 0, 0, 0.2);">
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 0.5px;">
+              © ${new Date().getFullYear()} ATFHEALTH | EMAIL VERIFICATION
+            </p>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('📧 Email verification OTP sent:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Error sending email verification OTP:', error);
+    return false;
+  }
+};
+
+
 // Unified communication function - UPDATED TYPE DEFINITION AND CASES
 export const sendCommunication = async (
   email: string,
   phoneNumber: string,
   preferredContact: 'email' | 'sms',
   // --- UPDATE THE TYPE DEFINITION HERE ---
-  type: 'password_reset' | 'welcome' | 'appointment_reminder' | 'password_reset_confirmation' | 'appointment_approved' | 'appointment_rebooked',
+  type: 'password_reset' | 'welcome' | 'appointment_reminder' | 'password_reset_confirmation' | 'appointment_approved' | 'appointment_rebooked' | 'email_verification',
    data: { [key: string]: any } 
 ): Promise<boolean> => {
   
@@ -353,6 +406,14 @@ export const sendCommunication = async (
         } else {
           return await sendPasswordResetConfirmationSMS(phoneNumber, data.firstName);
         }
+        
+      case 'email_verification':
+        if (preferredContact === 'email') {
+          return await sendEmailVerificationOTP(email, data.otp);
+        } else {
+          console.warn(`⚠️ Sending email OTP to ${email} for user preferring ${preferredContact}.`);
+        return await sendEmailVerificationOTP(email, data.otp);
+      }
         
       case 'welcome':
         if (preferredContact === 'email') {

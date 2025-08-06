@@ -1,12 +1,12 @@
 import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { sendCommunication } from '../config/email'; // Add this import
+import { sendCommunication } from '../config/email';
+import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser } from './otp.service';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
 
-// Define interfaces for better type safety
 interface PatientData {
   first_name: string;
   last_name: string;
@@ -14,7 +14,7 @@ interface PatientData {
   dob: string;
   email: string;
   phone_number: string;
-  preferred_contact: 'email' | 'sms'; //  more specific
+  preferred_contact: 'email' | 'sms';
   password: string;
 }
 
@@ -24,7 +24,7 @@ interface LoginData {
 }
 
 interface PatientResult {
-  id: string; // Changed to string  using UUID
+  id: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -32,7 +32,26 @@ interface PatientResult {
   preferred_contact: 'email' | 'sms';
 }
 
-export const registerPatient = async (data: PatientData) => {
+interface InitiatePatientRegistrationInput {
+  first_name: string;
+  last_name: string;
+  gender: string;
+  dob: string;
+  phone_number: string;
+  email: string;
+  password: string;
+  preferred_contact: 'email' | 'sms';
+}
+
+interface InitiatePatientRegistrationResult {
+  success: boolean;
+  message: string;
+  requiresVerification: boolean;
+}
+
+export const initiatePatientRegistration = async (
+  data: InitiatePatientRegistrationInput
+): Promise<InitiatePatientRegistrationResult> => {
   const {
     first_name,
     last_name,
@@ -45,18 +64,87 @@ export const registerPatient = async (data: PatientData) => {
   } = data;
 
   try {
+    const existingUserCheck = await pool.query(
+      `SELECT id FROM patients WHERE email = $1 OR phone_number = $2`,
+      [email, phone_number]
+    );
+    if (existingUserCheck.rows.length > 0) {
+      throw new Error('A user with this email or phone number already exists.');
+    }
+
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    
+    const emailOtp = generateOTP();
+    const phoneOtp = generateOTP();
+    const hashedEmailOtp = await hashOTP(emailOtp);
+    const hashedPhoneOtp = await hashOTP(phoneOtp);
+
+    const userDataToStore = {
+      first_name,
+      last_name,
+      gender,
+      dob,
+      phone_number,
+      email,
+      password_hash: hashedPassword,
+      preferred_contact,
+    };
+
+    const verificationId: string = await storeVerificationData(
+      email,
+      phone_number,
+      hashedEmailOtp,
+      hashedPhoneOtp,
+      userDataToStore
+    );
+
+    await sendOtpsToUser(email, phone_number, emailOtp, phoneOtp);
+
+    return {
+      success: true,
+      message: 'Verification codes sent to your email and phone number. Please verify to complete registration.',
+      requiresVerification: true,
+    };
+  } catch (error: any) {
+    console.error('Error in initiatePatientRegistration:', error);
+    throw error;
+  }
+};
+
+interface FinalizePatientRegistrationResult {
+  success: boolean;
+  message: string;
+  patient: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+}
+
+export const finalizePatientRegistration = async (
+  verifiedUserData: any
+): Promise<FinalizePatientRegistrationResult> => {
+  const {
+    first_name,
+    last_name,
+    gender,
+    dob,
+    phone_number,
+    email,
+    password_hash,
+    preferred_contact,
+  } = verifiedUserData;
+
+  try {
     const result = await pool.query(
       `INSERT INTO patients (
         first_name, last_name, gender, dob, phone_number, email, password_hash, preferred_contact
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, email, first_name, last_name, phone_number, preferred_contact`,
-      [first_name, last_name, gender, dob, phone_number, email, hashedPassword, preferred_contact]
+      [first_name, last_name, gender, dob, phone_number, email, password_hash, preferred_contact]
     );
 
     const patient = result.rows[0];
 
-    // Send welcome communication based on user's preference
     await sendCommunication(
       patient.email,
       patient.phone_number,
@@ -65,22 +153,35 @@ export const registerPatient = async (data: PatientData) => {
       { firstName: patient.first_name }
     );
 
-    return { 
-      message: 'Signup successful', 
+    return {
+      success: true,
+      message: 'Registration successful!',
       patient: {
         id: patient.id,
         email: patient.email,
         first_name: patient.first_name,
-        last_name: patient.last_name
-      }
+        last_name: patient.last_name,
+      },
     };
   } catch (error) {
-    console.error('Error in registerPatient:', error);
+    console.error('Error in finalizePatientRegistration:', error);
     throw error;
   }
 };
 
-export const loginPatient = async (data: LoginData) => {
+interface LoginPatientResult {
+  success: boolean;
+  message: string;
+  token: string;
+  user: {
+    id: string;
+    email: string;
+  };
+}
+
+export const loginPatient = async (
+  data: LoginData
+): Promise<LoginPatientResult> => {
   const { email, password } = data;
 
   const result = await pool.query(
@@ -89,7 +190,7 @@ export const loginPatient = async (data: LoginData) => {
   );
 
   const user = result.rows[0];
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error('Invalid credentials');
 
   const match = await bcrypt.compare(password, user.password_hash);
   if (!match) throw new Error('Invalid credentials');
@@ -99,16 +200,15 @@ export const loginPatient = async (data: LoginData) => {
   }
 
   const token = jwt.sign(
-    { id: user.id, email: user.email }, 
-    JWT_SECRET, 
-    {
-      expiresIn: '1h',
-    }
+    { id: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '1h' }
   );
 
-  return { 
-    message: 'Login successful', 
-    token, 
-    user: { id: user.id, email: user.email } 
+  return {
+    success: true,
+    message: 'Login successful',
+    token,
+    user: { id: user.id, email: user.email }
   };
 };
