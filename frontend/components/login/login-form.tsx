@@ -14,13 +14,18 @@ import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import axios from "axios";
+import system_api from "@/app/data/api";
+import { useDispatch } from "react-redux";
+import { setPatientData } from "@/store/features/patientReducer";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const dispatch = useDispatch();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -38,21 +43,34 @@ export function LoginForm({
       password,
     };
 
-    // For now: log to console
-    console.log("User logged in with:", userData);
-
-    try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Navigate to patients dashboard
-      router.push("/dashboard/patients");
-      toast.dismiss(loadingToast);
-    } catch (error) {
-      console.error("Login failed:", error);
-      alert("Something went wrong. Please try again.");
-      setIsLoading(false);
-    }
+    axios
+      .post(system_api.patient.login, userData)
+      .then((res) => {
+        if(res.status === 200){
+          toast.success("Login successful!", {
+            richColors: true,
+          });
+          // Save data to state
+          // State saves "user" as string to localStorage
+          dispatch(setPatientData(res.data.user))
+          router.push("/dashboard");
+        }else {
+          toast.error(" Login failed. Please try again.", { richColors: true });
+        }
+      })
+      .catch((err) => {
+        console.error("Login failed:", err);
+        if (err.response && err.response.data) {
+          toast.error(err.response.data.error, { richColors: true });
+        } else
+          toast.error("Couldn't Login. Please try again", {
+            richColors: true,
+          });
+      })
+      .finally(() => {
+        toast.dismiss(loadingToast);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -104,9 +122,17 @@ export function LoginForm({
                       disabled={isLoading}
                     />
                     {showPassword ? (
-                      <EyeOff size={20} onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-muted-foreground" />
+                      <EyeOff
+                        size={20}
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="cursor-pointer text-muted-foreground"
+                      />
                     ) : (
-                      <Eye size={20} onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-muted-foreground" />
+                      <Eye
+                        size={20}
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="cursor-pointer text-muted-foreground"
+                      />
                     )}
                   </Label>
                 </div>
