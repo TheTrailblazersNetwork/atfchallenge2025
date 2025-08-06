@@ -117,3 +117,60 @@ export const resetPasswordValidation = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters')
 ];
+
+// Add these new validation arrays
+export const appointmentValidation = [
+  body('medical_description')
+    .notEmpty()
+    .withMessage('Medical description is required')
+    .trim(),
+
+  body('visiting_status')
+    .notEmpty()
+    .withMessage('Visiting status is required')
+    .isIn([
+      'discharged_inpatient_2weeks',
+      'discharged_inpatient_1week',
+      'external_referral',
+      'internal_referral',
+      'review_patient'
+    ])
+    .withMessage('Invalid visiting status'),
+
+  body('discharge_type')
+    .optional()
+    .isIn(['2weeks_post_discharge', '1week_early_review'])
+    .withMessage('Invalid discharge type')
+];
+
+// export const scheduleValidation = [
+//   body('appointment_date')
+//     .notEmpty()
+//     .withMessage('Appointment date is required')
+//     .isISO8601()
+//     .withMessage('Invalid date format'),
+
+//   body('appointment_start_time')
+//     .notEmpty()
+//     .withMessage('Appointment start time is required')
+//     .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+//     .withMessage('Invalid time format (HH:MM)'),
+
+//   body('appointment_end_time')
+//     .notEmpty()
+//     .withMessage('Appointment end time is required')
+//     .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+//     .withMessage('Invalid time format (HH:MM)'),
+
+//   body('arrival_time')
+//     .notEmpty()
+//     .withMessage('Arrival time is required')
+//     .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+//     .withMessage('Invalid time format (HH:MM)'),
+
+//   body('day_before_visit')
+//     .notEmpty()
+//     .withMessage('Day before visit is required')
+//     .isISO8601()
+//     .withMessage('Invalid date format')
+// ];
