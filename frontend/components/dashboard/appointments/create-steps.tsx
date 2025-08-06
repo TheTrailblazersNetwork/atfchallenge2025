@@ -38,7 +38,7 @@ const CreateAppointmentSteps = () => {
   };
 
   return (
-    <div className="w-full lg:w-[800px] mx-auto bg-white rounded-lg p-5 md:p-10 shadow border-2">
+    <div className="w-full lg:w-[800px] mx-auto gl-container">
       <Stepper defaultValue={activeStep} value={activeStep} className="w-full">
         {steps.map((step) => (
           <StepperItem key={step} step={step} className="not-last:flex-1">
@@ -281,7 +281,7 @@ const CreateAppointmentSteps = () => {
         {activeStep === 3 && (
           <div className="pb-5">
             <div className="flex items-center justify-center my-5">
-              <CircleCheckBig className="text-green-700" size={100} />
+              <CircleCheckBig className="text-green-700" size={70} />
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-green-700">
