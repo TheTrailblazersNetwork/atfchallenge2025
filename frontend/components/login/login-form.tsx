@@ -98,12 +98,12 @@ export function LoginForm({
               <div className="grid gap-3">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
+                  <Link
                     className="text-sm underline-offset-4 hover:underline"
+                    href={"/forgot-password"}
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <div>
                   <Label
@@ -143,15 +143,7 @@ export function LoginForm({
                   className="w-full flex items-center justify-center gap-2"
                   disabled={isLoading || !email || !password}
                 >
-                  {isLoading ? (
-                    <>
-                      {/* Optional spinner */}
-                      <span className="loading loading-spinner loading-xs"></span>
-                      <span>Logging In...</span>
-                    </>
-                  ) : (
-                    "Login"
-                  )}
+                  {isLoading ? "Logging In..." : "Login"}
                 </Button>
                 {/* <Button variant="outline" className="w-full" disabled={isLoading}>
                   Login with Google
