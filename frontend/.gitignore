@@ -10,3 +10,4 @@ out/
 .env.production.local
 *.js
 !next.config.js
+!app/data/api.js
