@@ -20,7 +20,6 @@ const ReduxProvider = ({
         remember to declare types for res
     */
     const user = store.dispatch(getPatientData());
-    console.log('got user info from state', user);
     // axiosInstance
     //   .get("/patient")
     //   .then((res: any) => {
