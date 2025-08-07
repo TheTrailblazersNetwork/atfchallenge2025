@@ -10,20 +10,25 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import system_data from "@/app/data/system";
-import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
 import system_api from "@/app/data/api";
-import { Eye, EyeOff, MailCheck, MailWarning } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Label } from "../ui/label";
+import { useRouter } from "next/navigation";
 
 export function ChangeForm({
   className,
+  token,
   ...props
-}: React.ComponentProps<"div">) {
-  const [loading, setLoading] = useState(false);
+}: {
+  token: string;
+  className?: React.ComponentProps<"div">;
+}) {
+  const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,30 +36,32 @@ export function ChangeForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (password != confirmPassword) {
+      return toast.error("Passwords should match", { richColors: true });
+    }
+    
     const loadingToast = toast.loading("Logging in...", { richColors: true });
+    setLoading(true);
+
     axios
-      .post(system_api.patient.forgotPassword, { })
+      .post(system_api.patient.resetPassword + token, { password })
       .then((res) => {
-        if (res.status === 200) {
-          toast.success(
-            "If an account exists, you'll receive a recovery link.",
-            {
-              richColors: true,
-            }
-          );
-        } else {
-          toast.error("Failed to send recovery link. Please try again.", {
-            richColors: true,
-          });
+        if(res.status === 200){
+          toast.success(res.data.message, { richColors: true })
+          router.push('/login');
+        } else{
+          toast.error("An error occurred. Redirecting to login...");
+          setTimeout(() => router.push('/login'), 2000);
         }
       })
       .catch((err) => {
-        console.error("Login failed:", err);
-        toast.error("Couldn't send recovery link. Please try again", {
+        console.error("Password Reset:", err);
+        toast.error("Failed to reset password. Please try again", {
           richColors: true,
         });
       })
       .finally(() => {
+        setLoading(false);
         toast.dismiss(loadingToast);
       });
   };

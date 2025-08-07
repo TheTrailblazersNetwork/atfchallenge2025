@@ -288,14 +288,13 @@ const CreateAppointmentSteps = () => {
                 Appointment Confirmed!
               </h3>
               <p className="text-sm text-muted-foreground">
-                Thank you for booking your appointment. We will contact you
-                shortly with further details.
+                Thank you for booking your appointment. You will receive your appointment details on Wednesday
               </p>
             </div>
             <div className="grid md:flex w-full md:justify-end gap-2 mt-5">
-              <Button className="cursor-pointer" onClick={restartBooking}>
+              {/* <Button className="cursor-pointer" onClick={restartBooking}>
                 Book Another Appointment
-              </Button>
+              </Button> */}
               <Button className="cursor-pointer" variant="outline" asChild>
                 <Link href={"/dashboard"}>Go to Dashboard</Link>
               </Button>
