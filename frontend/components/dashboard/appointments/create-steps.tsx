@@ -38,7 +38,7 @@ const CreateAppointmentSteps = () => {
   };
 
   return (
-    <div className="w-full lg:w-[800px] mx-auto bg-white rounded-lg p-5 md:p-10 shadow border-2">
+    <div className="w-full lg:w-[800px] mx-auto gl-container">
       <Stepper defaultValue={activeStep} value={activeStep} className="w-full">
         {steps.map((step) => (
           <StepperItem key={step} step={step} className="not-last:flex-1">
@@ -281,21 +281,20 @@ const CreateAppointmentSteps = () => {
         {activeStep === 3 && (
           <div className="pb-5">
             <div className="flex items-center justify-center my-5">
-              <CircleCheckBig className="text-green-700" size={100} />
+              <CircleCheckBig className="text-green-700" size={70} />
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-green-700">
                 Appointment Confirmed!
               </h3>
               <p className="text-sm text-muted-foreground">
-                Thank you for booking your appointment. We will contact you
-                shortly with further details.
+                Thank you for booking your appointment. You will receive your appointment details on Wednesday
               </p>
             </div>
             <div className="grid md:flex w-full md:justify-end gap-2 mt-5">
-              <Button className="cursor-pointer" onClick={restartBooking}>
+              {/* <Button className="cursor-pointer" onClick={restartBooking}>
                 Book Another Appointment
-              </Button>
+              </Button> */}
               <Button className="cursor-pointer" variant="outline" asChild>
                 <Link href={"/dashboard"}>Go to Dashboard</Link>
               </Button>

@@ -122,9 +122,19 @@
 }
 
 
+/* ----------------- Custom Styles----------------- */
 /* 
------------------ Dashboard Styles-----------------
-This section styles the dashboard page layout, including grid structure and spacing.
+  * Global Styles
+  * This section contains global styles for the application.
+*/
+.gl-container{
+  @apply bg-white rounded-lg p-5 md:p-10 shadow border-2
+}
+
+
+/*
+  * Dashboard Page Styles
+  * This section styles the dashboard page layout.
 */
 .dashboard-page {
   @apply grid gap-6 py-5 w-full;
