@@ -2,11 +2,12 @@ import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendCommunication } from '../config/email';
-import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser } from './otp.service';
+import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData } from './otp.service';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
 
+// Interfaces
 interface PatientData {
   first_name: string;
   last_name: string;
@@ -32,22 +33,106 @@ interface PatientResult {
   preferred_contact: 'email' | 'sms';
 }
 
-interface InitiatePatientRegistrationInput {
-  first_name: string;
-  last_name: string;
-  gender: string;
-  dob: string;
-  phone_number: string;
-  email: string;
-  password: string;
-  preferred_contact: 'email' | 'sms';
-}
+interface InitiatePatientRegistrationInput extends PatientData {}
 
 interface InitiatePatientRegistrationResult {
   success: boolean;
   message: string;
   requiresVerification: boolean;
+  verificationId?: string;
 }
+
+interface FinalizePatientRegistrationResult {
+  success: boolean;
+  message: string;
+  patient: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+}
+
+interface PendingVerificationResult {
+  success: false;
+  pendingVerification: true;
+  userData: {
+    verificationId: string;
+    email: string;
+    phone_number: string;
+    email_verified: boolean;
+    phone_verified: boolean;
+    expires_at: string;
+  };
+}
+
+type LoginPatientResult =
+  | {
+      success: true;
+      message: string;
+      token: string;
+      user: {
+        id: string;
+        email: string;
+      };
+    }
+  | PendingVerificationResult;
+
+// Service Functions
+export const loginPatient = async (
+  data: LoginData
+): Promise<LoginPatientResult> => {
+  const { email, password } = data;
+
+  // 1. Check patients table
+  const result = await pool.query(
+    `SELECT id, email, password_hash, first_name, last_name FROM patients WHERE email = $1`,
+    [email]
+  );
+
+  const user = result.rows[0];
+  if (user) {
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) throw new Error('Invalid credentials');
+
+    if (!JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return {
+      success: true,
+      message: 'Login successful',
+      token,
+      user: { id: user.id, email: user.email }
+    };
+  }
+
+  // 2. Check verification table
+  const verification = await getVerificationData(email);
+  if (verification) {
+    return {
+      success: false,
+      pendingVerification: true,
+      userData: {
+        verificationId: verification.id,
+        email: verification.email,
+        phone_number: verification.phone_number,
+        email_verified: verification.email_verified,
+        phone_verified: verification.phone_verified,
+        expires_at: verification.expires_at,
+      }
+    };
+  }
+
+  // 3. Not found in either table
+  throw new Error('User not found');
+};
 
 export const initiatePatientRegistration = async (
   data: InitiatePatientRegistrationInput
@@ -167,48 +252,4 @@ export const finalizePatientRegistration = async (
     console.error('Error in finalizePatientRegistration:', error);
     throw error;
   }
-};
-
-interface LoginPatientResult {
-  success: boolean;
-  message: string;
-  token: string;
-  user: {
-    id: string;
-    email: string;
-  };
-}
-
-export const loginPatient = async (
-  data: LoginData
-): Promise<LoginPatientResult> => {
-  const { email, password } = data;
-
-  const result = await pool.query(
-    `SELECT id, email, password_hash, first_name, last_name FROM patients WHERE email = $1`,
-    [email]
-  );
-
-  const user = result.rows[0];
-  if (!user) throw new Error('Invalid credentials');
-
-  const match = await bcrypt.compare(password, user.password_hash);
-  if (!match) throw new Error('Invalid credentials');
-
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-  }
-
-  const token = jwt.sign(
-    { id: user.id, email: user.email },
-    JWT_SECRET,
-    { expiresIn: '1h' }
-  );
-
-  return {
-    success: true,
-    message: 'Login successful',
-    token,
-    user: { id: user.id, email: user.email }
-  };
 };

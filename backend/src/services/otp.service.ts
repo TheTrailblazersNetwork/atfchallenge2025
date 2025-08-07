@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import pool from '../config/db';
 import { sendCommunication } from '../config/email';
 import { sendSMS } from './sms.service';
+import { finalizePatientRegistration } from './auth.service';
 
 const OTP_EXPIRY_MINUTES = parseInt(process.env.OTP_EXPIRY_MINUTES || '15', 10);
 const OTP_LENGTH = parseInt(process.env.OTP_LENGTH || '6', 10);
@@ -18,6 +19,21 @@ export interface VerificationRecord {
   phone_verified: boolean;
   expires_at: string;
 }
+
+interface VerificationResult {
+  success: boolean;
+  message: string;
+}
+
+interface CheckerResult {
+  fullyVerified: boolean;
+  patient?: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+  }
 
 export const generateOTP = (length: number = OTP_LENGTH): string => {
   if (length <= 0 || length > 10) length = 6;
@@ -130,6 +146,105 @@ export const sendOtpsToUser = async (
   const smsMessage = `Your verification code is: ${phoneOtp}\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.`;
   const smsSent = await sendSMS(phoneNumber, smsMessage);
   return !!(emailSent || smsSent);
+};
+
+export const getVerificationDataById = async (id: string): Promise<VerificationRecord | null> => {
+  const query = `
+    SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, 
+           user_data, email_verified, phone_verified, expires_at
+    FROM user_verifications
+    WHERE id = $1 AND expires_at > NOW()
+  `;
+  const result = await pool.query(query, [id]);
+  return result.rows.length > 0 ? result.rows[0] : null;
+};
+
+export const verifySingleChannelOtp = async (
+  verificationId: string,
+  channel: 'email' | 'phone',
+  submittedOtp: string
+): Promise<VerificationResult> => {
+  try {
+    const verification = await getVerificationDataById(verificationId);
+    if (!verification) {
+      return {
+        success: false,
+        message: 'Invalid or expired verification session.'
+      };
+    }
+
+    // Check if already verified
+    if (channel === 'email' && verification.email_verified) {
+      return {
+        success: false,
+        message: 'Email has already been verified.'
+      };
+    }
+    if (channel === 'phone' && verification.phone_verified) {
+      return {
+        success: false,
+        message: 'Phone number has already been verified.'
+      };
+    }
+
+    // Compare OTP
+    const hashedOtp = channel === 'email' 
+      ? verification.hashed_email_otp 
+      : verification.hashed_phone_otp;
+    
+    const isValid = await verifyOTP(submittedOtp, hashedOtp);
+    if (!isValid) {
+      return {
+        success: false,
+        message: 'Invalid verification code.'
+      };
+    }
+
+    // Mark as verified
+    await markVerified(verificationId, channel);
+
+    return {
+      success: true,
+      message: `${channel === 'email' ? 'Email' : 'Phone number'} verified successfully.`
+    };
+  } catch (error) {
+    console.error('Error in verifySingleChannelOtp:', error);
+    return {
+      success: false,
+      message: 'An error occurred during verification.'
+    };
+  }
+};
+
+export const checker = async (verificationId: string): Promise<CheckerResult> => {
+  try {
+    const verification = await getVerificationDataById(verificationId);
+    if (!verification) {
+      return { fullyVerified: false };
+    }
+
+    if (verification.email_verified && verification.phone_verified) {
+      // Both channels verified, create patient account
+      const userData = typeof verification.user_data === 'string' 
+        ? JSON.parse(verification.user_data)
+        : verification.user_data;
+
+      const finalizedPatient = await finalizePatientRegistration(userData);
+      await removeVerificationData(verificationId);
+
+      return {
+        fullyVerified: true,
+        patient: finalizedPatient.patient
+      };
+    }
+
+    return { 
+      fullyVerified: false 
+    };
+  } catch (error) {
+    console.error('Error in checker:', error);
+    return { fullyVerified: false };
+  }
 };
 
 export const cleanupExpiredVerifications = async (): Promise<number> => {

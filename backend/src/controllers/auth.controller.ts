@@ -1,6 +1,18 @@
 import { Request, Response } from 'express';
 import { initiatePatientRegistration, finalizePatientRegistration, loginPatient } from '../services/auth.service';
-import { getVerificationData, verifyOTP, markVerified, removeVerificationData } from '../services/otp.service';
+import { getVerificationDataById, verifySingleChannelOtp, checker } from '../services/otp.service';
+
+interface VerificationResponse {
+  success: boolean;
+  message: string;
+  fullyVerified?: boolean;
+  patient?: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  } | null;
+}
 
 export const initiateRegistration = async (req: Request, res: Response) => {
   try {
@@ -15,86 +27,104 @@ export const initiateRegistration = async (req: Request, res: Response) => {
   }
 };
 
-export const verifyOtps = async (req: Request, res: Response) => {
+export const verifyEmailOtp = async (req: Request, res: Response) => {
   try {
-    const { email, emailOtp, phone, phoneOtp } = req.body as {
-      email: string;
-      emailOtp: string;
-      phone: string;
-      phoneOtp: string;
-    };
+    const { otp } = req.body;
+    const { id } = req.params;
 
-    if (!email || !emailOtp || !phone || !phoneOtp) {
-      return res.status(400).json({
-        success: false,
-        error: 'Email, email OTP, phone number, and phone OTP are all required.'
+    if (!id || !otp) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Verification ID and OTP are required.' 
       });
     }
 
-    const verificationRecord = await getVerificationData(email);
+    // First check if verification record exists
+    const verificationRecord = await getVerificationDataById(id);
     if (!verificationRecord) {
       return res.status(404).json({
         success: false,
-        error: 'No pending verification found for this email. The verification might have expired or already been completed.'
+        error: 'Verification record not found or expired.'
       });
     }
 
-    const { id: verificationId, hashed_email_otp, hashed_phone_otp, user_data, email_verified, phone_verified, expires_at } = verificationRecord;
-    if (new Date(expires_at) <= new Date()) {
-      await removeVerificationData(verificationId);
-      return res.status(400).json({
-        success: false,
-        error: 'Verification codes have expired. Please restart the registration process.'
+    const result = await verifySingleChannelOtp(id, 'email', otp);
+    if (!result.success) {
+      return res.status(400).json({ 
+        success: false, 
+        error: result.message 
       });
     }
 
-    const isEmailOtpValid = await verifyOTP(emailOtp, hashed_email_otp);
-    const isPhoneOtpValid = await verifyOTP(phoneOtp, hashed_phone_otp);
-
-    let updatedEmailVerified = email_verified;
-    let updatedPhoneVerified = phone_verified;
-
-    if (isEmailOtpValid && !email_verified) {
-      await markVerified(verificationId, 'email');
-      updatedEmailVerified = true;
-    } else if (!isEmailOtpValid && !email_verified) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid email verification code.'
-      });
-    }
-
-    if (isPhoneOtpValid && !phone_verified) {
-      await markVerified(verificationId, 'phone');
-      updatedPhoneVerified = true;
-    } else if (!isPhoneOtpValid && !phone_verified) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid phone verification code.'
-      });
-    }
-
-    const isNowFullyVerified = updatedEmailVerified && updatedPhoneVerified;
-
-    if (isNowFullyVerified) {
-      const finalResult = await finalizePatientRegistration(user_data);
-      await removeVerificationData(verificationId);
-      return res.status(200).json({
-        success: true,
-        message: finalResult.message || 'Registration successful!',
-        patient: finalResult.patient
-      });
-    }
-
+    const checkResult = await checker(id);
     return res.status(200).json({
       success: true,
-      message: 'OTP verification processed. Awaiting full verification completion.'
+      message: result.message,
+      fullyVerified: checkResult.fullyVerified,
+      patient: checkResult.patient || null,
     });
-
   } catch (error: any) {
-    res.status(500).json({
+    console.error('Error in verifyEmailOtp:', error);
+    return res.status(500).json({
       success: false,
-      error: 'An error occurred during OTP verification. Please try again.'
+      error: 'An error occurred during email verification.'
+    });
+  }
+};
+
+export const verifySmsOtp = async (req: Request, res: Response) => {
+  try {
+    const { otp } = req.body;
+    const { id } = req.params;
+
+    if (!id || !otp) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Verification ID and OTP are required.' 
+      });
+    }
+
+    const verificationRecord = await getVerificationDataById(id);
+    if (!verificationRecord) {
+      return res.status(404).json({
+        success: false,
+        error: 'Verification record not found or expired.'
+      });
+    }
+
+    const result = await verifySingleChannelOtp(id, 'phone', otp);
+    if (!result.success) {
+      return res.status(400).json({ 
+        success: false, 
+        error: result.message 
+      });
+    }
+
+    const checkResult = await checker(id);
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      fullyVerified: checkResult.fullyVerified,
+      patient: checkResult.patient || null,
+    });
+  } catch (error: any) {
+    console.error('Error in verifySmsOtp:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred during SMS verification.'
+    });
+  }
+};
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const result = await loginPatient(req.body);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    console.error('Error in login:', error);
+    return res.status(401).json({ 
+      success: false, 
+      error: error.message || 'Authentication failed' 
     });
   }
 };
@@ -102,23 +132,18 @@ export const verifyOtps = async (req: Request, res: Response) => {
 export const signup = async (req: Request, res: Response) => {
   try {
     const result = await initiatePatientRegistration(req.body);
-    res.status(201).json(result);
+    return res.status(201).json(result);
   } catch (error: any) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-};
-
-export const login = async (req: Request, res: Response) => {
-  try {
-    const result = await loginPatient(req.body);
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(401).json({ success: false, error: error.message });
+    console.error('Error in signup:', error);
+    return res.status(400).json({ 
+      success: false, 
+      error: error.message || 'Registration failed' 
+    });
   }
 };
 
 export const logout = async (_req: Request, res: Response) => {
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     message: 'Logged out successfully'
   });
