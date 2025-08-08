@@ -53,7 +53,6 @@ export function VerifyForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
   // State for OTP verified status
   const [mailVerified, setMailVerified] = useState(false);
   const [smsVerified, setSmsVerified] = useState(false);
@@ -219,7 +218,12 @@ export function VerifyForm({
                 )}
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="button" className="w-full" disabled={!mailVerified || !smsVerified} asChild>
+                <Button
+                  type="button"
+                  className="w-full"
+                  disabled={!mailVerified || !smsVerified}
+                  asChild
+                >
                   <Link href="/login">Go to Login</Link>
                 </Button>
               </div>
