@@ -84,7 +84,15 @@ export function SignupForm({
     axios
       .post(system_api.patient.register, userData)
       .then((res) => {
-        console.log(res);
+        if (res.status === 201) {
+          toast.success("Successful! Verify your email and mobile number.", {
+            richColors: true,
+          });
+          // localStorage.setItem("verifyID", res.data.verification_id);
+          router.push(`/signup/verify/`);
+        } else {
+          toast.error("Signup failed. Please try again.", { richColors: true });
+        }
       })
       .catch((err) => {
         console.error("Signup failed:", err);
