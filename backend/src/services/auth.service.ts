@@ -66,6 +66,12 @@ interface PendingVerificationResult {
   };
 }
 
+interface ResendOTPResult {
+  success: boolean;
+  message: string;
+  verificationId: string;
+}
+
 type LoginPatientResult =
   | {
       success: true;
@@ -251,6 +257,60 @@ export const finalizePatientRegistration = async (
     };
   } catch (error) {
     console.error('Error in finalizePatientRegistration:', error);
+    throw error;
+  }
+};
+
+export const resendVerificationOTP = async (
+  verificationId: string,
+  channel: 'email' | 'phone' | 'both'
+): Promise<ResendOTPResult> => {
+  try {
+    const verification = await getVerificationData(verificationId);
+    if (!verification) {
+      throw new Error('Verification record not found');
+    }
+
+    const emailOtp = channel !== 'phone' ? generateOTP() : '';
+    const phoneOtp = channel !== 'email' ? generateOTP() : '';
+
+    const hashedEmailOtp = emailOtp ? await hashOTP(emailOtp) : verification.hashed_email_otp;
+    const hashedPhoneOtp = phoneOtp ? await hashOTP(phoneOtp) : verification.hashed_phone_otp;
+
+    const query = `
+      UPDATE user_verifications 
+      SET 
+        hashed_email_otp = CASE WHEN $1 <> '' THEN $2 ELSE hashed_email_otp END,
+        hashed_phone_otp = CASE WHEN $3 <> '' THEN $4 ELSE hashed_phone_otp END,
+        expires_at = NOW() + INTERVAL '15 minutes'
+      WHERE id = $5
+      RETURNING id
+    `;
+    
+    await pool.query(query, [
+      emailOtp,
+      hashedEmailOtp,
+      phoneOtp,
+      hashedPhoneOtp,
+      verificationId
+    ]);
+
+    if (emailOtp || phoneOtp) {
+      await sendOtpsToUser(
+        verification.email,
+        verification.phone_number,
+        emailOtp || verification.hashed_email_otp,
+        phoneOtp || verification.hashed_phone_otp
+      );
+    }
+
+    return {
+      success: true,
+      message: `New verification code${channel === 'both' ? 's' : ''} sent`,
+      verificationId
+    };
+  } catch (error) {
+    console.error('Error in resendVerificationOTP:', error);
     throw error;
   }
 };
