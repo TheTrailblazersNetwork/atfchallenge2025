@@ -188,6 +188,7 @@ export const initiatePatientRegistration = async (
       success: true,
       message: 'Verification codes sent to your email and phone number. Please verify to complete registration.',
       requiresVerification: true,
+      verificationId: verificationId,
     };
   } catch (error: any) {
     console.error('Error in initiatePatientRegistration:', error);
