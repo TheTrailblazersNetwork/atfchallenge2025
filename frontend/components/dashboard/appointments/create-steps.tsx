@@ -296,7 +296,7 @@ const CreateAppointmentSteps = () => {
                 Book Another Appointment
               </Button> */}
               <Button className="cursor-pointer" variant="outline" asChild>
-                <Link href={"/dashboard"}>Go to Dashboard</Link>
+                <Link href={"/dashboard/appointments"}>View Appointments</Link>
               </Button>
             </div>
           </div>
