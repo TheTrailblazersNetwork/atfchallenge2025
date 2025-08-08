@@ -1,9 +1,13 @@
-import DashboardPageHeader from '@/components/dashboard/page-header';
-import { Button } from '@/components/ui/button'
-import Link from 'next/link';
-import React from 'react'
+"use client"
+import { useState } from "react";
+import appointments from "@/app/data/appointments";
+import AppointmentCard from "@/components/dashboard/appointments/appointment-card";
+import AppointmentFilters from "@/components/dashboard/appointments/appointment-filters";
+import DashboardPageHeader from "@/components/dashboard/page-header";
 
 const page = () => {
+
+  const [filterAppointments, setFilterAppointments] = useState(appointments);
   return (
     <div className="dashboard-page">
       <DashboardPageHeader
@@ -11,15 +15,22 @@ const page = () => {
         subtitle="Manage your appointments, view upcoming schedules, and book new
           appointments with your healthcare provider."
       />
-      <div>
-        <Button asChild>
-          <Link href={"/dashboard/appointments/create"}>
-            Book an Appointment
-          </Link>
-        </Button>
+
+      <AppointmentFilters filter={filterAppointments} filterFunction={setFilterAppointments} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {appointments && appointments.length > 0 ? (
+          appointments.map((appointment) => (
+            <AppointmentCard key={appointment.id} appointment={appointment} />
+          ))
+        ) : (
+          <div className="col-span-4 text-center text-gray-500">
+            No appointments found.
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
-export default page
+export default page;
