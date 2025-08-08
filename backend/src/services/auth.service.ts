@@ -2,7 +2,7 @@ import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendCommunication } from '../config/email';
-import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData } from './otp.service';
+import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData, getVerificationDataById } from './otp.service';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
@@ -70,6 +70,7 @@ interface ResendOTPResult {
   success: boolean;
   message: string;
   verificationId: string;
+  expiresAt: string;
 }
 
 type LoginPatientResult =
@@ -266,17 +267,56 @@ export const resendVerificationOTP = async (
   channel: 'email' | 'phone' | 'both'
 ): Promise<ResendOTPResult> => {
   try {
-    const verification = await getVerificationData(verificationId);
+    console.log(`Attempting to resend OTP for verification ID: ${verificationId}`);
+    
+    const verification = await getVerificationDataById(verificationId);
+    
     if (!verification) {
-      throw new Error('Verification record not found');
+      // Check the database directly to give more specific error
+      const recordExists = await pool.query(
+        'SELECT expires_at FROM user_verifications WHERE id = $1',
+        [verificationId]
+      );
+
+      if (recordExists.rows.length === 0) {
+        throw new Error('No verification record found with this ID');
+      } else {
+        throw new Error('Verification record exists but could not be retrieved');
+      }
     }
 
-    const emailOtp = channel !== 'phone' ? generateOTP() : '';
-    const phoneOtp = channel !== 'email' ? generateOTP() : '';
+    // Determine which channels need OTPs
+    let emailOtp = '';
+    let phoneOtp = '';
+    let hashedEmailOtp = verification.hashed_email_otp;
+    let hashedPhoneOtp = verification.hashed_phone_otp;
 
-    const hashedEmailOtp = emailOtp ? await hashOTP(emailOtp) : verification.hashed_email_otp;
-    const hashedPhoneOtp = phoneOtp ? await hashOTP(phoneOtp) : verification.hashed_phone_otp;
+    // Only generate OTP for unverified channels
+    if (
+      (channel === 'email' || channel === 'both') &&
+      !verification.email_verified
+    ) {
+      emailOtp = generateOTP();
+      hashedEmailOtp = await hashOTP(emailOtp);
+    }
+    if (
+      (channel === 'phone' || channel === 'both') &&
+      !verification.phone_verified
+    ) {
+      phoneOtp = generateOTP();
+      hashedPhoneOtp = await hashOTP(phoneOtp);
+    }
 
+    // If both channels are already verified, do not resend
+    if (
+      (channel === 'email' && verification.email_verified) ||
+      (channel === 'phone' && verification.phone_verified) ||
+      (channel === 'both' && verification.email_verified && verification.phone_verified)
+    ) {
+      throw new Error('All requested channels are already verified. No OTP sent.');
+    }
+
+    // Update verification record
     const query = `
       UPDATE user_verifications 
       SET 
@@ -284,10 +324,10 @@ export const resendVerificationOTP = async (
         hashed_phone_otp = CASE WHEN $3 <> '' THEN $4 ELSE hashed_phone_otp END,
         expires_at = NOW() + INTERVAL '15 minutes'
       WHERE id = $5
-      RETURNING id
+      RETURNING id, expires_at
     `;
-    
-    await pool.query(query, [
+
+    const result = await pool.query(query, [
       emailOtp,
       hashedEmailOtp,
       phoneOtp,
@@ -295,21 +335,28 @@ export const resendVerificationOTP = async (
       verificationId
     ]);
 
+    if (result.rows.length === 0) {
+      throw new Error('Failed to update verification record');
+    }
+
+    // Send new OTPs only for unverified channels
     if (emailOtp || phoneOtp) {
       await sendOtpsToUser(
         verification.email,
         verification.phone_number,
-        emailOtp || verification.hashed_email_otp,
-        phoneOtp || verification.hashed_phone_otp
+        emailOtp || '',
+        phoneOtp || ''
       );
     }
 
     return {
       success: true,
-      message: `New verification code${channel === 'both' ? 's' : ''} sent`,
-      verificationId
+      message: `New verification code${(emailOtp && phoneOtp) ? 's' : ''} sent successfully`,
+      verificationId,
+      expiresAt: result.rows[0].expires_at
     };
-  } catch (error) {
+
+  } catch (error: any) {
     console.error('Error in resendVerificationOTP:', error);
     throw error;
   }

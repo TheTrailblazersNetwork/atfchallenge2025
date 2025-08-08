@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { initiatePatientRegistration, finalizePatientRegistration, loginPatient } from '../services/auth.service';
+import { initiatePatientRegistration, finalizePatientRegistration, resendVerificationOTP, loginPatient } from '../services/auth.service';
 import { getVerificationDataById, verifySingleChannelOtp, checker } from '../services/otp.service';
 
 interface VerificationResponse {
@@ -112,6 +112,37 @@ export const verifySmsOtp = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       error: 'An error occurred during SMS verification.'
+    });
+  }
+};
+
+export const resendOTP = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { channel = 'both' } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Verification ID is required'
+      });
+    }
+
+    if (!['email', 'phone', 'both'].includes(channel)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid channel specified'
+      });
+    }
+
+    const result = await resendVerificationOTP(id, channel as 'email' | 'phone' | 'both');
+    return res.status(200).json(result);
+
+  } catch (error: any) {
+    console.error('Error in resendOTP:', error);
+    return res.status(400).json({
+      success: false,
+      error: error.message || 'Failed to resend verification code'
     });
   }
 };
