@@ -65,10 +65,10 @@ export function SignupForm({
       dob: date
         ? date.toISOString().slice(0, 10) // yyyy-mm-dd
         : undefined,
-      email,
       phone_number: mobile,
-      preferred_contact: comms,
+      email,
       password,
+      preferred_contact: comms,
     };
 
     // Basic validation
@@ -76,19 +76,20 @@ export function SignupForm({
       toast.warning("Passwords do not match!", { richColors: true });
       return;
     }
-    
+
     setIsLoading(true);
     const loadingToast = toast.loading("Signing up...", { richColors: true });
 
     const userData = data;
     axios
-      .post(system_api.patient.signup, userData)
+      .post(system_api.patient.register, userData)
       .then((res) => {
         if (res.status === 201) {
-          toast.success("Signup successful! Please login to continue.", {
+          toast.success("Successful! Verify your email and mobile number.", {
             richColors: true,
           });
-          router.push("/login");
+          // localStorage.setItem("verifyID", res.data.verification_id);
+          router.push(`/signup/verify/`);
         } else {
           toast.error("Signup failed. Please try again.", { richColors: true });
         }
