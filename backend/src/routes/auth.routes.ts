@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { signup, login,logout, initiateRegistration, verifyEmailOtp, verifySmsOtp } from '../controllers/auth.controller';
+import { signup, login,logout, initiateRegistration, verifyEmailOtp, verifySmsOtp, resendOTP } from '../controllers/auth.controller';
 import { signupValidation, loginValidation, validate, initiateRegistrationValidation, verifyOtpValidation } from '../middleware/validation';
 import { authenticateToken } from '../middleware/authMiddleware';
 
@@ -15,6 +15,8 @@ router.post('/register', validate(initiateRegistrationValidation), initiateRegis
 // New separate verification endpoints for email and SMS
 router.post('/verify/email/:id', validate(verifyOtpValidation), verifyEmailOtp);
 router.post('/verify/sms/:id', validate(verifyOtpValidation), verifySmsOtp);
+// Resend OTP endpoint
+router.post('/verify/resend/:id',resendOTP);
 
 // Protected route (authentication required)
 router.post('/logout', authenticateToken, logout);

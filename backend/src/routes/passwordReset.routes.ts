@@ -15,7 +15,7 @@ router.post('/forgot-password', validate(forgotPasswordValidation), forgotPasswo
 // Validate reset token
 router.get('/reset-password/:token', [
   param('token').notEmpty().withMessage('Token is required')
-], validate, validateToken);
+],  validateToken);
 
 // Reset password with token
 router.post('/reset-password/:token', [

@@ -155,8 +155,27 @@ export const getVerificationDataById = async (id: string): Promise<VerificationR
     FROM user_verifications
     WHERE id = $1 AND expires_at > NOW()
   `;
-  const result = await pool.query(query, [id]);
-  return result.rows.length > 0 ? result.rows[0] : null;
+  try {
+    const result = await pool.query(query, [id]);
+    if (result.rows.length === 0) {
+      console.log(`No verification record found for ID: ${id}`);
+      return null;
+    }
+
+    // Then check if it's expired
+    const verification = result.rows[0];
+    const isExpired = new Date(verification.expires_at) <= new Date();
+    
+    if (isExpired) {
+      console.log(`Verification record expired at ${verification.expires_at}`);
+      return null;
+    }
+
+    return verification;
+  } catch (error) {
+    console.error('Error in getVerificationDataById:', error);
+    return null;
+  }
 };
 
 export const verifySingleChannelOtp = async (
