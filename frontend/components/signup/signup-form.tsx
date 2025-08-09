@@ -88,9 +88,7 @@ export function SignupForm({
           toast.success("Successful! Verify your email and mobile number.", {
             richColors: true,
           });
-          // uncomment below to continue work on verification
-          // localStorage.setItem("isTemp", "true");
-          // localStorage.setItem("tempId", res.data.message)
+          localStorage.setItem("verificationId", res.data.verificationId);
           router.push(`/signup/verify/`);
         } else {
           toast.error("Signup failed. Please try again.", { richColors: true });
