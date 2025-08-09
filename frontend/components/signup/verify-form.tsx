@@ -270,10 +270,76 @@ export function VerifyForm({
                       className="absolute flex items-center justify-center w-full h-full"
                       href="/login"
                     >
+<<<<<<< HEAD
                       Login
                     </Link>
                   </Button>
                 </div>
+=======
+                      Verify Email
+                    </Button>
+                  </form>
+                )}
+              </div>
+              <div className="*:not-first:mt-2">
+                {smsVerified ? (
+                  <VerifiedComponent text="SMS Verified" />
+                ) : (
+                  <form className="grid gap-2" onSubmit={verifySms}>
+                    <Label htmlFor="sms">SMS Verification</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="sms"
+                        className="flex-1"
+                        placeholder="XXXXXX"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        minLength={6}
+                        maxLength={6}
+                        value={smsOtp}
+                        required
+                        onInput={(e) => {
+                          const input = e.target as HTMLInputElement;
+                          const sanitized = input.value.replace(/[^0-9]/g, "");
+                          setSmsOtp(sanitized);
+                        }}
+                      />
+                      <Button
+                        variant="outline"
+                        type="button"
+                        disabled={smsTimer.disabled}
+                        onClick={smsTimer.start}
+                      >
+                        {smsTimer.disabled
+                          ? `Resend (${smsTimer.formatted})`
+                          : "Resend"}
+                      </Button>
+                    </div>
+
+                    <span className="text-xs text-muted-foreground">
+                      Your code will be sent to <b>+233534155475</b>
+                    </span>
+                    <Button
+                      className="w-full"
+                      variant={"outline"}
+                      type="submit"
+                    >
+                      Verify SMS
+                    </Button>
+                  </form>
+                )}
+              </div>
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="button"
+                  className="w-full"
+                  disabled={!mailVerified || !smsVerified}
+                  asChild
+                >
+                  <Link href="/login">Go to Login</Link>
+                </Button>
+>>>>>>> 5a26ae21a75d03535fa983ddd3173a683f19bbb1
               </div>
             </div>
           </CardContent>
