@@ -268,51 +268,26 @@ export const resendVerificationOTP = async (
 ): Promise<ResendOTPResult> => {
   try {
     console.log(`Attempting to resend OTP for verification ID: ${verificationId}`);
-    
-    const verification = await getVerificationDataById(verificationId);
-    
-    if (!verification) {
-      // Check the database directly to give more specific error
-      const recordExists = await pool.query(
-        'SELECT expires_at FROM user_verifications WHERE id = $1',
-        [verificationId]
-      );
 
-      if (recordExists.rows.length === 0) {
-        throw new Error('No verification record found with this ID');
-      } else {
-        throw new Error('Verification record exists but could not be retrieved');
-      }
+    const verification = await getVerificationDataById(verificationId);
+    console.log(`Verification record found:, ${verification}`);
+
+    if (!verification) {
+      throw new Error(`Verification record not found for ID: ${verificationId}`);
     }
 
     // Determine which channels need OTPs
     let emailOtp = '';
     let phoneOtp = '';
-    let hashedEmailOtp = verification.hashed_email_otp;
-    let hashedPhoneOtp = verification.hashed_phone_otp;
 
-    // Only generate OTP for unverified channels
-    if (
-      (channel === 'email' || channel === 'both') &&
-      !verification.email_verified
-    ) {
+    if ((channel === 'email' || channel === 'both') && !verification.email_verified) {
       emailOtp = generateOTP();
-      hashedEmailOtp = await hashOTP(emailOtp);
     }
-    if (
-      (channel === 'phone' || channel === 'both') &&
-      !verification.phone_verified
-    ) {
+    if ((channel === 'phone' || channel === 'both') && !verification.phone_verified) {
       phoneOtp = generateOTP();
-      hashedPhoneOtp = await hashOTP(phoneOtp);
     }
 
-    // If both channels are already verified, do not resend
-    if (
-      (channel === 'email' && verification.email_verified) ||
-      (channel === 'phone' && verification.phone_verified) ||
-      (channel === 'both' && verification.email_verified && verification.phone_verified)
-    ) {
+    if (!emailOtp && !phoneOtp) {
       throw new Error('All requested channels are already verified. No OTP sent.');
     }
 
@@ -326,6 +301,9 @@ export const resendVerificationOTP = async (
       WHERE id = $5
       RETURNING id, expires_at
     `;
+
+    const hashedEmailOtp = emailOtp ? await hashOTP(emailOtp) : verification.hashed_email_otp;
+    const hashedPhoneOtp = phoneOtp ? await hashOTP(phoneOtp) : verification.hashed_phone_otp;
 
     const result = await pool.query(query, [
       emailOtp,
@@ -353,7 +331,7 @@ export const resendVerificationOTP = async (
       success: true,
       message: `New verification code${(emailOtp && phoneOtp) ? 's' : ''} sent successfully`,
       verificationId,
-      expiresAt: result.rows[0].expires_at
+      expiresAt: result.rows[0].expires_at,
     };
 
   } catch (error: any) {
