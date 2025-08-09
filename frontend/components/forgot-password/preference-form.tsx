@@ -27,7 +27,7 @@ export function PreferenceForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const loadingToast = toast.loading("Logging in...", { richColors: true });
+    const loadingToast = toast.loading("Authenticating...", { richColors: true });
     axios
       .post(system_api.patient.forgotPassword, { identifier })
       .then((res) => {
@@ -76,11 +76,15 @@ export function PreferenceForm({
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Button onClick={() => {
-              setError(false);
-              setCompleted(false);
-              setIdentifier("");
-            }} className="cursor-pointer" variant="default">
+            <Button
+              onClick={() => {
+                setError(false);
+                setCompleted(false);
+                setIdentifier("");
+              }}
+              className="cursor-pointer"
+              variant="default"
+            >
               Try Again
             </Button>
             <Button className="cursor-pointer" variant="outline" asChild>
@@ -138,6 +142,11 @@ export function PreferenceForm({
                   here
                 </Link>{" "}
                 if you remember your password.
+              </p>
+
+              <p className="text-muted-foreground text-center text-xs mt-3">
+                You only receive sms links if you opt for SMS notifications
+                during signup.
               </p>
             </form>
           </CardContent>
