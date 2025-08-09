@@ -26,7 +26,7 @@ export const patientSlice = createSlice({
         state.data = JSON.parse(user);
         state.loading = false;
       } else{
-        localStorage.clear();
+        // localStorage.clear(); do nothing
       };
     },
     clearPatientData: (state) => {
