@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { AppointmentCardType } from "@/types/Appointment";
 import clsx from "clsx";
 import { Info } from "lucide-react";
+import { useState } from "react";
 
 const AppointmentCard = ({
   appointment,
