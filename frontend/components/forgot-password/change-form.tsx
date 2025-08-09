@@ -40,7 +40,7 @@ export function ChangeForm({
       return toast.error("Passwords should match", { richColors: true });
     }
     
-    const loadingToast = toast.loading("Logging in...", { richColors: true });
+    const loadingToast = toast.loading("Updating Password", { richColors: true });
     setLoading(true);
 
     axios

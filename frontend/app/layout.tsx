@@ -23,8 +23,8 @@ export default function RootLayout({
     <html lang="en">
       <ReduxProvider>
         <body className={`${interFont.className} bg-zinc-100 antialiased`}>
-          {children}
           <Toaster />
+          {children}
         </body>
       </ReduxProvider>
     </html>

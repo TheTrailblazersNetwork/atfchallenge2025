@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import system_data from "@/app/data/system";
 import Link from "next/link";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
@@ -39,6 +39,21 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("verificationId");
+      if (stored) {
+        toast.message("Pending Registration", {
+          description: "Finish your verfication to proceed.",
+          richColors: true,
+        });
+        router.push("/signup/verify");
+      } else localStorage.clear();
+    } catch (error) {
+      console.error("Error clearing verificationId from localStorage:", error);
+    }
+  }, []);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -89,6 +104,8 @@ export function SignupForm({
             richColors: true,
           });
           localStorage.setItem("verificationId", res.data.verificationId);
+          localStorage.setItem("verificationEmail", email);
+          localStorage.setItem("verificationPhone", mobile);
           router.push(`/signup/verify/`);
         } else {
           toast.error("Signup failed. Please try again.", { richColors: true });

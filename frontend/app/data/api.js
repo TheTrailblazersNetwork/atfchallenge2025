@@ -19,6 +19,8 @@ const system_api = {
         // Verification APIs
         mailVerify: `${host}/api/auth/verify/email/`,
         smsVerify: `${host}/api/auth/verify/sms/`,
+        // Verification status
+        getVerificationStatus: `${host}/api/auth/verify/status/`,
     },
 };
 export default system_api;
