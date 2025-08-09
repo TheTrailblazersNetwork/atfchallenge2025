@@ -5,19 +5,17 @@ export interface Patient {
   gender: 'Male' | 'Female' | 'Other';
   age: number;
   medicalCondition: string;
-  visitStatus: 'Waiting' | 'In Progress' | 'Completed';
   patientStatus: string;
 }
 
 export const samplePatients: Patient[] = [
   {
     id: "p1",
-    queueNumber: "001",
+    queueNumber: "005",
     name: "John Smith",
     gender: "Male",
     age: 45,
     medicalCondition: "Migraine",
-    visitStatus: "In Progress",
     patientStatus: "Discharged Inpatients(1 week early review)"
   },
   {
@@ -27,7 +25,6 @@ export const samplePatients: Patient[] = [
     gender: "Female",
     age: 32,
     medicalCondition: "Chronic Headache",
-    visitStatus: "Waiting",
     patientStatus: "Discharged Inpatients(1 week early review)"
   },
   {
@@ -37,7 +34,6 @@ export const samplePatients: Patient[] = [
     gender: "Male",
     age: 58,
     medicalCondition: "Vertigo",
-    visitStatus: "Waiting",
     patientStatus: "Discharged Inpatients(2 weeks post discharge)"
   },
   {
@@ -47,17 +43,15 @@ export const samplePatients: Patient[] = [
     gender: "Female",
     age: 28,
     medicalCondition: "Epilepsy",
-    visitStatus: "Waiting",
     patientStatus: "External Referrals(1st Timers)"
   },
   {
     id: "p5",
-    queueNumber: "005",
+    queueNumber: "001",
     name: "Raymond Twist",
     gender: "Male",
     age: 28,
     medicalCondition: "Stomach Ulcer",
-    visitStatus: "Waiting",
     patientStatus: "Internal Referrals(1st Timers)"
   },
   {
@@ -67,7 +61,6 @@ export const samplePatients: Patient[] = [
     gender: "Female",
     age: 28,
     medicalCondition: "Neck Pain Follow-up",
-    visitStatus: "Waiting",
     patientStatus: "Review Patients(Old Patients)"
   }
 

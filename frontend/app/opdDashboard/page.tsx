@@ -4,29 +4,41 @@ import { Patient, samplePatients } from "@/types/patient";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { OPDButton } from "@/components/ui/opdbutton";
+import { EndOfQueue } from "@/components/ui/end-of-queue";
+
+type PatientsState = {
+  currentPatient: Patient | null;
+  nextPatient: Patient | null;
+  upcomingPatients: Patient[];
+};
 
 export default function OPDDashboardPage() {
-  const [patients, setPatients] = useState<{
-    currentPatient: Patient | null;
-    nextPatient: Patient | null;
-    upcomingPatients: Patient[];
-  }>({
+  const [patients, setPatients] = useState<PatientsState>({
     currentPatient: null,
     nextPatient: null,
     upcomingPatients: [],
   });
 
   useEffect(() => {
-    // Simulate API call with sample data
-    const currentPatient = samplePatients.find(p => p.visitStatus === 'In Progress');
-    const nextPatient = samplePatients.find(p => p.visitStatus === 'Waiting');
-    const upcomingPatients = samplePatients.filter(
-      p => p.visitStatus === 'Waiting' && p.queueNumber !== nextPatient?.queueNumber
+    const sortedPatients = [...samplePatients].sort((a, b) => 
+      parseInt(a.queueNumber) - parseInt(b.queueNumber)
     );
 
+    const currentPatient = sortedPatients.length > 0 
+      ? { ...sortedPatients[0], visitStatus: 'In Progress' } 
+      : null;
+
+    const nextPatient = sortedPatients.length > 1 
+      ? { ...sortedPatients[1], visitStatus: 'Waiting' } 
+      : null;
+
+    const upcomingPatients = sortedPatients.length > 2 
+      ? sortedPatients.slice(2).map(p => ({ ...p, visitStatus: 'Waiting' }))
+      : [];
+
     setPatients({
-      currentPatient: currentPatient || null,
-      nextPatient: nextPatient || null,
+      currentPatient,
+      nextPatient,
       upcomingPatients
     });
   }, []);
@@ -36,133 +48,210 @@ export default function OPDDashboardPage() {
   
     setPatients(prev => ({
       ...prev,
-      currentPatient: {
-        ...prev.nextPatient!,
-        visitStatus: 'In Progress'  // New current patient is now in progress
-      },
-      nextPatient: {
-        ...prev.currentPatient,
-        visitStatus: 'Waiting'  // Previous current patient goes back to waiting
-      },
-      // upcomingPatients remains unchanged
+      currentPatient: { ...prev.nextPatient as Patient, visitStatus: 'In Progress' },
+      nextPatient: { ...prev.currentPatient as Patient, visitStatus: 'Waiting' },
     }));
   };
 
-  // const handleSkipPatient = () => {
-  //   if (!patients.currentPatient || !patients.nextPatient) return;
-
-  //   setPatients(prev => ({
-  //     currentPatient: prev.nextPatient,
-  //     nextPatient: prev.upcomingPatients[0] || null,
-  //     upcomingPatients: prev.upcomingPatients.slice(1).concat({
-  //       ...prev.currentPatient!,
-  //       visitStatus: 'Waiting'
-  //     })
-  //   }));
-  // };
-
-  const handleUnavailablePatient = (patient: Patient) => {
+  const handleUnavailablePatient = () => {
     if (!patients.currentPatient) return;
   
     setPatients(prev => {
-      // Mark current patient as unavailable
-      const unavailablePatient = {
-        ...patient,
-        visitStatus: 'Unavailable'
+      const unavailablePatient = { 
+        ...prev.currentPatient as Patient, 
+        visitStatus: 'Unavailable' 
       };
-  
+
+      // Get all waiting patients (excluding unavailable ones)
+      const waitingPatients = [
+        ...(prev.nextPatient ? [prev.nextPatient] : []),
+        ...prev.upcomingPatients.filter(p => p.visitStatus !== 'Unavailable')
+      ].sort((a, b) => parseInt(a.queueNumber) - parseInt(b.queueNumber));
+
+      const newCurrent = waitingPatients.length > 0
+        ? { ...waitingPatients[0], visitStatus: 'In Progress' }
+        : null;
+
+      const newNext = waitingPatients.length > 1
+        ? { ...waitingPatients[1], visitStatus: 'Waiting' }
+        : null;
+
+      // Get all unavailable patients (including the new one)
+      const unavailablePatients = [
+        ...prev.upcomingPatients.filter(p => p.visitStatus === 'Unavailable'),
+        unavailablePatient
+      ];
+
       return {
-        currentPatient: prev.nextPatient 
-          ? { ...prev.nextPatient, visitStatus: 'In Progress' } 
-          : null,
-        nextPatient: prev.upcomingPatients[0] || null,
+        currentPatient: newCurrent,
+        nextPatient: newNext,
         upcomingPatients: [
-          ...prev.upcomingPatients.slice(1),
-          unavailablePatient // Add to end of queue as unavailable
+          ...waitingPatients.slice(2),
+          ...unavailablePatients
         ]
       };
     });
   };
 
   const handleCompletePatient = () => {
-    if (!patients.currentPatient || !patients.nextPatient) return;
+    if (!patients.currentPatient) return;
   
+    setPatients(prev => {
+      const waitingPatients = [
+        ...(prev.nextPatient ? [prev.nextPatient] : []),
+        ...prev.upcomingPatients.filter(p => p.visitStatus !== 'Unavailable')
+      ].sort((a, b) => parseInt(a.queueNumber) - parseInt(b.queueNumber));
+
+      const newCurrent = waitingPatients.length > 0
+        ? { ...waitingPatients[0], visitStatus: 'In Progress' }
+        : null;
+
+      const newNext = waitingPatients.length > 1
+        ? { ...waitingPatients[1], visitStatus: 'Waiting' }
+        : null;
+
+      return {
+        currentPatient: newCurrent,
+        nextPatient: newNext,
+        upcomingPatients: [
+          ...waitingPatients.slice(2),
+          ...prev.upcomingPatients.filter(p => p.visitStatus === 'Unavailable')
+        ]
+      };
+    });
+  };
+
+  const handleRestorePatient = (patient: Patient) => {
+    setPatients(prev => {
+      const restoredPatient = { ...patient, visitStatus: 'Waiting' };
+      
+      // Remove from unavailable list
+      const unavailablePatients = prev.upcomingPatients.filter(
+        p => p.id !== patient.id || p.visitStatus !== 'Unavailable'
+      );
+
+      // Add to waiting list and sort
+      const waitingPatients = [
+        ...(prev.nextPatient ? [prev.nextPatient] : []),
+        ...unavailablePatients,
+        restoredPatient
+      ].sort((a, b) => parseInt(a.queueNumber) - parseInt(b.queueNumber));
+
+      // If current slot is empty and we have waiting patients, promote first to current
+      const needsPromotion = !prev.currentPatient && waitingPatients.length > 0;
+      const newCurrent = needsPromotion
+        ? { ...waitingPatients[0], visitStatus: 'In Progress' }
+        : prev.currentPatient;
+
+      const remainingPatients = needsPromotion 
+        ? waitingPatients.slice(1)
+        : waitingPatients;
+
+      return {
+        currentPatient: newCurrent,
+        nextPatient: remainingPatients.length > 0
+          ? { ...remainingPatients[0], visitStatus: 'Waiting' }
+          : null,
+        upcomingPatients: remainingPatients.slice(1)
+      };
+    });
+  };
+
+
+  const handleConfirmUnavailability = (patient: Patient) => {
     setPatients(prev => ({
-      currentPatient: {
-        ...prev.nextPatient!,
-        visitStatus: 'In Progress'  // New current patient is now in progress
-      },
-      nextPatient: prev.upcomingPatients[0] 
-        ? {
-            ...prev.upcomingPatients[0],
-            visitStatus: 'Waiting'  // Next patient remains waiting
-          } 
-        : null,
-      upcomingPatients: prev.upcomingPatients.slice(1)
+      ...prev,
+      upcomingPatients: prev.upcomingPatients.filter(p => p.id !== patient.id)
     }));
   };
+
+  const isQueueEmpty = !patients.currentPatient && 
+                      !patients.nextPatient && 
+                      patients.upcomingPatients.length === 0;
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">OPD Dashboard</h1>
       
-      {/* Current Patient */}
-      <div className="grid gap-4">
-        {patients.currentPatient && (
-          <PatientCard 
-            key={patients.currentPatient.id}
-            patient={patients.currentPatient} 
-            highlight 
-            actions={
-              <div className="flex gap-2">
-                <OPDButton 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleSkipPatient}
-                >
-                  Skip
-                </OPDButton>
-                <OPDButton 
-                  variant="warning" 
-                  size="sm"
-                  onClick={() => handleUnavailablePatient(patients.currentPatient!)}
-                >
-                  Unavailable
-                </OPDButton>
-                <OPDButton 
-                  variant="success" 
-                  size="sm"
-                  onClick={handleCompletePatient}
-                >
-                  Complete
-                </OPDButton>
-              </div>
-            }
-          />
-        )}
-      </div>
+      {isQueueEmpty ? (
+        <EndOfQueue />
+      ) : (
+        <>
+          {/* Current Patient */}
+          <div className="grid gap-4">
+            {patients.currentPatient && (
+              <PatientCard 
+                patient={patients.currentPatient} 
+                highlight 
+                actions={
+                  <div className="flex gap-2">
+                    <OPDButton 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleSkipPatient}
+                    >
+                      Skip
+                    </OPDButton>
+                    <OPDButton 
+                      variant="warning" 
+                      size="sm"
+                      onClick={handleUnavailablePatient}
+                    >
+                      Unavailable
+                    </OPDButton>
+                    <OPDButton 
+                      variant="success" 
+                      size="sm"
+                      onClick={handleCompletePatient}
+                    >
+                      Complete
+                    </OPDButton>
+                  </div>
+                }
+              />
+            )}
+          </div>
 
-      {/* Next Patient */}
-      <h2 className="text-xl font-semibold mt-8 mb-4">Next Up</h2>
-      <div className="grid gap-4">
-        {patients.nextPatient && (
-          <PatientCard 
-            key={patients.nextPatient.id}
-            patient={patients.nextPatient} 
-          />
-        )}
-      </div>
+          {/* Next Patient */}
+          <h2 className="text-xl font-semibold mt-8 mb-4">Next Up</h2>
+          <div className="grid gap-4">
+            {patients.nextPatient && (
+              <PatientCard 
+                patient={patients.nextPatient} 
+              />
+            )}
+          </div>
 
-      {/* Upcoming Patients */}
-      <h2 className="text-xl font-semibold mt-8 mb-4">Upcoming Patients</h2>
-      <div className="grid gap-4">
-        {patients.upcomingPatients.map(patient => (
-          <PatientCard 
-            key={patient.id}
-            patient={patient}
-          />
-        ))}
-      </div>
+          {/* Upcoming Patients */}
+          <h2 className="text-xl font-semibold mt-8 mb-4">Upcoming Patients</h2>
+          <div className="grid gap-4">
+            {patients.upcomingPatients.map(patient => (
+              <PatientCard 
+                key={patient.id}
+                patient={patient}
+                actions={patient.visitStatus === 'Unavailable' && (
+                  <div className="flex gap-2">
+                    <OPDButton 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleRestorePatient(patient)}
+                    >
+                      Restore
+                    </OPDButton>
+                    <OPDButton 
+                      variant="danger" 
+                      size="sm"
+                      onClick={() => handleConfirmUnavailability(patient)}
+                    >
+                      Confirm Unavailability
+                    </OPDButton>
+                  </div>
+                )}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -175,12 +264,8 @@ interface PatientCardProps {
 
 function PatientCard({ patient, highlight = false, actions }: PatientCardProps) {
   return (
-    <div
-      className={`
-        flex items-center gap-4 p-4 rounded-lg border
-        ${highlight ? 'bg-primary/5 border-primary' : 'bg-background'}
-      `}
-    >
+    <div className={`flex items-center gap-4 p-4 rounded-lg border
+      ${highlight ? 'bg-primary/5 border-primary' : 'bg-background'}`}>
       <div className="size-10 rounded-full bg-muted/20 flex items-center justify-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -228,13 +313,9 @@ function PatientCard({ patient, highlight = false, actions }: PatientCardProps) 
 
 function getStatusVariant(status: Patient['visitStatus']) {
   switch (status) {
-    case 'In Progress':
-      return 'default';
-    case 'Completed':
-      return 'success';
-    case 'Unavailable':
-      return 'destructive'; // Red color for unavailable
-    default:
-      return 'secondary';
+    case 'In Progress': return 'default';
+    case 'Completed': return 'success';
+    case 'Unavailable': return 'destructive';
+    default: return 'secondary';
   }
 }
