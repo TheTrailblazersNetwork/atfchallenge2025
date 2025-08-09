@@ -33,7 +33,7 @@ const AppointmentCard = ({
             ? "text-red-600"
             : "text-blue-500"
         )}
-        variant={"outline"}
+        variant={"ghost"}
       >
         <Info />
       </Button>
