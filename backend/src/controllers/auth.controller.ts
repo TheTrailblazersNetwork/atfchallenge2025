@@ -136,6 +136,13 @@ export const resendOTP = async (req: Request, res: Response) => {
     }
 
     const result = await resendVerificationOTP(id, channel as 'email' | 'phone' | 'both');
+    
+    // If the service returns success: false (OTP not expired), return 400 status
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    // If successful (OTP was expired and resent), return 200 status
     return res.status(200).json(result);
 
   } catch (error: any) {

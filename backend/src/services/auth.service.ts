@@ -2,7 +2,7 @@ import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendCommunication } from '../config/email';
-import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData, getVerificationDataById } from './otp.service';
+import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData, getVerificationDataById, getVerificationDataByIdRaw } from './otp.service';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
@@ -269,13 +269,28 @@ export const resendVerificationOTP = async (
   try {
     console.log(`Attempting to resend OTP for verification ID: ${verificationId}`);
 
-    const verification = await getVerificationDataById(verificationId);
+    // First check if verification record exists (without expiration filter)
+    const verification = await getVerificationDataByIdRaw(verificationId);
     console.log(`Verification record found:, ${verification}`);
 
     if (!verification) {
       throw new Error(`Verification record not found for ID: ${verificationId}`);
     }
 
+    // Check if the OTP has expired
+    const isExpired = new Date(verification.expires_at) <= new Date();
+    
+    if (!isExpired) {
+      // OTP is still valid, return message with expiration time
+      return {
+        success: false,
+        message: `OTP is still valid and has not expired yet. Please use the current OTP or wait until it expires.`,
+        verificationId,
+        expiresAt: verification.expires_at,
+      };
+    }
+
+    // OTP has expired, proceed to resend
     // Determine which channels need OTPs
     let emailOtp = '';
     let phoneOtp = '';
@@ -291,7 +306,7 @@ export const resendVerificationOTP = async (
       throw new Error('All requested channels are already verified. No OTP sent.');
     }
 
-    // Update verification record
+    // Update verification record with new OTPs and extended expiration
     const query = `
       UPDATE user_verifications 
       SET 

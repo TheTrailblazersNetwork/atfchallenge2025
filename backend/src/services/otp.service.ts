@@ -148,12 +148,34 @@ export const sendOtpsToUser = async (
   return !!(emailSent || smsSent);
 };
 
+// Get verification data without expiration check
+export const getVerificationDataByIdRaw = async (id: string): Promise<VerificationRecord | null> => {
+  const query = `
+    SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, 
+           user_data, email_verified, phone_verified, expires_at
+    FROM user_verifications
+    WHERE id = $1
+  `;
+  try {
+    const result = await pool.query(query, [id]);
+    if (result.rows.length === 0) {
+      console.log(`No verification record found for ID: ${id}`);
+      return null;
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error in getVerificationDataByIdRaw:', error);
+    return null;
+  }
+};
+
 export const getVerificationDataById = async (id: string): Promise<VerificationRecord | null> => {
   const query = `
     SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, 
            user_data, email_verified, phone_verified, expires_at
     FROM user_verifications
-    WHERE id = $1 AND expires_at > NOW()
+    WHERE id = $1
   `;
   try {
     const result = await pool.query(query, [id]);
