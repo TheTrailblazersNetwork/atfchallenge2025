@@ -2,7 +2,7 @@ import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendCommunication } from '../config/email';
-import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData, getVerificationDataById, getVerificationDataByIdRaw } from './otp.service';
+import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData, getVerificationDataById, getVerificationDataByIdRaw, getVerificationDataForLogin } from './otp.service';
 
 const SALT_ROUNDS = 10;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
@@ -91,6 +91,8 @@ export const loginPatient = async (
 ): Promise<LoginPatientResult> => {
   const { email, password } = data;
 
+  console.log(`Login attempt for email: ${email}`);
+
   // 1. Check patients table
   const result = await pool.query(
     `SELECT id, email, password_hash, first_name, last_name FROM patients WHERE email = $1`,
@@ -99,6 +101,7 @@ export const loginPatient = async (
 
   const user = result.rows[0];
   if (user) {
+    console.log(`User found in patients table: ${user.email}`);
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) throw new Error('Invalid credentials');
 
@@ -120,24 +123,100 @@ export const loginPatient = async (
     };
   }
 
-  // 2. Check verification table
-  const verification = await getVerificationData(email);
+  console.log(`User not found in patients table, checking verification table...`);
+
+  // 2. Check verification table (ignoring expiration for login)
+  const verification = await getVerificationDataForLogin(email);
   if (verification) {
-    return {
-      success: false,
-      pendingVerification: true,
-      userData: {
-        verificationId: verification.id,
-        email: verification.email,
-        phone_number: verification.phone_number,
-        email_verified: verification.email_verified,
-        phone_verified: verification.phone_verified,
-        expires_at: verification.expires_at,
+    console.log(`User found in verification table: ${verification.email}, expires_at: ${verification.expires_at}`);
+    console.log(`User data structure:`, verification.user_data);
+    
+    // Check if verification has expired
+    const isExpired = new Date(verification.expires_at) <= new Date();
+    
+    // Validate password for users in verification
+    const userData = verification.user_data;
+    if (userData && userData.password_hash) {
+      const match = await bcrypt.compare(password, userData.password_hash);
+      if (!match) {
+        console.log(`Password mismatch for user in verification table`);
+        throw new Error('Invalid credentials');
       }
-    };
+      
+      console.log(`Password valid for user in verification table, checking expiration status`);
+      
+      if (isExpired) {
+        console.log(`Verification has expired, automatically resending OTPs`);
+        
+        // Determine which channels need resending based on verification status
+        let channelToResend: 'email' | 'phone' | 'both';
+        
+        if (!verification.email_verified && !verification.phone_verified) {
+          // Both are unverified, resend both
+          channelToResend = 'both';
+          console.log(`Both email and phone are unverified, resending both OTPs`);
+        } else if (!verification.email_verified) {
+          // Only email is unverified
+          channelToResend = 'email';
+          console.log(`Only email is unverified, resending email OTP only`);
+        } else if (!verification.phone_verified) {
+          // Only phone is unverified
+          channelToResend = 'phone';
+          console.log(`Only phone is unverified, resending SMS OTP only`);
+        } else {
+          // Both are verified - this shouldn't happen but handle gracefully
+          console.log(`Both channels are already verified, no need to resend`);
+          throw new Error('Your account verification is complete. Please try logging in again.');
+        }
+        
+        // Automatically resend OTPs for expired verification
+        try {
+          const resendResult = await resendVerificationOTP(verification.id, channelToResend);
+          console.log(`OTPs resent successfully for ${channelToResend}:`, resendResult);
+          
+          // Return pending verification status with updated expiration time
+          return {
+            success: false,
+            pendingVerification: true,
+            userData: {
+              verificationId: verification.id,
+              email: verification.email,
+              phone_number: verification.phone_number,
+              email_verified: verification.email_verified,
+              phone_verified: verification.phone_verified,
+              expires_at: resendResult.expiresAt,
+            }
+          };
+        } catch (resendError: any) {
+          console.error(`Failed to resend OTPs:`, resendError);
+          throw new Error('Your verification session has expired and we could not resend the codes. Please register again.');
+        }
+      }
+      
+      console.log(`Verification is still valid, returning pending verification status`);
+      
+      // Password is correct and not expired, return pending verification status
+      return {
+        success: false,
+        pendingVerification: true,
+        userData: {
+          verificationId: verification.id,
+          email: verification.email,
+          phone_number: verification.phone_number,
+          email_verified: verification.email_verified,
+          phone_verified: verification.phone_verified,
+          expires_at: verification.expires_at,
+        }
+      };
+    } else {
+      console.log(`No password hash found in user_data for verification record`);
+    }
+  } else {
+    console.log(`User not found in verification table either`);
   }
 
   // 3. Not found in either table
+  console.log(`User not found in any table: ${email}`);
   throw new Error('User not found');
 };
 
@@ -291,20 +370,35 @@ export const resendVerificationOTP = async (
     }
 
     // OTP has expired, proceed to resend
-    // Determine which channels need OTPs
+    console.log(`OTP has expired, proceeding to resend new codes for channel: ${channel}`);
+    
+    // Determine which channels need OTPs based on the requested channel and verification status
     let emailOtp = '';
     let phoneOtp = '';
 
+    // Only generate OTP for requested channels that are also unverified
     if ((channel === 'email' || channel === 'both') && !verification.email_verified) {
       emailOtp = generateOTP();
+      console.log(`Generating email OTP because channel includes email and email is unverified`);
     }
     if ((channel === 'phone' || channel === 'both') && !verification.phone_verified) {
       phoneOtp = generateOTP();
+      console.log(`Generating phone OTP because channel includes phone and phone is unverified`);
+    }
+
+    // Additional check: if specific channel requested but already verified, throw error
+    if (channel === 'email' && verification.email_verified) {
+      throw new Error('Email is already verified. No OTP sent.');
+    }
+    if (channel === 'phone' && verification.phone_verified) {
+      throw new Error('Phone number is already verified. No OTP sent.');
     }
 
     if (!emailOtp && !phoneOtp) {
       throw new Error('All requested channels are already verified. No OTP sent.');
     }
+
+    console.log(`Will send - Email OTP: ${emailOtp ? 'YES' : 'NO'}, Phone OTP: ${phoneOtp ? 'YES' : 'NO'}`);
 
     // Update verification record with new OTPs and extended expiration
     const query = `
@@ -332,8 +426,9 @@ export const resendVerificationOTP = async (
       throw new Error('Failed to update verification record');
     }
 
-    // Send new OTPs only for unverified channels
+    // Send new OTPs only for the channels that were generated
     if (emailOtp || phoneOtp) {
+      console.log(`Sending OTPs - Email: ${emailOtp || 'not sending'}, Phone: ${phoneOtp || 'not sending'}`);
       await sendOtpsToUser(
         verification.email,
         verification.phone_number,
