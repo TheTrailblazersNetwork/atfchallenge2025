@@ -14,10 +14,11 @@ const system_api = {
         // /:id added to the end of the below URLs
         validateForgotPassword: `${host}/api/auth/reset-password/`,
         resetPassword: `${host}/api/auth/reset-password/`,
-        mailOtp: `${host}/api/patient/mail-otp/`,
-        smsOtp: `${host}/api/patient/sms-otp/`,
-        mailVerify: `${host}/api/verify/email/`,
-        smsVerify: `${host}/api/verify/sms/`,
+        // Resend OTP
+        resendOTP: `${host}/api/auth/verify/resend/`,
+        // Verification APIs
+        mailVerify: `${host}/api/auth/verify/email/`,
+        smsVerify: `${host}/api/auth/verify/sms/`,
     },
 };
 export default system_api;

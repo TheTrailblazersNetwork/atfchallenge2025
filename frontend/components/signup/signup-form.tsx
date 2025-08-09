@@ -88,7 +88,13 @@ export function SignupForm({
           toast.success("Successful! Verify your email and mobile number.", {
             richColors: true,
           });
-          // localStorage.setItem("verifyID", res.data.verification_id);
+<<<<<<< HEAD
+          localStorage.setItem("verificationId", res.data.verificationId);
+=======
+          // uncomment below to continue work on verification
+          // localStorage.setItem("isTemp", "true");
+          // localStorage.setItem("tempId", res.data.message)
+>>>>>>> 5a26ae21a75d03535fa983ddd3173a683f19bbb1
           router.push(`/signup/verify/`);
         } else {
           toast.error("Signup failed. Please try again.", { richColors: true });
@@ -212,9 +218,16 @@ export function SignupForm({
                     type="tel"
                     placeholder="0244123456"
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
+                    onInput={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      const sanitized = input.value.replace(/[^0-9]/g, "");
+                      setMobile(sanitized);
+                    }}
                     required
                     disabled={isLoading}
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    inputMode="numeric"
                   />
                 </div>
                 <div className="col-span-full flex items-center gap-2">

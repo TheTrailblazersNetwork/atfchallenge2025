@@ -14,6 +14,10 @@ import {
 import system_data from "@/app/data/system";
 import { CircleCheckBig } from "lucide-react";
 import Link from "next/link";
+import PageLoading from "../Page-Loading";
+import PageError from "../Page-Error";
+import system_api from "@/app/data/api";
+import axios from "axios";
 
 const RESEND_TIMEOUT = 15 * 60; // 15 minutes in seconds
 
@@ -53,6 +57,21 @@ export function VerifyForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("verificationId");
+      if (stored != '') setVerificationId(stored);
+      else setError(true);
+    } catch (e) {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // State for OTP verified status
   const [mailVerified, setMailVerified] = useState(false);
@@ -61,8 +80,18 @@ export function VerifyForm({
   const [mailOtp, setMailOtp] = useState("");
   const [smsOtp, setSmsOtp] = useState("");
   // Resend timers for email and SMS
-  const mailTimer = useResendTimer();
-  const smsTimer = useResendTimer();
+  const otpTimer = useResendTimer();
+
+  const requestResend = () => {
+    axios
+      .post(system_api.patient.resendOTP + verificationId)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const verfiyEmail = async () => {
     try {
@@ -88,145 +117,168 @@ export function VerifyForm({
   };
 
   const verifySms = async () => {
-    try {
-      const response = await fetch(`/api/verify/sms/${smsOtp}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ otp: smsOtp }),
-      });
+    axios.post(system_api.patient.smsVerify + verificationId, {
+      otp: smsOtp,
+    })
+    .then(res => {
+      console.log(res);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+    // try {
+    //   const response = await fetch(`/api/verify/sms/${smsOtp}`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({ otp: smsOtp }),
+    //   });
 
-      const data = await response.json();
-      if (data.success) {
-        setSmsVerified(true);
-        alert("SMS verified successfully!");
-      } else {
-        alert(data.error || "SMS verification failed.");
-      }
-    } catch (error) {
-      console.error("Error verifying SMS:", error);
-      alert("An error occurred while verifying SMS.");
-    }
+    //   const data = await response.json();
+    //   if (data.success) {
+    //     setSmsVerified(true);
+    //     alert("SMS verified successfully!");
+    //   } else {
+    //     alert(data.error || "SMS verification failed.");
+    //   }
+    // } catch (error) {
+    //   console.error("Error verifying SMS:", error);
+    //   alert("An error occurred while verifying SMS.");
+    // }
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Account Verification</CardTitle>
-          <CardDescription>Verify your email and mobile number</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <div className="flex flex-col gap-6">
-              <div className="*:not-first:mt-2">
-                {mailVerified ? (
-                  <VerifiedComponent text="Email Verified" />
-                ) : (
-                  <form className="grid gap-2" onSubmit={verfiyEmail}>
-                    <Label htmlFor="mail">Mail Verification</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="mail"
-                        className="flex-1"
-                        placeholder="XXXXXX"
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        minLength={6}
-                        maxLength={6}
-                        value={mailOtp}
-                        required
-                        onInput={(e) => {
-                          const input = e.target as HTMLInputElement;
-                          const sanitized = input.value.replace(/[^0-9]/g, "");
-                          setMailOtp(sanitized);
-                        }}
-                      />
-                      <Button
-                        variant="outline"
-                        type="button"
-                        disabled={mailTimer.disabled}
-                        onClick={mailTimer.start}
-                      >
-                        {mailTimer.disabled
-                          ? `Resend (${mailTimer.formatted})`
-                          : "Resend"}
-                      </Button>
-                    </div>
-
-                    <span className="text-xs text-muted-foreground">
-                      Your code will be sent to <b>testing@gmail.com</b>
-                    </span>
-                    <Button
-                      className="w-full"
-                      variant={"outline"}
-                      type="submit"
+      {loading ? (
+        <PageLoading text="Loading verification..." />
+      ) : error ? (
+        <PageError
+          title="Invalid Request"
+          text="Failed to load verification data"
+          link="/login"
+          linkText="Go to Login"
+        />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>{system_data.name} Account Verification</CardTitle>
+            <CardDescription>
+              Verify your email and mobile number
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <div className="flex flex-col gap-6">
+                <div className="*:not-first:mt-2">
+                  {mailVerified ? (
+                    <VerifiedComponent text="Email Verified" />
+                  ) : (
+                    <form className="grid gap-2" onSubmit={(e) => {
+                      e.preventDefault();
+                      verfiyEmail();
+                    }}>
+                      <Label htmlFor="mail">Mail Verification</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="mail"
+                          className="flex-1"
+                          placeholder="XXXXXX"
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          minLength={6}
+                          maxLength={6}
+                          value={mailOtp}
+                          required
+                          onInput={(e) => {
+                            const input = e.target as HTMLInputElement;
+                            const sanitized = input.value.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
+                            setMailOtp(sanitized);
+                          }}
+                        />
+                        <Button variant={"outline"} type="submit">
+                          Verify
+                        </Button>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Your code will be sent to <b>testing@gmail.com</b>
+                      </span>
+                    </form>
+                  )}
+                </div>
+                <div className="*:not-first:mt-2">
+                  {smsVerified ? (
+                    <VerifiedComponent text="SMS Verified" />
+                  ) : (
+                    <form className="grid gap-2" onSubmit={(e) => {
+                      e.preventDefault();
+                      verifySms();
+                    }}>
+                      <Label htmlFor="sms">SMS Verification</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="sms"
+                          className="flex-1"
+                          placeholder="XXXXXX"
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          minLength={6}
+                          maxLength={6}
+                          value={smsOtp}
+                          required
+                          onInput={(e) => {
+                            const input = e.target as HTMLInputElement;
+                            const sanitized = input.value.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
+                            setSmsOtp(sanitized);
+                          }}
+                        />
+                        <Button variant={"outline"} type="submit">
+                          Verify
+                        </Button>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Your code will be sent to <b>+233534155475</b>
+                      </span>
+                    </form>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={otpTimer.disabled}
+                    onClick={requestResend}
+                  >
+                    {otpTimer.disabled
+                      ? `Resend in (${otpTimer.formatted})`
+                      : "Resend OTP"}
+                  </Button>
+                  <Button
+                    type="button"
+                    className="relative"
+                    disabled={!mailVerified || !smsVerified}
+                  >
+                    <Link
+                      className="absolute flex items-center justify-center w-full h-full"
+                      href="/login"
                     >
-                      Verify Email
-                    </Button>
-                  </form>
-                )}
-              </div>
-              <div className="*:not-first:mt-2">
-                {smsVerified ? (
-                  <VerifiedComponent text="SMS Verified" />
-                ) : (
-                  <form className="grid gap-2" onSubmit={verifySms}>
-                    <Label htmlFor="sms">SMS Verification</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="sms"
-                        className="flex-1"
-                        placeholder="XXXXXX"
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        minLength={6}
-                        maxLength={6}
-                        value={smsOtp}
-                        required
-                        onInput={(e) => {
-                          const input = e.target as HTMLInputElement;
-                          const sanitized = input.value.replace(/[^0-9]/g, "");
-                          setSmsOtp(sanitized);
-                        }}
-                      />
-                      <Button
-                        variant="outline"
-                        type="button"
-                        disabled={smsTimer.disabled}
-                        onClick={smsTimer.start}
-                      >
-                        {smsTimer.disabled
-                          ? `Resend (${smsTimer.formatted})`
-                          : "Resend"}
-                      </Button>
-                    </div>
-
-                    <span className="text-xs text-muted-foreground">
-                      Your code will be sent to <b>+233534155475</b>
-                    </span>
-                    <Button
-                      className="w-full"
-                      variant={"outline"}
-                      type="submit"
-                    >
-                      Verify SMS
-                    </Button>
-                  </form>
-                )}
-              </div>
-              <div className="flex flex-col gap-3">
-                <Button type="button" className="w-full" disabled={!mailVerified || !smsVerified} asChild>
-                  <Link href="/login">Go to Login</Link>
-                </Button>
+                      Login
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

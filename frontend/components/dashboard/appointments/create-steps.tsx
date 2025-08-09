@@ -30,13 +30,6 @@ const CreateAppointmentSteps = () => {
   const [condition, setCondition] = useState("");
   const [dischargeType, setDischargeType] = useState("");
 
-  const restartBooking = () => {
-    setActiveStep(1);
-    setVisiting("");
-    setCondition("");
-    setDischargeType("");
-  };
-
   return (
     <div className="w-full lg:w-[800px] mx-auto gl-container">
       <Stepper defaultValue={activeStep} value={activeStep} className="w-full">
@@ -97,8 +90,11 @@ const CreateAppointmentSteps = () => {
                     <SelectValue placeholder="Select visiting status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="discharged_inpatient">
-                      Discharged Inpatient
+                    <SelectItem value="discharged_inpatient_1week">
+                      Discharged Inpatient (1 week early review)
+                    </SelectItem>
+                    <SelectItem value="discharged_inpatient_2weeks">
+                      Discharged Inpatient (2 weeks post discharge)
                     </SelectItem>
                     <SelectItem value="external_referral">
                       External referrals (1st timers)
@@ -123,36 +119,10 @@ const CreateAppointmentSteps = () => {
                   required
                 />
               </div>
-              {visiting === "discharged_inpatient" && (
-                <div className="grid gap-2">
-                  <Label htmlFor="gender">Discharge Type</Label>
-                  <Select
-                    required
-                    defaultValue={dischargeType}
-                    onValueChange={setDischargeType}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select discharge type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="discharged_inpatient_1week">
-                        Discharged Inpatients (1 week early review)
-                      </SelectItem>
-                      <SelectItem value="discharged_inpatient_2weeks">
-                        Discharged Inpatients ( 2 weeks post discharge)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
             </div>
             <Button
               className="block w-full md:w-max md:ml-auto cursor-pointer"
-              disabled={
-                !visiting ||
-                !condition ||
-                (visiting === "discharged_inpatient" && !dischargeType)
-              }
+              disabled={!visiting || !condition}
               type="submit"
             >
               Continue
@@ -218,8 +188,10 @@ const CreateAppointmentSteps = () => {
                   <SelectTrigger className="w-full disabled:opacity-80">
                     <SelectValue
                       placeholder={
-                        visiting === "discharged_inpatient"
-                          ? "Discharged Inpatient"
+                        visiting === "discharged_inpatient_1week"
+                          ? "Discharged Inpatient (1 week early review)"
+                          : visiting === "discharged_inpatient_2weeks"
+                          ? "Discharged Inpatient (2 weeks post discharge)"
                           : visiting === "external_referral"
                           ? "External referrals (1st timers)"
                           : visiting === "internal_referral"
@@ -236,24 +208,6 @@ const CreateAppointmentSteps = () => {
                 <Label>Medical Condition</Label>
                 <Textarea rows={10} value={condition} disabled />
               </div>
-              {visiting === "discharged_inpatient" && (
-                <div className="grid gap-2">
-                  <Label>Discharge Type</Label>
-                  <Select disabled>
-                    <SelectTrigger className="w-full">
-                      <SelectValue
-                        placeholder={
-                          dischargeType === "discharged_inpatient_1week"
-                            ? "Discharged Inpatients (1 week early review)"
-                            : dischargeType === "discharged_inpatient_2weeks"
-                            ? "Discharged Inpatients (2 weeks post discharge)"
-                            : ""
-                        }
-                      />
-                    </SelectTrigger>
-                  </Select>
-                </div>
-              )}
             </div>
             <div className="grid grid-cols-2 md:flex w-full justify-end gap-2">
               <Button
@@ -288,7 +242,8 @@ const CreateAppointmentSteps = () => {
                 Appointment Confirmed!
               </h3>
               <p className="text-sm text-muted-foreground">
-                Thank you for booking your appointment. You will receive your appointment details on Wednesday
+                Thank you for booking your appointment. You will receive your
+                appointment details on Wednesday
               </p>
             </div>
             <div className="grid md:flex w-full md:justify-end gap-2 mt-5">
@@ -296,7 +251,7 @@ const CreateAppointmentSteps = () => {
                 Book Another Appointment
               </Button> */}
               <Button className="cursor-pointer" variant="outline" asChild>
-                <Link href={"/dashboard"}>Go to Dashboard</Link>
+                <Link href={"/dashboard/appointments"}>View Appointments</Link>
               </Button>
             </div>
           </div>
