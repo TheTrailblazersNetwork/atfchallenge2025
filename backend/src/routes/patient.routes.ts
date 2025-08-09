@@ -1,6 +1,7 @@
 import express, { Router, Request, Response } from 'express';
 import { authenticateToken } from '../middleware/authMiddleware';
 import { getPatientProfile } from '../services/patient.service';
+import { getPatientAppointments } from '../services/appointment.service';
 
 const router: Router = express.Router();
 
@@ -29,16 +30,31 @@ router.get('/profile', authenticateToken, async (req: Request, res: Response) =>
       dob: patientData.dob,
     }
   });
+
+ // Route to get patient profile and appointments
+router.get('/master/:id', authenticateToken, async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const [patientProfile, appointments] = await Promise.all([
+      getPatientProfile(id),
+      getPatientAppointments(id),
+    ]);
+
+    if (!patientProfile) {
+      return res.status(404).json({ message: 'Patient profile not found' });
+    }
+
+    res.json({
+      message: 'Patient profile and appointments retrieved successfully',
+      patient: patientProfile,
+      appointments: appointments
+    });
+  } catch (error) {
+    console.error('Error fetching master patient data:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 });
 
-// Get patient profile by ID
- // this endpoint should return all the patient profile data and the appointments data that are associated with that patient 
-router.get('/master/:id', authenticateToken, (req: Request, res: Response) => {
-  
-  
-    
-  }
-);
-
 export default router;
-
