@@ -81,14 +81,86 @@ export const storeVerificationData = async (
 
 export const getVerificationData = async (identifier: string): Promise<VerificationRecord | null> => {
   const isEmail = identifier.includes('@');
-  const field = isEmail ? 'email' : 'phone_number';
-  const query = `
-    SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, user_data, email_verified, phone_verified, expires_at
-    FROM user_verifications
-    WHERE ${field} = $1 AND expires_at > NOW()
-  `;
-  const result = await pool.query(query, [identifier]);
-  return result.rows.length > 0 ? result.rows[0] : null;
+  
+  console.log(`getVerificationData called with identifier: ${identifier}, isEmail: ${isEmail}`);
+  
+  let query: string;
+  if (isEmail) {
+    query = `
+      SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, user_data, email_verified, phone_verified, expires_at
+      FROM user_verifications
+      WHERE email = $1 AND expires_at > NOW()
+    `;
+  } else {
+    query = `
+      SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, user_data, email_verified, phone_verified, expires_at
+      FROM user_verifications
+      WHERE phone_number = $1 AND expires_at > NOW()
+    `;
+  }
+  
+  try {
+    console.log(`Executing query: ${query.replace(/\s+/g, ' ').trim()}`);
+    const result = await pool.query(query, [identifier]);
+    console.log(`Query returned ${result.rows.length} rows`);
+    
+    if (result.rows.length > 0) {
+      console.log(`Found verification record:`, {
+        id: result.rows[0].id,
+        email: result.rows[0].email,
+        expires_at: result.rows[0].expires_at,
+        user_data_exists: !!result.rows[0].user_data
+      });
+    }
+    
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error('Error in getVerificationData:', error);
+    return null;
+  }
+};
+
+// Get verification data for login (ignores expiration)
+export const getVerificationDataForLogin = async (identifier: string): Promise<VerificationRecord | null> => {
+  const isEmail = identifier.includes('@');
+  
+  console.log(`getVerificationDataForLogin called with identifier: ${identifier}, isEmail: ${isEmail}`);
+  
+  let query: string;
+  if (isEmail) {
+    query = `
+      SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, user_data, email_verified, phone_verified, expires_at
+      FROM user_verifications
+      WHERE email = $1
+    `;
+  } else {
+    query = `
+      SELECT id, email, phone_number, hashed_email_otp, hashed_phone_otp, user_data, email_verified, phone_verified, expires_at
+      FROM user_verifications
+      WHERE phone_number = $1
+    `;
+  }
+  
+  try {
+    console.log(`Executing login query: ${query.replace(/\s+/g, ' ').trim()}`);
+    const result = await pool.query(query, [identifier]);
+    console.log(`Login query returned ${result.rows.length} rows`);
+    
+    if (result.rows.length > 0) {
+      console.log(`Found verification record for login:`, {
+        id: result.rows[0].id,
+        email: result.rows[0].email,
+        expires_at: result.rows[0].expires_at,
+        user_data_exists: !!result.rows[0].user_data,
+        isExpired: new Date(result.rows[0].expires_at) <= new Date()
+      });
+    }
+    
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error('Error in getVerificationDataForLogin:', error);
+    return null;
+  }
 };
 
 export const verifyOTP = async (submittedOtp: string, storedHashedOtp: string): Promise<boolean> => {
@@ -136,15 +208,32 @@ export const sendOtpsToUser = async (
   emailOtp: string,
   phoneOtp: string
 ): Promise<boolean> => {
-  const emailSent = await sendCommunication(
-    email,
-    phoneNumber,
-    'email',
-    'email_verification',
-    { otp: emailOtp }
-  );
-  const smsMessage = `Your verification code is: ${phoneOtp}\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.`;
-  const smsSent = await sendSMS(phoneNumber, smsMessage);
+  let emailSent = false;
+  let smsSent = false;
+
+  // Only send email if emailOtp is provided
+  if (emailOtp && emailOtp.trim() !== '') {
+    console.log(`Sending email OTP to ${email}`);
+    emailSent = await sendCommunication(
+      email,
+      phoneNumber,
+      'email',
+      'email_verification',
+      { otp: emailOtp }
+    );
+  } else {
+    console.log(`No email OTP to send (emailOtp is empty)`);
+  }
+
+  // Only send SMS if phoneOtp is provided
+  if (phoneOtp && phoneOtp.trim() !== '') {
+    console.log(`Sending SMS OTP to ${phoneNumber}`);
+    const smsMessage = `Your verification code is: ${phoneOtp}\nThis code expires in ${OTP_EXPIRY_MINUTES} minutes.`;
+    smsSent = await sendSMS(phoneNumber, smsMessage);
+  } else {
+    console.log(`No SMS OTP to send (phoneOtp is empty)`);
+  }
+
   return !!(emailSent || smsSent);
 };
 
