@@ -136,6 +136,13 @@ export const resendOTP = async (req: Request, res: Response) => {
     }
 
     const result = await resendVerificationOTP(id, channel as 'email' | 'phone' | 'both');
+    
+    // If the service returns success: false (OTP not expired), return 400 status
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    // If successful (OTP was expired and resent), return 200 status
     return res.status(200).json(result);
 
   } catch (error: any) {
@@ -145,6 +152,27 @@ export const resendOTP = async (req: Request, res: Response) => {
       error: error.message || 'Failed to resend verification code'
     });
   }
+};
+
+export const getVerificationStatus = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Verification ID is required' });
+  }
+
+  const verificationRecord = await getVerificationDataById(id);
+
+  if (!verificationRecord) {
+    return res.status(404).json({ error: 'Verification record not found' });
+  }
+
+  const verificationStatus = {
+    email: verificationRecord.email_verified,
+    phone: verificationRecord.phone_verified,
+  };
+
+  res.json(verificationStatus);
 };
 
 export const login = async (req: Request, res: Response) => {
