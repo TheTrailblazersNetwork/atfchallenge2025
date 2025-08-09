@@ -171,9 +171,6 @@ export function LoginForm({
                 >
                   {isLoading ? "Logging In..." : "Login"}
                 </Button>
-                {/* <Button variant="outline" className="w-full" disabled={isLoading}>
-                  Login with Google
-                </Button> */}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
