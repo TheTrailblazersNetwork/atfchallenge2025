@@ -154,6 +154,27 @@ export const resendOTP = async (req: Request, res: Response) => {
   }
 };
 
+export const getVerificationStatus = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Verification ID is required' });
+  }
+
+  const verificationRecord = await getVerificationDataById(id);
+
+  if (!verificationRecord) {
+    return res.status(404).json({ error: 'Verification record not found' });
+  }
+
+  const verificationStatus = {
+    email: verificationRecord.email_verified,
+    phone: verificationRecord.phone_verified,
+  };
+
+  res.json(verificationStatus);
+};
+
 export const login = async (req: Request, res: Response) => {
   try {
     const result = await loginPatient(req.body);
