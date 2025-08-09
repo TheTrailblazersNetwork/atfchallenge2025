@@ -4,10 +4,11 @@ import appointments from "@/app/data/appointments";
 import AppointmentCard from "@/components/dashboard/appointments/appointment-card";
 import AppointmentFilters from "@/components/dashboard/appointments/appointment-filters";
 import DashboardPageHeader from "@/components/dashboard/page-header";
+import { AppointmentCardType } from "@/types/Appointment";
 
 const page = () => {
 
-  const [filterAppointments, setFilterAppointments] = useState(appointments);
+  const [filterAppointments, setFilterAppointments] = useState<Array<AppointmentCardType>>(appointments);
   return (
     <div className="dashboard-page">
       <DashboardPageHeader

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { AppointmentCardType } from "@/types/Appointment";
 import clsx from "clsx";
 import { Info } from "lucide-react";
-import { useState } from "react";
 
 const AppointmentCard = ({
   appointment,
@@ -63,7 +62,7 @@ const AppointmentCard = ({
                   ? "rd"
                   : "th";
               return `${day}${suffix} ${m} ${y}, ${h}:${min} ${
-                new Date(appointment.date)
+                new Date(appointment.created_at)
                   .toLocaleString("en-US", {
                     hour: "2-digit",
                     hour12: true,
