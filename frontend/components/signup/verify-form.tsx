@@ -18,6 +18,7 @@ import PageLoading from "../Page-Loading";
 import PageError from "../Page-Error";
 import system_api from "@/app/data/api";
 import axios from "axios";
+import { toast } from "sonner";
 
 const RESEND_TIMEOUT = 15 * 60; // 15 minutes in seconds
 
@@ -64,8 +65,12 @@ export function VerifyForm({
   useEffect(() => {
     try {
       const stored = localStorage.getItem("verificationId");
-      if (stored != '') setVerificationId(stored);
-      else setError(true);
+      if (stored && stored.trim() !== "") {
+        setVerificationId(stored);
+      } else {
+        localStorage.removeItem("verificationId");
+        setError(true);
+      }
     } catch (e) {
       setError(true);
     } finally {
@@ -117,15 +122,27 @@ export function VerifyForm({
   };
 
   const verifySms = async () => {
-    axios.post(system_api.patient.smsVerify + verificationId, {
-      otp: smsOtp,
-    })
-    .then(res => {
-      console.log(res);
-    })
-    .catch(err => {
-      console.log(err);
-    });
+    axios
+      .post(system_api.patient.smsVerify + verificationId, {
+        otp: smsOtp,
+      })
+      .then((res) => {
+        if(res.status === 200){
+          toast.success(
+            res.data.message || "Phone number verified successfully.",
+            { richColors: true }
+          );
+          setSmsVerified(true);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        if(err.response){
+          toast.error(err.response.data.error || "SMS verification failed", { richColors: true });
+        } else{ 
+          toast.error("An error occurred while verifying SMS", { richColors: true });
+        }
+      });
     // try {
     //   const response = await fetch(`/api/verify/sms/${smsOtp}`, {
     //     method: "POST",
@@ -174,10 +191,13 @@ export function VerifyForm({
                   {mailVerified ? (
                     <VerifiedComponent text="Email Verified" />
                   ) : (
-                    <form className="grid gap-2" onSubmit={(e) => {
-                      e.preventDefault();
-                      verfiyEmail();
-                    }}>
+                    <form
+                      className="grid gap-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        verfiyEmail();
+                      }}
+                    >
                       <Label htmlFor="mail">Mail Verification</Label>
                       <div className="flex gap-2">
                         <Input
@@ -214,10 +234,13 @@ export function VerifyForm({
                   {smsVerified ? (
                     <VerifiedComponent text="SMS Verified" />
                   ) : (
-                    <form className="grid gap-2" onSubmit={(e) => {
-                      e.preventDefault();
-                      verifySms();
-                    }}>
+                    <form
+                      className="grid gap-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        verifySms();
+                      }}
+                    >
                       <Label htmlFor="sms">SMS Verification</Label>
                       <div className="flex gap-2">
                         <Input
