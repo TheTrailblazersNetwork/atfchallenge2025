@@ -13,7 +13,11 @@ import { Settings, CalendarClock, House, BellDot } from "lucide-react";
 import Logo from "./Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { logoutPatient } from "@/store/features/patientReducer";
+import { logout } from "@/lib/auth";
+import { toast } from "sonner";
 import clsx from "clsx";
 
 // Menu items.
@@ -42,6 +46,22 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    // Clear auth data from localStorage
+    logout();
+    
+    // Clear Redux store
+    dispatch(logoutPatient());
+    
+    // Show success message
+    toast.success("Logged out successfully", { richColors: true });
+    
+    // Redirect to login
+    router.push("/login");
+  };
 
   return (
     <Sidebar className="select-none" variant={"floating"}>
@@ -83,6 +103,7 @@ export function AppSidebar() {
                 <Button
                   variant={"outline"}
                   className={"w-full cursor-pointer mt-2"}
+                  onClick={handleLogout}
                 >
                   Log Out
                 </Button>

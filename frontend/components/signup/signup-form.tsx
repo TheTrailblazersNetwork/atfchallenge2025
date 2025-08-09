@@ -33,6 +33,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 import system_api from "@/app/data/api";
+import { isAuthenticated } from "@/lib/auth";
 
 export function SignupForm({
   className,
@@ -41,6 +42,12 @@ export function SignupForm({
   const router = useRouter();
 
   useEffect(() => {
+    // Check if user is already authenticated
+    if (isAuthenticated()) {
+      router.push("/dashboard");
+      return;
+    }
+    
     try {
       const stored = localStorage.getItem("verificationId");
       if (stored) {
@@ -53,7 +60,7 @@ export function SignupForm({
     } catch (error) {
       console.error("Error clearing verificationId from localStorage:", error);
     }
-  }, []);
+  }, [router]);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");

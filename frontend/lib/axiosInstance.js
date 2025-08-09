@@ -10,11 +10,10 @@ const axiosInstance = axios.create({
 
 // Add a request interceptor to include the token in the headers
 axiosInstance.interceptors.request.use((config) => {
-    if (typeof document !== 'undefined') {
-        const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('authToken');
         if (token) {
-            const tokenValue = token.split('=')[1]; // Extract the token value
-            config.headers['Cookie'] = `token=${tokenValue}`; // Set the Cookie header
+            config.headers['Authorization'] = `Bearer ${token}`;
         }
     }
     return config;
