@@ -2,6 +2,8 @@ import pool from '../config/db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendCommunication } from '../config/email';
+import { getPatientProfile } from './patient.service';
+import { getPatientAppointments } from './appointment.service';
 import { generateOTP, hashOTP, storeVerificationData, sendOtpsToUser, getVerificationData, getVerificationDataById, getVerificationDataByIdRaw, getVerificationDataForLogin } from './otp.service';
 
 const SALT_ROUNDS = 10;
@@ -75,14 +77,18 @@ interface ResendOTPResult {
 
 type LoginPatientResult =
   | {
-      success: true;
-      message: string;
-      token: string;
-      user: {
-        id: string;
-        email: string;
-      };
-    }
+  success: boolean;
+  message: string;
+  token: string;
+  user: {
+    id: string;
+    email: string;
+  };
+  master?: {
+    profile: any;
+    appointments: any;
+  };
+}
   | PendingVerificationResult;
 
 // Service Functions
@@ -115,11 +121,19 @@ export const loginPatient = async (
       { expiresIn: '1h' }
     );
 
+    // Get patient profile and appointments
+    const patientProfile = await getPatientProfile(user.id);
+    const appointments = await getPatientAppointments(user.id);
+
     return {
       success: true,
       message: 'Login successful',
       token,
-      user: { id: user.id, email: user.email }
+      user: { id: user.id, email: user.email },
+      master: {
+        profile: patientProfile,
+        appointments: appointments
+      }
     };
   }
 
