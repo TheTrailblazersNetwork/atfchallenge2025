@@ -12,7 +12,7 @@ const Logo = ({
 }) => {
   return (
     <Image
-      src={"/assets/logo.jpg"}
+      src={"/assets/logo.png"}
       className={`${classname}`}
       width={width}
       height={height}

@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Settings, CalendarClock, House, CircleUserRound } from "lucide-react";
+import { CalendarClock, House } from "lucide-react";
 import Logo from "./Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -20,6 +20,7 @@ import { clearAppointmentsData } from "@/store/features/appointmentsReducer";
 import { logout } from "@/lib/auth";
 import { toast } from "sonner";
 import clsx from "clsx";
+import TextLogo from "./TextLogo";
 
 // Menu items.
 const items = [
@@ -74,16 +75,17 @@ export function AppSidebar() {
               "flex items-center justify-center flex-col py-10 my-5"
             }
           >
-            <Logo />
+            <Logo width={100} height={100} />
+            <TextLogo size="text-2xl" classname="my-1" />
           </SidebarGroupLabel>
-          <SidebarGroupContent className={"h-full"}>
+          <SidebarGroupContent className={"h-full mt-5"}>
             <SidebarMenu className={"relative h-full space-y-1"}>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton className="hover:bg-blue-900/70 hover:text-white transition-all" asChild>
                     <Link
                       className={clsx("!text-base !py-5", {
-                        "bg-sidebar-accent font-medium ":
+                        "bg-zinc-200 font-medium ":
                           pathname === item.url ||
                           pathname.startsWith(item.url),
                       })}
