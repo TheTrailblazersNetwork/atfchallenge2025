@@ -86,6 +86,7 @@ export function LoginForm({
             localStorage.setItem("authToken", token);
             
             // Save user data to Redux store (this also saves to localStorage)
+            // console.log(user);
             dispatch(setPatientData(user));
             
             // Navigate to dashboard

@@ -77,8 +77,12 @@ export default function AppointmentDetails({
       toast.success("Appointment cancelled successfully", { richColors: true });
       onAppointmentUpdated?.();
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to cancel appointment", { richColors: true });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to cancel appointment";
+      toast.error(errorMessage, { richColors: true });
     } finally {
       toast.dismiss(loadingToast);
       setIsCancelling(false);
