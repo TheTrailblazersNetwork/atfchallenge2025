@@ -6,9 +6,6 @@ import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   InputOTP,
@@ -16,7 +13,6 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import system_data from "@/app/data/system";
 import { CircleCheckBig } from "lucide-react";
 import PageLoading from "../Page-Loading";
 import PageError from "../Page-Error";
