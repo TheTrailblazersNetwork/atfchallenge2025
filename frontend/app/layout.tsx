@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import ReduxProvider from "@/components/Redux-Provider";
 
 export const metadata: Metadata = {
-  title: "my_health",
-  description: "health Booking App",
+  title: "NeuroFlow - AI-Powered Hospital Queue Management",
+  description: "AI-powered hospital queue management system that streamlines patient flow through intelligent triaging and real-time queue management.",
 };
 
 const interFont = Inter({

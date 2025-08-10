@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AppointmentCardType } from "@/types/Appointment";
+import { updateAppointment } from "@/store/features/appointmentsReducer";
 import { Calendar, FileText, AlertCircle, User, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { cancelAppointment } from "@/services/appointmentService";
@@ -21,12 +23,13 @@ interface AppointmentDetailsProps {
   onAppointmentUpdated?: () => void;
 }
 
-export default function AppointmentDetails({ 
-  appointment, 
-  open, 
+export default function AppointmentDetails({
+  appointment,
+  open,
   onOpenChange,
-  onAppointmentUpdated 
+  onAppointmentUpdated,
 }: AppointmentDetailsProps) {
+  const dispatch = useDispatch();
   const [isCancelling, setIsCancelling] = useState(false);
 
   if (!appointment) return null;
@@ -65,26 +68,62 @@ export default function AppointmentDetails({
     }
 
     if (appointment.status.toLowerCase() === "completed") {
-      toast.error("Cannot cancel a completed appointment", { richColors: true });
+      toast.error("Cannot cancel a completed appointment", {
+        richColors: true,
+      });
+      return;
+    }
+
+    if (appointment.status.toLowerCase() === "approved") {
+      toast.error("Cannot cancel an approved appointment", {
+        richColors: true,
+      });
+      return;
+    }
+
+    if (appointment.status.toLowerCase() === "rebook") {
+      toast.error("Cannot cancel a rebook appointment", { richColors: true });
       return;
     }
 
     setIsCancelling(true);
-    const loadingToast = toast.loading("Cancelling appointment...", { richColors: true });
+
+    const cancelPromise = async () => {
+      await cancelAppointment(appointment.id);
+
+      // Update the appointment in Redux state
+      const updatedAppointment = {
+        ...appointment,
+        status: "cancelled",
+        updated_at: new Date().toISOString(),
+      };
+      dispatch(updateAppointment(updatedAppointment));
+
+      // Trigger update callback to refresh any filtered views
+      onAppointmentUpdated?.();
+
+      // Close the modal
+      onOpenChange(false);
+
+      return "Appointment cancelled successfully";
+    };
 
     try {
-      await cancelAppointment(appointment.id);
-      toast.success("Appointment cancelled successfully", { richColors: true });
-      onAppointmentUpdated?.();
-      onOpenChange(false);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to cancel appointment";
-      toast.error(errorMessage, { richColors: true });
+      await toast.promise(cancelPromise(), {
+        loading: "Cancelling appointment...",
+        success: "Appointment cancelled successfully",
+        error: (error) => {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Failed to cancel appointment";
+          return errorMessage;
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      // Error handling is done by toast.promise
     } finally {
-      toast.dismiss(loadingToast);
       setIsCancelling(false);
     }
   };
@@ -101,12 +140,17 @@ export default function AppointmentDetails({
             View and manage your appointment information
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusColor(appointment.status)}`}>
-              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusColor(
+                appointment.status
+              )}`}
+            >
+              {appointment.status.charAt(0).toUpperCase() +
+                appointment.status.slice(1)}
             </span>
             {appointment.priority_rank && (
               <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
@@ -196,22 +240,21 @@ export default function AppointmentDetails({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
-          {appointment.status.toLowerCase() !== "cancelled" && 
-           appointment.status.toLowerCase() !== "completed" && (
-            <Button
-              variant="destructive"
-              onClick={handleCancel}
-              disabled={isCancelling}
-            >
-              {isCancelling ? "Cancelling..." : "Cancel Appointment"}
-            </Button>
-          )}
+          {appointment.status.toLowerCase() !== "cancelled" &&
+            appointment.status.toLowerCase() !== "completed" &&
+            appointment.status.toLowerCase() !== "approved" &&
+            appointment.status.toLowerCase() !== "rebook" && (
+              <Button
+                variant="destructive"
+                onClick={handleCancel}
+                disabled={isCancelling}
+              >
+                {isCancelling ? "Cancelling..." : "Cancel Appointment"}
+              </Button>
+            )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

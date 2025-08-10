@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
 import PatientReducer from './features/patientReducer'
+import AppointmentsReducer from './features/appointmentsReducer'
 
 export default configureStore({
     reducer: {
-        patient: PatientReducer
+        patient: PatientReducer,
+        appointments: AppointmentsReducer
     }
 })

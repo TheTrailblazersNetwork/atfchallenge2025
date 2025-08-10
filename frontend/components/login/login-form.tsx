@@ -4,13 +4,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -20,7 +16,9 @@ import axios from "axios";
 import system_api from "@/app/data/api";
 import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
+import { setAppointmentsData } from "@/store/features/appointmentsReducer";
 import { isAuthenticated } from "@/lib/auth";
+import TLHeader from "../TLHeader";
 
 export function LoginForm({
   className,
@@ -80,14 +78,20 @@ export function LoginForm({
             router.push(`/signup/verify/`);
           } else {
             // Successful login - save token and user data
-            const { token, user } = res.data;
+            const { token } = res.data;
+            const user = res.data.master.profile;
+            const appointments = res.data.master.appointments;
             
             // Save token to localStorage
             localStorage.setItem("authToken", token);
             
             // Save user data to Redux store (this also saves to localStorage)
-            // console.log(user);
             dispatch(setPatientData(user));
+            
+            // Save appointments data to Redux store
+            if (appointments && appointments.length > 0) {
+              dispatch(setAppointmentsData(appointments));
+            }
             
             // Navigate to dashboard
             router.push("/dashboard");
@@ -119,10 +123,7 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Login</CardTitle>
-          <CardDescription>Connect to your account to continue</CardDescription>
-        </CardHeader>
+        <TLHeader title="Login" desc="Connect to your account to continue" />
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">

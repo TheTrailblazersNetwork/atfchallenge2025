@@ -4,9 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Select,
@@ -24,7 +21,6 @@ import { ChevronDown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import system_data from "@/app/data/system";
 import Link from "next/link";
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -34,6 +30,7 @@ import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 import system_api from "@/app/data/api";
 import { isAuthenticated } from "@/lib/auth";
+import TLHeader from "../TLHeader";
 
 export function SignupForm({
   className,
@@ -136,10 +133,7 @@ export function SignupForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Sign Up</CardTitle>
-          <CardDescription>Create your account to continue</CardDescription>
-        </CardHeader>
+        <TLHeader title="Sign Up" desc="Create your account to continue" />
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
