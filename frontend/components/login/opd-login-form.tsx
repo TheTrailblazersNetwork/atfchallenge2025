@@ -54,17 +54,26 @@ export function LoginForm({
           router.push("/opd-pending-approval");
         }
       }
-    } catch (err) {
-      if (err.response?.data?.error === "Account pending approval") {
-        router.push("/opd-pending-approval");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const apiError = err.response?.data as { error?: string };
+        if (apiError?.error === "Account pending approval") {
+          router.push("/opd-pending-approval");
+        } else {
+          console.error("Login failed:", err);
+          if (apiError?.error) {
+            toast.error(apiError.error, { richColors: true });
+          } else {
+            toast.error("Couldn't Login. Please try again", {
+              richColors: true,
+            });
+          }
+        }
       } else {
-        console.error("Login failed:", err);
-        if (err.response && err.response.data) {
-          toast.error(err.response.data.error, { richColors: true });
-        } else
-          toast.error("Couldn't Login. Please try again", {
-            richColors: true,
-          });
+        console.error("Unexpected error:", err);
+        toast.error("Couldn't Login. Please try again", {
+          richColors: true,
+        });
       }
     } finally {
       toast.dismiss(loadingToast);
