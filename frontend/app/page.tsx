@@ -6,9 +6,6 @@ export default function Home() {
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <h1 className="text-4xl font-bold text-center sm:text-left">{system_data.shortname}</h1>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-      
-      </footer>
     </div>
   );
 }

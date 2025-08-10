@@ -8,118 +8,150 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
 import system_api from "@/app/data/api";
+import { MailCheck, MailWarning } from "lucide-react";
 
 export function PreferenceForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
-
-  const [selection, setSelection] = useState("email");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [error, setError] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [identifier, setIdentifier] = useState("");
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setIsLoading(true);
-    const loadingToast = toast.loading("Logging in...", { richColors: true });
-
-    const userData = {
-      email,
-    };
-
+    const loadingToast = toast.loading("Authenticating...", { richColors: true });
     axios
-      .post(system_api.patient.login, userData)
+      .post(system_api.patient.forgotPassword, { identifier })
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Login successful!", {
+          toast.success(
+            "If an account exists, you'll receive a recovery link.",
+            {
+              richColors: true,
+            }
+          );
+          setCompleted(true);
+        } else {
+          toast.error("Failed to send recovery link. Please try again.", {
             richColors: true,
           });
-          router.push("/dashboard");
-        } else {
-          toast.error(" Login failed. Please try again.", { richColors: true });
         }
       })
       .catch((err) => {
         console.error("Login failed:", err);
-        if (err.response && err.response.data) {
-          toast.error(err.response.data.error, { richColors: true });
-        } else
-          toast.error("Couldn't Login. Please try again", {
-            richColors: true,
-          });
+        toast.error("Couldn't send recovery link. Please try again", {
+          richColors: true,
+        });
+        setError(true);
       })
       .finally(() => {
         toast.dismiss(loadingToast);
-        setIsLoading(false);
       });
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 select-none", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Password Recovery</CardTitle>
-          <CardDescription>Choose your recovery method</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <Tabs defaultValue={selection} onValueChange={setSelection} className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="mobile">Mobile Number</TabsTrigger>
-              </TabsList>
-              <TabsContent value="email">
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                  disabled={isLoading}
-                />
-              </TabsContent>
-              <TabsContent value="mobile">
-                <Input
-                  id="tel"
-                  type="tel"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
-                  placeholder="Enter your mobile number"
-                  required
-                  disabled={isLoading}
-                />
-              </TabsContent>
-            </Tabs>
-            <Button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 mt-3"
-              disabled={isLoading || (selection === "email" && email === "") || (selection === "mobile" && mobile === "")}
-            >
-              {isLoading ? "Sending..." : "Send Recovery Link"}
-            </Button>
-            <p className="text-muted-foreground text-xs mt-3">
-              If an account exists with your email or mobile number, a recovery link will be sent
-              to change your password. Click{" "}
-              <Link href="/login" className="underline underline-offset-4">
-                here
-              </Link>{" "}
-              if you remember your password.
+    <div
+      className={cn("flex flex-col gap-6 select-none", className)}
+      {...props}
+    >
+      {error ? (
+        <Card className="gl-container">
+          <div className="flex items-center justify-center">
+            <MailWarning className="text-red-700" size={70} />
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-green-700">
+              Error Occurred
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Please try again later or contact support if the issue persists.
             </p>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              onClick={() => {
+                setError(false);
+                setCompleted(false);
+                setIdentifier("");
+              }}
+              className="cursor-pointer"
+              variant="default"
+            >
+              Try Again
+            </Button>
+            <Button className="cursor-pointer" variant="outline" asChild>
+              <Link href={"/login"}>Go to Login</Link>
+            </Button>
+          </div>
+        </Card>
+      ) : completed ? (
+        <Card className="gl-container">
+          <div className="flex items-center justify-center">
+            <MailCheck className="text-green-700" size={70} />
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-green-700">Link Sent</h3>
+            <p className="text-sm text-muted-foreground">
+              You'll receive a recovery link.
+            </p>
+          </div>
+          <Button className="cursor-pointer" variant="outline" asChild>
+            <Link href={"/login"}>Go to Login</Link>
+          </Button>
+          <p className="text-muted-foreground text-center text-xs">
+            You only receive a recovery link if an account exists with the
+            provided email or mobile number.
+          </p>
+        </Card>
+      ) : (
+        <Card className="text-center">
+          <CardHeader>
+            <CardTitle>{system_data.name} Password Recovery</CardTitle>
+            <CardDescription>Choose your recovery method</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <Input
+                id="identifier"
+                type="text"
+                value={identifier}
+                className="text-center"
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="Enter your email or mobile number"
+                required
+              />
+              <Button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 mt-3"
+                disabled={!identifier}
+              >
+                Send Recovery Link
+              </Button>
+              <p className="text-muted-foreground text-center text-xs mt-3">
+                If an account exists with your email or mobile number, a
+                recovery link will be sent to change your password. <br /> Click{" "}
+                <Link href="/login" className="underline">
+                  here
+                </Link>{" "}
+                if you remember your password.
+              </p>
+
+              <p className="text-muted-foreground text-center text-xs mt-3">
+                You only receive sms links if you opt for SMS notifications
+                during signup.
+              </p>
+            </form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

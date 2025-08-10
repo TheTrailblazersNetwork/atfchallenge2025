@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import system_data from "@/app/data/system";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ import axios from "axios";
 import system_api from "@/app/data/api";
 import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
+import { isAuthenticated } from "@/lib/auth";
 
 export function LoginForm({
   className,
@@ -27,6 +28,27 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const dispatch = useDispatch();
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    if (isAuthenticated()) {
+      router.push("/dashboard");
+      return;
+    }
+    
+    try {
+      const stored = localStorage.getItem("verificationId");
+      if (stored) {
+        toast.message("Pending Registration", {
+          description: "Finish your verfication to proceed.",
+          richColors: true,
+        });
+        router.push("/signup/verify");
+      } else localStorage.clear();
+    } catch (error) {
+      console.error("Error clearing verificationId from localStorage:", error);
+    }
+  }, [router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,20 +68,40 @@ export function LoginForm({
     axios
       .post(system_api.patient.login, userData)
       .then((res) => {
-        if(res.status === 200){
-          toast.success("Login successful!", {
-            richColors: true,
-          });
-          // Save data to state
-          // State saves "user" as string to localStorage
-          dispatch(setPatientData(res.data.user))
-          router.push("/dashboard");
-        }else {
+        console.log(res);
+        if (res.status === 200) {
+          if (res.data.pendingVerification) {
+            toast.success("Successful! Verify your email and mobile number.", {
+              richColors: true,
+            });
+            localStorage.setItem("verificationId", res.data.userData.verificationId);
+            localStorage.setItem("verificationEmail", res.data.userData.email);
+            localStorage.setItem("verificationPhone", res.data.userData.phone_number);
+            router.push(`/signup/verify/`);
+          } else {
+            // Successful login - save token and user data
+            const { token, user } = res.data;
+            
+            // Save token to localStorage
+            localStorage.setItem("authToken", token);
+            
+            // Save user data to Redux store (this also saves to localStorage)
+            dispatch(setPatientData(user));
+            
+            // Navigate to dashboard
+            router.push("/dashboard");
+            
+            // Show success message
+            toast.success("Login successful!", {
+              richColors: true,
+            });
+          }
+        } else {
           toast.error(" Login failed. Please try again.", { richColors: true });
         }
       })
       .catch((err) => {
-        console.error("Login failed:", err);
+        console.log("Login failed:", err);
         if (err.response && err.response.data) {
           toast.error(err.response.data.error, { richColors: true });
         } else
@@ -145,9 +187,6 @@ export function LoginForm({
                 >
                   {isLoading ? "Logging In..." : "Login"}
                 </Button>
-                {/* <Button variant="outline" className="w-full" disabled={isLoading}>
-                  Login with Google
-                </Button> */}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">

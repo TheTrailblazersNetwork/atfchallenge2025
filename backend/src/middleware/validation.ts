@@ -1,4 +1,4 @@
-import { body, validationResult, ValidationChain } from 'express-validator';
+import { body, param, validationResult, ValidationChain } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
 // Generic validation middleware
@@ -141,6 +141,24 @@ export const appointmentValidation = [
     .optional()
     .isIn(['2weeks_post_discharge', '1week_early_review'])
     .withMessage('Invalid discharge type')
+];
+
+export const initiateRegistrationValidation = signupValidation;
+
+export const verifyOtpValidation = [
+  body('otp')
+    .notEmpty()
+    .withMessage('Verification code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Verification code must be 6 digits')
+    .matches(/^\d+$/)
+    .withMessage('Verification code must be numeric'),
+
+  param('id')
+    .notEmpty()
+    .withMessage('Verification ID is required')
+    .isUUID()
+    .withMessage('Invalid verification ID format')
 ];
 
 // export const scheduleValidation = [

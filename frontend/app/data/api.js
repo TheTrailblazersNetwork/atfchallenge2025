@@ -8,11 +8,27 @@ const system_api = {
     patient: {
         login: `${host}/api/auth/login`,
         signup: `${host}/api/auth/signup`,
+        register: `${host}/api/auth/register`,
         getData: `${host}/api/patient/`,
         forgotPassword: `${host}/api/auth/forgot-password`,
         // /:id added to the end of the below URLs
         validateForgotPassword: `${host}/api/auth/reset-password/`,
         resetPassword: `${host}/api/auth/reset-password/`,
+        // Resend OTP
+        resendOTP: `${host}/api/auth/verify/resend/`,
+        // Verification APIs
+        mailVerify: `${host}/api/auth/verify/email/`,
+        smsVerify: `${host}/api/auth/verify/sms/`,
+        // Verification status
+        getVerificationStatus: `${host}/api/auth/verify/status/`,
+    },
+    appointments: {
+        create: `${host}/api/appointments`,
+        getAll: `${host}/api/appointments`,
+        getById: `${host}/api/appointments/`,  // append appointment ID
+        update: `${host}/api/appointments/`,   // append appointment ID
+        cancel: `${host}/api/appointments/`,   // append appointment ID
+        testBatch: `${host}/api/appointments/test-run-batch`,
     },
 };
 export default system_api;

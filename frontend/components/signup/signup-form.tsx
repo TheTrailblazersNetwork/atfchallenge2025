@@ -27,18 +27,40 @@ import { Label } from "@/components/ui/label";
 import system_data from "@/app/data/system";
 import Link from "next/link";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 import system_api from "@/app/data/api";
+import { isAuthenticated } from "@/lib/auth";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    if (isAuthenticated()) {
+      router.push("/dashboard");
+      return;
+    }
+    
+    try {
+      const stored = localStorage.getItem("verificationId");
+      if (stored) {
+        toast.message("Pending Registration", {
+          description: "Finish your verfication to proceed.",
+          richColors: true,
+        });
+        router.push("/signup/verify");
+      } else localStorage.clear();
+    } catch (error) {
+      console.error("Error clearing verificationId from localStorage:", error);
+    }
+  }, [router]);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -65,10 +87,10 @@ export function SignupForm({
       dob: date
         ? date.toISOString().slice(0, 10) // yyyy-mm-dd
         : undefined,
-      email,
       phone_number: mobile,
-      preferred_contact: comms,
+      email,
       password,
+      preferred_contact: comms,
     };
 
     // Basic validation
@@ -76,19 +98,22 @@ export function SignupForm({
       toast.warning("Passwords do not match!", { richColors: true });
       return;
     }
-    
+
     setIsLoading(true);
     const loadingToast = toast.loading("Signing up...", { richColors: true });
 
     const userData = data;
     axios
-      .post(system_api.patient.signup, userData)
+      .post(system_api.patient.register, userData)
       .then((res) => {
         if (res.status === 201) {
-          toast.success("Signup successful! Please login to continue.", {
+          toast.success("Successful! Verify your email and mobile number.", {
             richColors: true,
           });
-          router.push("/login");
+          localStorage.setItem("verificationId", res.data.verificationId);
+          localStorage.setItem("verificationEmail", email);
+          localStorage.setItem("verificationPhone", mobile);
+          router.push(`/signup/verify/`);
         } else {
           toast.error("Signup failed. Please try again.", { richColors: true });
         }
@@ -211,9 +236,16 @@ export function SignupForm({
                     type="tel"
                     placeholder="0244123456"
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
+                    onInput={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      const sanitized = input.value.replace(/[^0-9]/g, "");
+                      setMobile(sanitized);
+                    }}
                     required
                     disabled={isLoading}
+                    maxLength={10}
+                    pattern="[0-9]{10}"
+                    inputMode="numeric"
                   />
                 </div>
                 <div className="col-span-full flex items-center gap-2">

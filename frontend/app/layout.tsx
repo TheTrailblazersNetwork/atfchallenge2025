@@ -20,11 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <ReduxProvider>
         <body className={`${interFont.className} bg-zinc-100 antialiased`}>
-          {children}
           <Toaster />
+          {children}
         </body>
       </ReduxProvider>
     </html>
