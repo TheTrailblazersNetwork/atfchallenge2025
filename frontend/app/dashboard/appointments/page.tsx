@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import AppointmentCard from "@/components/dashboard/appointments/appointment-card";
 import AppointmentFilters from "@/components/dashboard/appointments/appointment-filters";
 import DashboardPageHeader from "@/components/dashboard/page-header";
@@ -7,22 +8,33 @@ import BookAppointment from "@/components/dashboard/appointments/book-appointmen
 import AppointmentDetails from "@/components/dashboard/appointments/appointment-details";
 import { AppointmentCardType } from "@/types/Appointment";
 import { getPatientAppointments } from "@/services/appointmentService";
+import { setAppointmentsData, setAppointmentsLoading } from "@/store/features/appointmentsReducer";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 const Page = () => {
+  const dispatch = useDispatch();
+  const { data: appointments, loading: isLoading } = useSelector((state: any) => state.appointments);
+  
   const [filterAppointments, setFilterAppointments] = useState<AppointmentCardType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentCardType | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
+  // Initialize filter appointments when Redux appointments change
+  useEffect(() => {
+    if (appointments && appointments.length > 0) {
+      setFilterAppointments(appointments);
+    }
+  }, [appointments]);
+
   const fetchAppointments = async (showToast = false) => {
     try {
       setIsRefreshing(true);
+      dispatch(setAppointmentsLoading(true));
       const data = await getPatientAppointments();
-      setFilterAppointments(data);
+      dispatch(setAppointmentsData(data));
       if (showToast) {
         toast.success("Appointments refreshed", { richColors: true });
       }
@@ -31,13 +43,16 @@ const Page = () => {
         richColors: true 
       });
     } finally {
-      setIsLoading(false);
+      dispatch(setAppointmentsLoading(false));
       setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchAppointments();
+    // Only fetch if we don't have appointments in Redux state
+    if (!appointments || appointments.length === 0) {
+      fetchAppointments();
+    }
   }, []);
 
   const handleAppointmentCreated = () => {
@@ -54,7 +69,10 @@ const Page = () => {
   };
 
   const handleAppointmentUpdated = () => {
-    fetchAppointments(true);
+    // Update filter appointments to reflect the changes from Redux state
+    if (appointments && appointments.length > 0) {
+      setFilterAppointments(appointments);
+    }
   };
 
   if (isLoading) {
@@ -93,7 +111,7 @@ const Page = () => {
         </Button>
       </div>
 
-      <AppointmentFilters filter={filterAppointments} filterFunction={setFilterAppointments} />
+      <AppointmentFilters filter={appointments || []} filterFunction={setFilterAppointments} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filterAppointments && filterAppointments.length > 0 ? (
@@ -106,7 +124,12 @@ const Page = () => {
           ))
         ) : (
           <div className="col-span-4 text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">No appointments found.</p>
+            <p className="text-gray-500 text-lg mb-4">
+              {appointments && appointments.length > 0 
+                ? "No appointments match your current filters." 
+                : "No appointments found."
+              }
+            </p>
             <BookAppointment onAppointmentCreated={handleAppointmentCreated} />
           </div>
         )}

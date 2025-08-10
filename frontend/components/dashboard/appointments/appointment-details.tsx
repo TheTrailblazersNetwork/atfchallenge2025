@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AppointmentCardType } from "@/types/Appointment";
+import { updateAppointment } from "@/store/features/appointmentsReducer";
 import { Calendar, FileText, AlertCircle, User, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { cancelAppointment } from "@/services/appointmentService";
@@ -27,6 +29,7 @@ export default function AppointmentDetails({
   onOpenChange,
   onAppointmentUpdated 
 }: AppointmentDetailsProps) {
+  const dispatch = useDispatch();
   const [isCancelling, setIsCancelling] = useState(false);
 
   if (!appointment) return null;
@@ -69,22 +72,50 @@ export default function AppointmentDetails({
       return;
     }
 
+    if (appointment.status.toLowerCase() === "approved") {
+      toast.error("Cannot cancel an approved appointment", { richColors: true });
+      return;
+    }
+
+    if (appointment.status.toLowerCase() === "rebook") {
+      toast.error("Cannot cancel a rebook appointment", { richColors: true });
+      return;
+    }
+
     setIsCancelling(true);
-    const loadingToast = toast.loading("Cancelling appointment...", { richColors: true });
+
+    const cancelPromise = async () => {
+      await cancelAppointment(appointment.id);
+      
+      // Update the appointment in Redux state
+      const updatedAppointment = {
+        ...appointment,
+        status: "cancelled",
+        updated_at: new Date().toISOString()
+      };
+      dispatch(updateAppointment(updatedAppointment));
+      
+      // Trigger update callback to refresh any filtered views
+      onAppointmentUpdated?.();
+      
+      // Close the modal
+      onOpenChange(false);
+      
+      return "Appointment cancelled successfully";
+    };
 
     try {
-      await cancelAppointment(appointment.id);
-      toast.success("Appointment cancelled successfully", { richColors: true });
-      onAppointmentUpdated?.();
-      onOpenChange(false);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to cancel appointment";
-      toast.error(errorMessage, { richColors: true });
+      await toast.promise(cancelPromise(), {
+        loading: "Cancelling appointment...",
+        success: "Appointment cancelled successfully",
+        error: (error) => {
+          const errorMessage = error instanceof Error ? error.message : "Failed to cancel appointment";
+          return errorMessage;
+        },
+      });
+    } catch (error) {
+      // Error handling is done by toast.promise
     } finally {
-      toast.dismiss(loadingToast);
       setIsCancelling(false);
     }
   };
@@ -203,7 +234,9 @@ export default function AppointmentDetails({
             Close
           </Button>
           {appointment.status.toLowerCase() !== "cancelled" && 
-           appointment.status.toLowerCase() !== "completed" && (
+           appointment.status.toLowerCase() !== "completed" &&
+           appointment.status.toLowerCase() !== "approved" &&
+           appointment.status.toLowerCase() !== "rebook" && (
             <Button
               variant="destructive"
               onClick={handleCancel}

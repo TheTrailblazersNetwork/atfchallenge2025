@@ -16,6 +16,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { logoutPatient } from "@/store/features/patientReducer";
+import { clearAppointmentsData } from "@/store/features/appointmentsReducer";
 import { logout } from "@/lib/auth";
 import { toast } from "sonner";
 import clsx from "clsx";
@@ -55,6 +56,7 @@ export function AppSidebar() {
     
     // Clear Redux store
     dispatch(logoutPatient());
+    dispatch(clearAppointmentsData());
     
     // Show success message
     toast.success("Logged out successfully", { richColors: true });

@@ -20,6 +20,7 @@ import axios from "axios";
 import system_api from "@/app/data/api";
 import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
+import { setAppointmentsData } from "@/store/features/appointmentsReducer";
 import { isAuthenticated } from "@/lib/auth";
 
 export function LoginForm({
@@ -80,14 +81,20 @@ export function LoginForm({
             router.push(`/signup/verify/`);
           } else {
             // Successful login - save token and user data
-            const { token, user } = res.data;
+            const { token } = res.data;
+            const user = res.data.master.profile;
+            const appointments = res.data.master.appointments;
             
             // Save token to localStorage
             localStorage.setItem("authToken", token);
             
             // Save user data to Redux store (this also saves to localStorage)
-            // console.log(user);
             dispatch(setPatientData(user));
+            
+            // Save appointments data to Redux store
+            if (appointments && appointments.length > 0) {
+              dispatch(setAppointmentsData(appointments));
+            }
             
             // Navigate to dashboard
             router.push("/dashboard");

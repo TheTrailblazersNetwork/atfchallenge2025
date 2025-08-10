@@ -44,6 +44,7 @@ export const patientSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem("user");
       localStorage.removeItem("authToken");
+      localStorage.removeItem("appointments");
     },
     logoutPatient: (state) => {
       state.data = {
@@ -57,6 +58,7 @@ export const patientSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem("user");
       localStorage.removeItem("authToken");
+      localStorage.removeItem("appointments");
     },
   },
 });
