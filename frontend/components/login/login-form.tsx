@@ -4,13 +4,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import system_data from "@/app/data/system";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -22,8 +18,6 @@ import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
 import { setAppointmentsData } from "@/store/features/appointmentsReducer";
 import { isAuthenticated } from "@/lib/auth";
-import TextLogo from "../TextLogo";
-import Logo from "../Logo";
 import TLHeader from "../TLHeader";
 
 export function LoginForm({

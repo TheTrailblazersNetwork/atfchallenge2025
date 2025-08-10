@@ -1,5 +1,4 @@
 import system_data from "@/app/data/system";
-import Image from "next/image";
 
 const TextLogo = ({
   classname = "",

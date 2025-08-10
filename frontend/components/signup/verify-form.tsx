@@ -18,13 +18,13 @@ import {
 } from "@/components/ui/input-otp";
 import system_data from "@/app/data/system";
 import { CircleCheckBig } from "lucide-react";
-import Link from "next/link";
 import PageLoading from "../Page-Loading";
 import PageError from "../Page-Error";
 import system_api from "@/app/data/api";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import TLHeader from "../TLHeader";
 
 const RESEND_TIMEOUT = 15 * 60; // 15 minutes in seconds
 
@@ -44,11 +44,11 @@ function useResendTimer() {
         const date = new Date(isoDate);
         if (isNaN(date.getTime())) {
           // Fallback if invalid
-            setSecondsLeft(RESEND_TIMEOUT);
-            setTargetMinute(null);
-            setTargetSecond(null);
-            setTargetTime(null);
-            return;
+          setSecondsLeft(RESEND_TIMEOUT);
+          setTargetMinute(null);
+          setTargetSecond(null);
+          setTargetTime(null);
+          return;
         }
 
         // Extract time portion after 'T'
@@ -102,9 +102,9 @@ function useResendTimer() {
             .toString()
             .padStart(2, "0")}`
         : "",
-    targetTime,      // "HH:MM:SS" if a date was supplied
-    targetMinute,    // minute from supplied date
-    targetSecond,    // second from supplied date
+    targetTime, // "HH:MM:SS" if a date was supplied
+    targetMinute, // minute from supplied date
+    targetSecond, // second from supplied date
   };
 }
 
@@ -154,6 +154,7 @@ export function VerifyForm({
         setError(true);
       }
     } catch (e) {
+      console.log(e);
       setError(true);
     } finally {
       setLoading(false);
@@ -178,10 +179,10 @@ export function VerifyForm({
       })
       .catch((err) => {
         console.log(err);
-        if(err.response){
+        if (err.response) {
           const expiry = err.response.data.expiresAt;
           otpTimer.start(expiry || undefined);
-        } else{
+        } else {
           toast.error("Failed to resend OTP. Please try again.", {
             richColors: true,
           });
@@ -258,7 +259,7 @@ export function VerifyForm({
   const doLogin = () => {
     router.push("/login");
     localStorage.clear();
-  }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -273,12 +274,10 @@ export function VerifyForm({
         />
       ) : (
         <Card>
-          <CardHeader>
-            <CardTitle>{system_data.name} Account Verification</CardTitle>
-            <CardDescription>
-              Verify your email and mobile number
-            </CardDescription>
-          </CardHeader>
+          <TLHeader
+            title="Account Verification"
+            desc="Verify your email and mobile number"
+          />
           <CardContent>
             <div>
               <div className="flex flex-col gap-6">

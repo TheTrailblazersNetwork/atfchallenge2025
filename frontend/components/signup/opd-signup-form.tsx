@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -58,25 +59,25 @@ export function SignupForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const data = {
-      first_name: firstName,
-      last_name: lastName,
-      gender,
-      dob: date
-        ? date.toISOString().slice(0, 10) // yyyy-mm-dd
-        : undefined,
-      email,
-      phone_number: mobile,
-      preferred_contact: comms,
-      password,
-    };
+    // const data = {
+    //   first_name: firstName,
+    //   last_name: lastName,
+    //   gender,
+    //   dob: date
+    //     ? date.toISOString().slice(0, 10) // yyyy-mm-dd
+    //     : undefined,
+    //   email,
+    //   phone_number: mobile,
+    //   preferred_contact: comms,
+    //   password,
+    // };
 
     // Basic validation
     if (password !== confirmPassword) {
       toast.warning("Passwords do not match!", { richColors: true });
       return;
     }
-    
+
     setIsLoading(true);
     const loadingToast = toast.loading("Signing up...", { richColors: true });
 
@@ -90,7 +91,7 @@ export function SignupForm({
         phone_number: mobile,
         preferred_contact: comms,
         password,
-        status: "pending" // Add status field
+        status: "pending", // Add status field
       });
 
       if (response.status === 201) {
@@ -99,15 +100,15 @@ export function SignupForm({
         });
         router.push("/opd-pending-approval");
       }
-    } catch (err) {
+    } catch (err: any) {
       // ... (keep existing error handling)
       console.error("Signup failed:", err);
-        if (err.response && err.response.data) {
-          toast.error(err.response.data.error, { richColors: true });
-        } else
-          toast.error("Couldn't Sign Up. Please try again", {
-            richColors: true,
-          });
+      if (err.response && err.response.data) {
+        toast.error(err.response.data.error, { richColors: true });
+      } else
+        toast.error("Couldn't Sign Up. Please try again", {
+          richColors: true,
+        });
     } finally {
       toast.dismiss(loadingToast);
       setIsLoading(false);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -53,7 +54,7 @@ const Page = () => {
     if (!appointments || appointments.length === 0) {
       fetchAppointments();
     }
-  }, []);
+  });
 
   const handleAppointmentCreated = () => {
     fetchAppointments(true);

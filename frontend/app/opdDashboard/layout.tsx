@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <>
       <SidebarProvider>
         <OPDSidebar />
-        <main className="w-full p-3 md:p-5">
+        <main className={`${inter.className} w-full p-3 md:p-5`}>
           <SidebarTrigger />
           {children}
         </main>

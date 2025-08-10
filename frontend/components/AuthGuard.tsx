@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,9 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      toast.error("Please log in to access the dashboard", { richColors: true });
+      toast.error("Please log in to access the dashboard", {
+        richColors: true,
+      });
       router.push("/login");
     } else {
       // Initialize data from localStorage if authenticated

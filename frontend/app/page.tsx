@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Logo from "@/components/Logo";
 import { ArrowRight, Brain, Clock, Users, Shield, Zap, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -260,9 +261,11 @@ export default function Home() {
                 <div
                   className={`w-16 h-16 ${tech.bgColor} rounded-lg flex items-center justify-center mx-auto mb-3 shadow-lg border border-gray-200 group-hover:shadow-xl transition-shadow duration-200 p-2`}
                 >
-                  <img
+                  <Image
                     src={tech.logo}
                     alt={`${tech.name} logo`}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 object-contain"
                   />
                 </div>

@@ -11,8 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { 
-  UserRound, 
-  CalendarClock, 
+  UserRound,
   Home, 
   Bell,
   ClipboardList,

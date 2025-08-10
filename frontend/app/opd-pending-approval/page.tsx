@@ -17,7 +17,7 @@ export default function PendingApproval() {
               approval by our administration team.
             </p>
             <p>
-              You'll receive an email notification once your account has been
+              You&apos;ll receive an email notification once your account has been
               approved. This process typically takes 24-48 hours.
             </p>
             <div className="flex justify-between pt-4">
