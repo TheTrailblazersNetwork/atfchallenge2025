@@ -2,7 +2,7 @@
 
 import { Patient, samplePatients } from "@/types/patient";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/opdbadge";
 import { OPDButton } from "@/components/ui/opdbutton";
 import { EndOfQueue } from "@/components/ui/end-of-queue";
 
