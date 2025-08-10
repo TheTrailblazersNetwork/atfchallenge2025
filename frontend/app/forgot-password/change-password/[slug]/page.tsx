@@ -8,7 +8,7 @@ import PageLoading from "@/components/Page-Loading";
 import PageError from "@/components/Page-Error";
 import PageFull from "@/components/Page-Full";
 
-const page = () => {
+const Page = () => {
   const { slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -20,7 +20,10 @@ const page = () => {
         .then((res) => {
           if (res.status === 200) setIsValid(true);
         })
-        .catch((err) => setIsValid(false))
+        .catch((err) => {
+          console.error("Error validating [slug]:", err);
+          setIsValid(false);
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -60,4 +63,4 @@ const invalidSlug = () => {
   );
 };
 
-export default page;
+export default Page;

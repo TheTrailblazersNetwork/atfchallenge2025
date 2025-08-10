@@ -11,8 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
-const page = () => {
-  const [appointments, setAppointments] = useState<AppointmentCardType[]>([]);
+const Page = () => {
   const [filterAppointments, setFilterAppointments] = useState<AppointmentCardType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -23,7 +22,6 @@ const page = () => {
     try {
       setIsRefreshing(true);
       const data = await getPatientAppointments();
-      setAppointments(data);
       setFilterAppointments(data);
       if (showToast) {
         toast.success("Appointments refreshed", { richColors: true });
@@ -124,4 +122,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

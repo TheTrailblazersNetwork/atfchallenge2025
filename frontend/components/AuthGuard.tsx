@@ -12,6 +12,7 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const patient = useSelector((state: any) => state.patient);
+  console.log(patient);
 
   useEffect(() => {
     if (!isAuthenticated()) {

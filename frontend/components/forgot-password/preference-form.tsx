@@ -100,7 +100,7 @@ export function PreferenceForm({
           <div className="text-center">
             <h3 className="text-lg font-semibold text-green-700">Link Sent</h3>
             <p className="text-sm text-muted-foreground">
-              You'll receive a recovery link.
+              You&apos;ll receive a recovery link.
             </p>
           </div>
           <Button className="cursor-pointer" variant="outline" asChild>

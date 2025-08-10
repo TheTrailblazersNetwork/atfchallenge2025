@@ -77,9 +77,12 @@ export default function BookAppointment({ onAppointmentCreated }: BookAppointmen
       
       setOpen(false);
       onAppointmentCreated?.();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create appointment", { 
-        richColors: true 
+    } catch (error: unknown) {
+      const message = error instanceof Error
+        ? error.message
+        : "Failed to create appointment";
+      toast.error(message, {
+        richColors: true
       });
     } finally {
       toast.dismiss(loadingToast);
