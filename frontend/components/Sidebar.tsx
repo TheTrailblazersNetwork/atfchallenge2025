@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Settings, CalendarClock, House, BellDot } from "lucide-react";
+import { Settings, CalendarClock, House, CircleUserRound } from "lucide-react";
 import Logo from "./Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -33,9 +33,9 @@ const items = [
     icon: CalendarClock,
   },
   {
-    title: "Notifications",
-    url: "/dashboard/notifications",
-    icon: BellDot,
+    title: "Profile",
+    url: "/dashboard/profile",
+    icon: CircleUserRound,
   },
   {
     title: "Settings",
@@ -102,7 +102,7 @@ export function AppSidebar() {
               <div className="mt-auto">
                 <Button
                   variant={"outline"}
-                  className={"w-full cursor-pointer mt-2"}
+                  className={"w-full cursor-pointer"}
                   onClick={handleLogout}
                 >
                   Log Out
