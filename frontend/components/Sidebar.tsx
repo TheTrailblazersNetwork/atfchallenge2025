@@ -25,7 +25,7 @@ import clsx from "clsx";
 const items = [
   {
     title: "Home",
-    url: "/dashboard/patients",
+    url: "/dashboard/patient",
     icon: House,
   },
   {
@@ -33,16 +33,16 @@ const items = [
     url: "/dashboard/appointments",
     icon: CalendarClock,
   },
-  {
-    title: "Profile",
-    url: "/dashboard/profile",
-    icon: CircleUserRound,
-  },
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Profile",
+  //   url: "/dashboard/profile",
+  //   icon: CircleUserRound,
+  // },
+  // {
+  //   title: "Settings",
+  //   url: "/dashboard/settings",
+  //   icon: Settings,
+  // },
 ];
 
 export function AppSidebar() {
