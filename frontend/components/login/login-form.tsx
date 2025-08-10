@@ -20,6 +20,7 @@ import axios from "axios";
 import system_api from "@/app/data/api";
 import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
+import { isAuthenticated } from "@/lib/auth";
 
 export function LoginForm({
   className,
@@ -29,6 +30,12 @@ export function LoginForm({
   const router = useRouter();
 
   useEffect(() => {
+    // Check if user is already authenticated
+    if (isAuthenticated()) {
+      router.push("/dashboard");
+      return;
+    }
+    
     try {
       const stored = localStorage.getItem("verificationId");
       if (stored) {
@@ -41,7 +48,7 @@ export function LoginForm({
     } catch (error) {
       console.error("Error clearing verificationId from localStorage:", error);
     }
-  }, []);
+  }, [router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -72,10 +79,19 @@ export function LoginForm({
             localStorage.setItem("verificationPhone", res.data.userData.phone_number);
             router.push(`/signup/verify/`);
           } else {
-            // Save data to state
-            // State saves "user" as string to localStorage
-            dispatch(setPatientData(res.data.user));
+            // Successful login - save token and user data
+            const { token, user } = res.data;
+            
+            // Save token to localStorage
+            localStorage.setItem("authToken", token);
+            
+            // Save user data to Redux store (this also saves to localStorage)
+            dispatch(setPatientData(user));
+            
+            // Navigate to dashboard
             router.push("/dashboard");
+            
+            // Show success message
             toast.success("Login successful!", {
               richColors: true,
             });

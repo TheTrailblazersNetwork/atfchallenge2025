@@ -22,5 +22,13 @@ const system_api = {
         // Verification status
         getVerificationStatus: `${host}/api/auth/verify/status/`,
     },
+    appointments: {
+        create: `${host}/api/appointments`,
+        getAll: `${host}/api/appointments`,
+        getById: `${host}/api/appointments/`,  // append appointment ID
+        update: `${host}/api/appointments/`,   // append appointment ID
+        cancel: `${host}/api/appointments/`,   // append appointment ID
+        testBatch: `${host}/api/appointments/test-run-batch`,
+    },
 };
 export default system_api;

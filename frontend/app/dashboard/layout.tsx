@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ReactNode } from "react";
 import { Inter } from "next/font/google";
 import { AppSidebar } from "@/components/Sidebar";
+import AuthGuard from "@/components/AuthGuard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -11,7 +12,7 @@ const inter = Inter({
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <AuthGuard>
       <SidebarProvider>
         <AppSidebar />
         <main className="w-full p-3 md:p-5">
@@ -20,25 +21,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </main>
       </SidebarProvider>
       <Toaster />
-    </>
-    // <div className="flex min-h-screen">
-    //   {/* Sidebar */}
-    //   <aside className="w-64 bg-white shadow-md p-6">
-    //     <h2 className="text-xl font-bold mb-6">Dashboard</h2>
-    //     <nav className="space-y-2">
-    //       <Link href="/dashboard/patients" className="block text-blue-600 hover:underline">
-    //         Patients
-    //       </Link>
-    //       <Link href="/dashboard/appointments" className="block text-blue-600 hover:underline">
-    //         Appointments
-    //       </Link>
-    //     </nav>
-    //   </aside>
-
-    //   {/* Main Content */}
-    //   <main className="flex-1 p-8 bg-gray-50">
-    //     {children}
-    //   </main>
-    // </div>
+    </AuthGuard>
   );
 }
