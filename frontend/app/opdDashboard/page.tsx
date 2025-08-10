@@ -263,6 +263,18 @@ interface PatientCardProps {
 }
 
 function PatientCard({ patient, highlight = false, actions }: PatientCardProps) {
+  // Determine recommended doctors based on patientStatus
+  const getRecommendedDoctors = () => {
+    // Check if patientStatus contains "1st Timers"
+    const isFirstTimer = patient.patientStatus.includes("1st Timers");
+    
+    if (isFirstTimer) {
+      return "Resident and Consultant";
+    } else {
+      // For all other cases (Review, Follow-up, etc.)
+      return "Consultant Only";
+    }
+  };
   return (
     <div className={`flex items-center gap-4 p-4 rounded-lg border
       ${highlight ? 'bg-primary/5 border-primary' : 'bg-background'}`}>
@@ -305,6 +317,10 @@ function PatientCard({ patient, highlight = false, actions }: PatientCardProps) 
               {actions}
             </div>
           )}
+          <div className="text-xs text-muted-foreground text-right">
+              <p className="font-medium">Recommended Doctor(s):</p>
+              <p>{getRecommendedDoctors()}</p>
+          </div>
         </div>
       </div>
     </div>

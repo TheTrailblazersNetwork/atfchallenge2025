@@ -6,6 +6,7 @@ export interface Patient {
   age: number;
   medicalCondition: string;
   patientStatus: string;
+  visitStatus: string;
 }
 
 export const samplePatients: Patient[] = [

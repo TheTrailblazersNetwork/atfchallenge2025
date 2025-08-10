@@ -38,27 +38,25 @@ export function LoginForm({
     setIsLoading(true);
     const loadingToast = toast.loading("Logging in...", { richColors: true });
 
-    const userData = {
-      email,
-      password,
-    };
+    try {
+      const response = await axios.post(system_api.patient.login, {
+        email,
+        password
+      });
 
-    axios
-      .post(system_api.patient.login, userData)
-      .then((res) => {
-        if(res.status === 200){
-          toast.success("Login successful!", {
-            richColors: true,
-          });
-          // Save data to state
-          // State saves "user" as string to localStorage
-          dispatch(setPatientData(res.data.user))
+      if (response.status === 200) {
+        if (response.data.user.status === "approved") {
+          toast.success("Login successful!", { richColors: true });
+          dispatch(setPatientData(response.data.user));
           router.push("/opdDashboard");
-        }else {
-          toast.error(" Login failed. Please try again.", { richColors: true });
+        } else {
+          router.push("/opd-pending-approval");
         }
-      })
-      .catch((err) => {
+      }
+    } catch (err) {
+      if (err.response?.data?.error === "Account pending approval") {
+        router.push("/opd-pending-approval");
+      } else {
         console.error("Login failed:", err);
         if (err.response && err.response.data) {
           toast.error(err.response.data.error, { richColors: true });
@@ -66,11 +64,11 @@ export function LoginForm({
           toast.error("Couldn't Login. Please try again", {
             richColors: true,
           });
-      })
-      .finally(() => {
-        toast.dismiss(loadingToast);
-        setIsLoading(false);
-      });
+      }
+    } finally {
+      toast.dismiss(loadingToast);
+      setIsLoading(false);
+    }
   };
 
   return (
