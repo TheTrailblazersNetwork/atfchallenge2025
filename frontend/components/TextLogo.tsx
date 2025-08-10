@@ -4,16 +4,18 @@ import Image from "next/image";
 const TextLogo = ({
   classname = "",
   size = "text-5xl",
+  extra = "",
 }: {
   classname?: string;
   size?: string;
   width?: number;
   responsiveSize?: string;
   height?: number;
+  extra?: string;
 }) => {
   return (
     <h1 className={`${size} font-bold text-gray-900 ${classname}`}>
-      Neuro<span className="text-blue-600">Flow</span>
+      {system_data.first_name}<span className="text-blue-600">{system_data.last_name} {extra}</span>
     </h1>
   );
 };

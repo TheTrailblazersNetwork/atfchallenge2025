@@ -34,6 +34,7 @@ import { Checkbox } from "../ui/checkbox";
 import { toast } from "sonner";
 import system_api from "@/app/data/api";
 import { isAuthenticated } from "@/lib/auth";
+import TLHeader from "../TLHeader";
 
 export function SignupForm({
   className,
@@ -136,10 +137,7 @@ export function SignupForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Sign Up</CardTitle>
-          <CardDescription>Create your account to continue</CardDescription>
-        </CardHeader>
+        <TLHeader title="Sign Up" desc="Create your account to continue" />
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">

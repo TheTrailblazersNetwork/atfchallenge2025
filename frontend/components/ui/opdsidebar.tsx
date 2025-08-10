@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import TextLogo from "../TextLogo";
 
 const opdMenuItems = [
   {
@@ -59,19 +60,27 @@ export function OPDSidebar() {
     <Sidebar className="select-none" variant={"floating"}>
       <SidebarContent>
         <SidebarGroup className={"h-full"}>
-          <SidebarGroupLabel className={"flex items-center justify-center flex-col py-10 my-5"}>
+          {/* <SidebarGroupLabel
+            className={"flex items-center justify-center flex-col py-10 my-5"}
+          >
             <Logo />
             <h2 className="text-lg font-semibold mt-2">Neurology OPD</h2>
+          </SidebarGroupLabel> */}
+          <SidebarGroupLabel
+            className={"flex items-center justify-center flex-col py-10 my-5"}
+          >
+            <Logo width={100} height={100} />
+            <TextLogo extra="OPD" size="text-2xl" classname="my-1" />
           </SidebarGroupLabel>
-          <SidebarGroupContent className={"h-full"}>
+          <SidebarGroupContent className={"h-full mt-5"}>
             <SidebarMenu className={"relative h-full space-y-1"}>
               {opdMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton className="hover:bg-blue-900/70 hover:text-white transition-all" asChild>
                     <Link
                       className={clsx("!text-base !py-5", {
-                        "bg-sidebar-accent font-medium": 
-                          pathname === item.url || 
+                        "bg-zinc-200 font-medium":
+                          pathname === item.url ||
                           pathname.startsWith(item.url),
                       })}
                       href={item.url}
@@ -89,7 +98,10 @@ export function OPDSidebar() {
                 </SidebarMenuItem>
               ))}
               <div className="mt-auto">
-                <Button variant={"outline"} className={"w-full cursor-pointer mt-2"}>
+                <Button
+                  variant={"outline"}
+                  className={"w-full cursor-pointer mt-2"}
+                >
                   Log Out
                 </Button>
               </div>

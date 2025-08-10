@@ -20,6 +20,7 @@ import axios from "axios";
 import system_api from "@/app/data/api";
 import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
+import TLHeader from "../TLHeader";
 
 export function LoginForm({
   className,
@@ -74,10 +75,10 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} OPD Login</CardTitle>
-          <CardDescription>Connect to your account to continue</CardDescription>
-        </CardHeader>
+        <TLHeader
+          title="OPD Login"
+          desc="Connect to your account to continue"
+        />
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">

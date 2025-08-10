@@ -22,6 +22,9 @@ import { useDispatch } from "react-redux";
 import { setPatientData } from "@/store/features/patientReducer";
 import { setAppointmentsData } from "@/store/features/appointmentsReducer";
 import { isAuthenticated } from "@/lib/auth";
+import TextLogo from "../TextLogo";
+import Logo from "../Logo";
+import TLHeader from "../TLHeader";
 
 export function LoginForm({
   className,
@@ -126,10 +129,7 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Login</CardTitle>
-          <CardDescription>Connect to your account to continue</CardDescription>
-        </CardHeader>
+        <TLHeader title="Login" desc="Connect to your account to continue" />
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
