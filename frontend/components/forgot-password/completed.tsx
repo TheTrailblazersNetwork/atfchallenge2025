@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import axios from "axios";
 import system_api from "@/app/data/api";
+import TLHeader from "../TLHeader";
 
 export function PreferenceForm({
   className,
@@ -66,15 +67,22 @@ export function PreferenceForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 select-none", className)} {...props}>
+    <div
+      className={cn("flex flex-col gap-6 select-none", className)}
+      {...props}
+    >
       <Card>
-        <CardHeader>
-          <CardTitle>{system_data.name} Password Recovery</CardTitle>
-          <CardDescription>Choose your recovery method</CardDescription>
-        </CardHeader>
+        <TLHeader
+          title="Password Recovery"
+          desc="Choose your recovery method"
+        />
         <CardContent>
           <form onSubmit={handleSubmit}>
-            <Tabs defaultValue={selection} onValueChange={setSelection} className="w-full">
+            <Tabs
+              defaultValue={selection}
+              onValueChange={setSelection}
+              className="w-full"
+            >
               <TabsList className="w-full">
                 <TabsTrigger value="email">Email</TabsTrigger>
                 <TabsTrigger value="mobile">Mobile Number</TabsTrigger>
@@ -105,13 +113,17 @@ export function PreferenceForm({
             <Button
               type="submit"
               className="w-full flex items-center justify-center gap-2 mt-3"
-              disabled={isLoading || (selection === "email" && email === "") || (selection === "mobile" && mobile === "")}
+              disabled={
+                isLoading ||
+                (selection === "email" && email === "") ||
+                (selection === "mobile" && mobile === "")
+              }
             >
               {isLoading ? "Sending..." : "Send Recovery Link"}
             </Button>
             <p className="text-muted-foreground text-xs mt-3">
-              If an account exists with your email or mobile number, a recovery link will be sent
-              to change your password. Click{" "}
+              If an account exists with your email or mobile number, a recovery
+              link will be sent to change your password. Click{" "}
               <Link href="/login" className="underline underline-offset-4">
                 here
               </Link>{" "}

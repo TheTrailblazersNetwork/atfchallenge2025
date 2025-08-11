@@ -4,9 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import system_data from "@/app/data/system";
@@ -16,6 +13,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import system_api from "@/app/data/api";
 import { MailCheck, MailWarning } from "lucide-react";
+import TLHeader from "../TLHeader";
 
 export function PreferenceForm({
   className,
@@ -113,10 +111,10 @@ export function PreferenceForm({
         </Card>
       ) : (
         <Card className="text-center">
-          <CardHeader>
-            <CardTitle>{system_data.name} Password Recovery</CardTitle>
-            <CardDescription>Choose your recovery method</CardDescription>
-          </CardHeader>
+          <TLHeader
+            title="Password Recovery"
+            desc="Choose your recovery method"
+          />
           <CardContent>
             <form onSubmit={handleSubmit}>
               <Input
