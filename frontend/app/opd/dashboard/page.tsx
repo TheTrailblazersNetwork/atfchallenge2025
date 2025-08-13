@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Patient, samplePatients } from "@/types/patient";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/opdbadge";
