@@ -127,7 +127,6 @@ export function VerifyForm({
         axios
           .get(system_api.patient.getVerificationStatus + stored)
           .then((res) => {
-            console.log(res);
             if (res.status === 200) {
               setVerificationId(stored);
               setSmsVerified(res.data.phone);
@@ -167,6 +166,7 @@ export function VerifyForm({
   const otpTimer = useResendTimer();
 
   const requestResend = () => {
+    if (otpTimer.disabled) return;
     setVerifying(true);
     axios
       .post(system_api.patient.resendOTP + verificationId)

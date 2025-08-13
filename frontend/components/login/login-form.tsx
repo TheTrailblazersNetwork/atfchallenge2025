@@ -66,7 +66,7 @@ export function LoginForm({
     axios
       .post(system_api.patient.login, userData)
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         if (res.status === 200) {
           if (res.data.pendingVerification) {
             toast.success("Successful! Verify your email and mobile number.", {
@@ -106,7 +106,7 @@ export function LoginForm({
         }
       })
       .catch((err) => {
-        console.log("Login failed:", err);
+        // console.log("Login failed:", err);
         if (err.response && err.response.data) {
           toast.error(err.response.data.error, { richColors: true });
         } else

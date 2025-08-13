@@ -31,6 +31,7 @@ export default function AppointmentDetails({
 }: AppointmentDetailsProps) {
   const dispatch = useDispatch();
   const [isCancelling, setIsCancelling] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   if (!appointment) return null;
 
@@ -61,7 +62,7 @@ export default function AppointmentDetails({
     }
   };
 
-  const handleCancel = async () => {
+  const handleCancelClick = () => {
     if (appointment.status.toLowerCase() === "cancelled") {
       toast.error("Appointment is already cancelled", { richColors: true });
       return;
@@ -86,7 +87,12 @@ export default function AppointmentDetails({
       return;
     }
 
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmCancel = async () => {
     setIsCancelling(true);
+    setShowConfirmDialog(false);
 
     const cancelPromise = async () => {
       await cancelAppointment(appointment.id);
@@ -129,134 +135,164 @@ export default function AppointmentDetails({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Appointment Details
-          </DialogTitle>
-          <DialogDescription>
-            View and manage your appointment information
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Appointment Details
+            </DialogTitle>
+            <DialogDescription>
+              View and manage your appointment information
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Status Badge */}
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusColor(
-                appointment.status
-              )}`}
-            >
-              {appointment.status.charAt(0).toUpperCase() +
-                appointment.status.slice(1)}
-            </span>
-            {appointment.priority_rank && (
-              <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
-                Priority: {appointment.priority_rank}
+          <div className="space-y-6">
+            {/* Status Badge */}
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusColor(
+                  appointment.status
+                )}`}
+              >
+                {appointment.status.charAt(0).toUpperCase() +
+                  appointment.status.slice(1)}
               </span>
-            )}
-          </div>
-
-          {/* Appointment Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Created</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(appointment.created_at).toLocaleString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Last Updated</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(appointment.updated_at).toLocaleString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                  </p>
-                </div>
-              </div>
+              {appointment.priority_rank && (
+                <span className="inline-flex items-center rounded-full border border-gray-300 px-2.5 py-0.5 text-xs font-semibold text-gray-700">
+                  Priority: {appointment.priority_rank}
+                </span>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Visiting Status</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatVisitingStatus(appointment.visiting_status)}
-                  </p>
-                </div>
-              </div>
-
-              {appointment.discharge_type && (
+            {/* Appointment Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">Discharge Type</p>
+                    <p className="text-sm font-medium">Created</p>
                     <p className="text-sm text-muted-foreground">
-                      {appointment.discharge_type}
+                      {new Date(appointment.created_at).toLocaleString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Last Updated</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(appointment.updated_at).toLocaleString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Visiting Status</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatVisitingStatus(appointment.visiting_status)}
+                    </p>
+                  </div>
+                </div>
+
+                {appointment.discharge_type && (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Discharge Type</p>
+                      <p className="text-sm text-muted-foreground">
+                        {appointment.discharge_type}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Medical Description */}
+            <div>
+              <p className="text-sm font-medium mb-2">Medical Description</p>
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm">{appointment.medical_description}</p>
+              </div>
+            </div>
+
+            {/* Appointment ID */}
+            <div>
+              <p className="text-sm font-medium mb-1">Appointment ID</p>
+              <p className="text-xs text-muted-foreground font-mono">
+                {appointment.id}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+            {appointment.status.toLowerCase() !== "cancelled" &&
+              appointment.status.toLowerCase() !== "completed" &&
+              appointment.status.toLowerCase() !== "approved" &&
+              appointment.status.toLowerCase() !== "rebook" && (
+                <Button
+                  variant="destructive"
+                  onClick={handleCancelClick}
+                  disabled={isCancelling}
+                >
+                  Cancel Appointment
+                </Button>
               )}
-            </div>
-          </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          {/* Medical Description */}
-          <div>
-            <p className="text-sm font-medium mb-2">Medical Description</p>
-            <div className="bg-gray-50 p-3 rounded-md">
-              <p className="text-sm">{appointment.medical_description}</p>
-            </div>
-          </div>
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              Confirm Cancellation
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this appointment? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
 
-          {/* Appointment ID */}
-          <div>
-            <p className="text-sm font-medium mb-1">Appointment ID</p>
-            <p className="text-xs text-muted-foreground font-mono">
-              {appointment.id}
-            </p>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          {appointment.status.toLowerCase() !== "cancelled" &&
-            appointment.status.toLowerCase() !== "completed" &&
-            appointment.status.toLowerCase() !== "approved" &&
-            appointment.status.toLowerCase() !== "rebook" && (
-              <Button
-                variant="destructive"
-                onClick={handleCancel}
-                disabled={isCancelling}
-              >
-                {isCancelling ? "Cancelling..." : "Cancel Appointment"}
-              </Button>
-            )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Keep Appointment
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmCancel}
+              disabled={isCancelling}
+            >
+              {isCancelling ? "Cancelling..." : "Yes, Cancel"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

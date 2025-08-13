@@ -2,7 +2,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getPatientData } from "@/store/features/patientReducer";
 import { getAppointmentsData } from "@/store/features/appointmentsReducer";
 import { isAuthenticated } from "@/lib/auth";
@@ -15,8 +15,6 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const patient = useSelector((state: any) => state.patient);
-  console.log(patient);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -25,7 +23,8 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       });
       router.push("/login");
     } else {
-      // Initialize data from localStorage if authenticated
+      // Only initialize data from localStorage if authenticated
+      // Don't fetch from API here to avoid conflicts with page-level fetching
       dispatch(getPatientData());
       dispatch(getAppointmentsData());
     }
@@ -33,7 +32,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   // Show loading while checking authentication
   if (!isAuthenticated()) {
-    return null; // or a loading spinner
+    return null; // Return null immediately for unauthenticated users
   }
 
   return <>{children}</>;
