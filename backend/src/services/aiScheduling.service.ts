@@ -1,6 +1,7 @@
 import axios from 'axios';
 import pool from '../config/db';
 import { updateAppointmentsAfterAI } from './appointment.service';
+import { createQueueFromApprovedAppointments } from './queue.service';
 
 //  type definitions
 type CommunicationType = 
@@ -115,6 +116,16 @@ export const processAIResults = async (aiResponse: AIReturn) => {
     const updatedAppointments = await updateAppointmentsAfterAI(formattedResults);
 
     console.log(`✅ Database update successful. Updated ${updatedAppointments.length} appointments.`);
+
+    // --- CREATE QUEUE ENTRIES BEFORE NOTIFICATIONS ---
+    console.log('📋 Creating queue entries for approved appointments...');
+    try {
+      await createQueueFromApprovedAppointments(formattedResults);
+      console.log('✅ Queue creation successful.');
+    } catch (queueError: any) {
+      console.error('❌ Queue creation failed:', queueError?.message || queueError);
+      // Don't throw here as notifications should still be sent
+    }
 
     console.log('📧 Initiating patient notifications...');
     let notificationCount = 0;

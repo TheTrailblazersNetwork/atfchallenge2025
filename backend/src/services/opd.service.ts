@@ -69,7 +69,8 @@ export const loginOPDOperator = async (loginData: OPDOperatorLoginInput): Promis
         id: operator.id, 
         email: operator.email, 
         type: 'opd_operator',
-        full_name: operator.full_name 
+        full_name: operator.full_name,
+        isOPDOperator: true
       },
       JWT_SECRET,
       { expiresIn: '24h' }
