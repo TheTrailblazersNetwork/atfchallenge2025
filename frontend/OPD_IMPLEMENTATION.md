@@ -13,7 +13,7 @@ This implementation provides a complete OPD system with authentication, patient 
 
 ### Protected Routes (Requires OPD Authentication)
 - `/opd/dashboard` - Queue Dashboard (placeholder for future queue management)
-- `/opd/patients` - Patient Records with full CRUD operations and filtering
+- `/opd/dashboard/patients` - Patient Records with full CRUD operations and filtering
 
 ## Features Implemented
 
@@ -24,7 +24,7 @@ This implementation provides a complete OPD system with authentication, patient 
 - **Auth Guard**: Protects dashboard routes from unauthorized access
 - **Logout**: Clears authentication and redirects to login
 
-### 2. Patient Records Management (`/opd/patients`)
+### 2. Patient Records Management (`/opd/dashboard/patients`)
 - **Redux Integration**: Full state management with patients slice
 - **API Integration**: Connected to backend patient endpoints
 - **Advanced Filtering**:
@@ -119,11 +119,10 @@ patient: {
 - `app/opd/signup/page.tsx` - OPD registration form  
 - `app/opd/forgot-password/page.tsx` - Password reset form
 - `app/opd/dashboard/page.tsx` - Queue dashboard (placeholder)
-- `app/opd/patients/page.tsx` - Full patient management interface
+- `app/opd/dashboard/patients/page.tsx` - Full patient management interface
 
 ### Layouts
-- `app/opd/dashboard/layout.tsx` - Dashboard layout with sidebar and auth
-- `app/opd/patients/layout.tsx` - Patients layout with sidebar and auth
+- `app/opd/dashboard/layout.tsx` - Shared layout with sidebar and auth for dashboard and patients
 
 ### Components
 - `components/OPDAuthGuard.tsx` - Authentication guard for protected routes
@@ -159,7 +158,7 @@ patient: {
 2. Use the signup form to create OPD staff accounts
 3. Once logged in, access:
    - Queue Dashboard: `/opd/dashboard` (placeholder)
-   - Patient Records: `/opd/patients` (fully functional)
+   - Patient Records: `/opd/dashboard/patients` (fully functional)
 
 ### For Patient Records
 1. The system loads all patients on page load

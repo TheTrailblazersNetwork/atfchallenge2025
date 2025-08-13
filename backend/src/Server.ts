@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes';
 import patientRoutes from './routes/patient.routes';
 import passwordResetRoutes from './routes/passwordReset.routes'; 
 import appointementRoutes from './routes/appointment.routes';
+import opdRoutes from './routes/opd.routes';
 import './jobs/batchScheduling.job'; 
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth', passwordResetRoutes); 
 app.use('/api/patients', patientRoutes); 
 app.use('/api/appointments', appointementRoutes);
+app.use('/api/opd', opdRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

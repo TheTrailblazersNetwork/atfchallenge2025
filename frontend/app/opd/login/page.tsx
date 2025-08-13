@@ -70,7 +70,7 @@ export default function OPDLoginPage() {
   return (
     <PageMain>
       <Card className="nf-glass-bg text-center">
-        <TLHeader title="Sign in to OPD" desc="Provide login credentials" />
+        <TLHeader title="OPD Login" desc="Provide login credentials" />
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">

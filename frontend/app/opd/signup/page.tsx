@@ -133,7 +133,7 @@ export default function OPDSignupPage() {
   return (
     <PageMain>
       <Card className="nf-glass-bg text-center">
-        <TLHeader title="Create OPD Account" desc="Create a new OPD account" />
+        <TLHeader title="OPD Sign Up" desc="Create a new OPD account" />
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
