@@ -71,7 +71,7 @@ export function PreferenceForm({
       className={cn("flex flex-col gap-6 select-none", className)}
       {...props}
     >
-      <Card>
+      <Card className="nf-glass-bg">
         <TLHeader
           title="Password Recovery"
           desc="Choose your recovery method"

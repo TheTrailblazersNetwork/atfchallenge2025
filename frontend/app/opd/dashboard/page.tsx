@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/opdbadge";
 import { OPDButton } from "@/components/ui/opdbutton";
 import { EndOfQueue } from "@/components/ui/end-of-queue";
+import DashboardPageHeader from "@/components/dashboard/page-header";
 
 type PatientsState = {
   currentPatient: Patient | null;
@@ -12,7 +13,7 @@ type PatientsState = {
   upcomingPatients: Patient[];
 };
 
-export default function OPDDashboardPage() {
+export default function OPDQueueDashboard() {
   const [patients, setPatients] = useState<PatientsState>({
     currentPatient: null,
     nextPatient: null,
@@ -157,7 +158,6 @@ export default function OPDDashboardPage() {
     });
   };
 
-
   const handleConfirmUnavailability = (patient: Patient) => {
     setPatients(prev => ({
       ...prev,
@@ -170,88 +170,93 @@ export default function OPDDashboardPage() {
                       patients.upcomingPatients.length === 0;
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">OPD Dashboard</h1>
+    <div className="dashboard-page">
+      <DashboardPageHeader
+        title="Queue Dashboard"
+        subtitle="Monitor patient queue and manage appointments in real-time"
+      />
       
-      {isQueueEmpty ? (
-        <EndOfQueue />
-      ) : (
-        <>
-          {/* Current Patient */}
-          <div className="grid gap-4">
-            {patients.currentPatient && (
-              <PatientCard 
-                patient={patients.currentPatient} 
-                highlight 
-                actions={
-                  <div className="flex gap-2">
-                    <OPDButton 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleSkipPatient}
-                    >
-                      Skip
-                    </OPDButton>
-                    <OPDButton 
-                      variant="warning" 
-                      size="sm"
-                      onClick={handleUnavailablePatient}
-                    >
-                      Unavailable
-                    </OPDButton>
-                    <OPDButton 
-                      variant="success" 
-                      size="sm"
-                      onClick={handleCompletePatient}
-                    >
-                      Complete
-                    </OPDButton>
-                  </div>
-                }
-              />
-            )}
-          </div>
+      <div className="p-4">
+        {isQueueEmpty ? (
+          <EndOfQueue />
+        ) : (
+          <>
+            {/* Current Patient */}
+            <div className="grid gap-4">
+              {patients.currentPatient && (
+                <PatientCard 
+                  patient={patients.currentPatient} 
+                  highlight 
+                  actions={
+                    <div className="flex gap-2">
+                      <OPDButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleSkipPatient}
+                      >
+                        Skip
+                      </OPDButton>
+                      <OPDButton 
+                        variant="warning" 
+                        size="sm"
+                        onClick={handleUnavailablePatient}
+                      >
+                        Unavailable
+                      </OPDButton>
+                      <OPDButton 
+                        variant="success" 
+                        size="sm"
+                        onClick={handleCompletePatient}
+                      >
+                        Complete
+                      </OPDButton>
+                    </div>
+                  }
+                />
+              )}
+            </div>
 
-          {/* Next Patient */}
-          <h2 className="text-xl font-semibold mt-8 mb-4">Next Up</h2>
-          <div className="grid gap-4">
-            {patients.nextPatient && (
-              <PatientCard 
-                patient={patients.nextPatient} 
-              />
-            )}
-          </div>
+            {/* Next Patient */}
+            <h2 className="text-xl font-semibold mt-8 mb-4">Next Up</h2>
+            <div className="grid gap-4">
+              {patients.nextPatient && (
+                <PatientCard 
+                  patient={patients.nextPatient} 
+                />
+              )}
+            </div>
 
-          {/* Upcoming Patients */}
-          <h2 className="text-xl font-semibold mt-8 mb-4">Upcoming Patients</h2>
-          <div className="grid gap-4">
-            {patients.upcomingPatients.map(patient => (
-              <PatientCard 
-                key={patient.id}
-                patient={patient}
-                actions={patient.visitStatus === 'Unavailable' && (
-                  <div className="flex gap-2">
-                    <OPDButton 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleRestorePatient(patient)}
-                    >
-                      Restore
-                    </OPDButton>
-                    <OPDButton 
-                      variant="danger" 
-                      size="sm"
-                      onClick={() => handleConfirmUnavailability(patient)}
-                    >
-                      Confirm Unavailability
-                    </OPDButton>
-                  </div>
-                )}
-              />
-            ))}
-          </div>
-        </>
-      )}
+            {/* Upcoming Patients */}
+            <h2 className="text-xl font-semibold mt-8 mb-4">Upcoming Patients</h2>
+            <div className="grid gap-4">
+              {patients.upcomingPatients.map(patient => (
+                <PatientCard 
+                  key={patient.id}
+                  patient={patient}
+                  actions={patient.visitStatus === 'Unavailable' && (
+                    <div className="flex gap-2">
+                      <OPDButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleRestorePatient(patient)}
+                      >
+                        Restore
+                      </OPDButton>
+                      <OPDButton 
+                        variant="danger" 
+                        size="sm"
+                        onClick={() => handleConfirmUnavailability(patient)}
+                      >
+                        Confirm Unavailability
+                      </OPDButton>
+                    </div>
+                  )}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -275,6 +280,7 @@ function PatientCard({ patient, highlight = false, actions }: PatientCardProps) 
       return "Consultant Only";
     }
   };
+
   return (
     <div className={`flex items-center gap-4 p-4 rounded-lg border
       ${highlight ? 'bg-primary/5 border-primary' : 'bg-background'}`}>

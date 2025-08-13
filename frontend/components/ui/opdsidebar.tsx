@@ -12,48 +12,44 @@ import {
 } from "@/components/ui/sidebar";
 import { 
   UserRound,
-  Home, 
-  Bell,
-  ClipboardList,
-  Settings
+  Home
 } from "lucide-react";
 import Logo from "../Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import TextLogo from "../TextLogo";
+import { opdAuthService } from "@/services/opdService";
 
 const opdMenuItems = [
   {
     title: "Queue Dashboard",
-    url: "/opdDashboard",
+    url: "/opd/dashboard",
     icon: Home,
   },
   {
     title: "Patient Records",
-    url: "/opdDashboard/patients",
+    url: "/opd/patients",
     icon: UserRound,
-  },
-  {
-    title: "Medical Notes",
-    url: "/opdDashboard/notes",
-    icon: ClipboardList,
-  },
-  {
-    title: "Notifications",
-    url: "/opdDashboard/notifications",
-    icon: Bell,
-  },
-  {
-    title: "Settings",
-    url: "/opdDashboard/settings",
-    icon: Settings,
   },
 ];
 
 export function OPDSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await opdAuthService.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if API call fails, clear local storage and redirect
+      localStorage.removeItem("opdAuth");
+    }
+    // Redirect to OPD login
+    router.push("/opd/login");
+  };
 
   return (
     <Sidebar className="select-none" variant={"floating"}>
@@ -100,6 +96,7 @@ export function OPDSidebar() {
                 <Button
                   variant={"outline"}
                   className={"w-full cursor-pointer mt-2"}
+                  onClick={handleLogout}
                 >
                   Log Out
                 </Button>
