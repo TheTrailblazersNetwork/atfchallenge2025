@@ -30,8 +30,6 @@ export default function PatientPage() {
   }, [dispatch]);
 
   // Calculate appointment statistics
-
-  console.log("Appointments Data:", appointments.data);
   const appointmentStats = {
     total: appointments.data?.length || 0,
     pending:
@@ -98,7 +96,12 @@ export default function PatientPage() {
     return "text-green-600";
   };
 
-  if (patient.loading || appointments.loading) {
+  // Only show loading if we're actually fetching data and patient is authenticated
+  // For new accounts with no data, we should show the dashboard with empty state
+  const isActuallyLoading = (patient.loading && patient.isAuthenticated) || 
+                           (appointments.loading && appointments.data.length === 0 && patient.isAuthenticated);
+
+  if (isActuallyLoading) {
     return (
       <div className="dashboard-page">
         <DashboardPageHeader

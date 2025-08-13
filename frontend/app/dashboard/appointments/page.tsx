@@ -22,6 +22,7 @@ const Page = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentCardType | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Initialize filter appointments when Redux appointments change
   useEffect(() => {
@@ -35,6 +36,7 @@ const Page = () => {
       setIsRefreshing(true);
       dispatch(setAppointmentsLoading(true));
       const data = await getPatientAppointments();
+      // console.log(data);
       dispatch(setAppointmentsData(data));
       if (showToast) {
         toast.success("Appointments refreshed", { richColors: true });
@@ -46,18 +48,32 @@ const Page = () => {
     } finally {
       dispatch(setAppointmentsLoading(false));
       setIsRefreshing(false);
+      setIsInitialLoad(false);
     }
   };
 
+  // Fetch appointments on component mount with better dependency management
   useEffect(() => {
     // Only fetch if we don't have appointments in Redux state
     if (!appointments || appointments.length === 0) {
       fetchAppointments();
     }
-  });
+  }, []); // Empty dependency array to run only once on mount
+
+  // Separate useEffect to handle authentication state
+  useEffect(() => {
+    // If user navigates away and comes back, refresh if data is stale
+    const lastUpdated = localStorage.getItem('appointments_last_updated');
+    const now = new Date().getTime();
+    const fiveMinutes = 5 * 60 * 1000;
+    
+    if (lastUpdated && (now - parseInt(lastUpdated)) > fiveMinutes) {
+      fetchAppointments();
+    }
+  }, []);
 
   const handleAppointmentCreated = () => {
-    fetchAppointments(true);
+    fetchAppointments(false);
   };
 
   const handleRefresh = () => {
