@@ -175,7 +175,7 @@ const Page = () => {
         <PageFull>
           <PageLoading title="Getting Queue" />
         </PageFull>
-      ) : queue && queue.length > 0 ? (
+      ) : (queue || completedPatients || unavailablePatients) && (queue.length > 0 || unavailablePatients.length > 0 || completedPatients.length > 0) ? (
         <>
           <div>
             <DashboardPageHeader
