@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
@@ -139,19 +138,6 @@ export default function BookAppointment({ onAppointmentCreated }: BookAppointmen
               }
               disabled={isLoading}
               rows={4}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="discharge_type">Discharge Type (Optional)</Label>
-            <Input
-              id="discharge_type"
-              placeholder="e.g., Standard discharge, Early discharge, etc."
-              value={formData.discharge_type}
-              onChange={(e) =>
-                setFormData({ ...formData, discharge_type: e.target.value })
-              }
-              disabled={isLoading}
             />
           </div>
 
