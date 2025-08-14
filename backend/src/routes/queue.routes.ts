@@ -7,7 +7,8 @@ import {
   getQueueStatsController,
   getNextPatientController,
   getCurrentPatientController,
-  callNextPatientController
+  callNextPatientController,
+  markPatientCompletedController
 } from '../controllers/queue.controller';
 
 const router: Router = express.Router();
@@ -29,6 +30,11 @@ router.get('/current', getCurrentPatientController);
 
 // Call next patient (move to in_progress)
 router.post('/call-next', callNextPatientController);
+
+// Mark patient as completed (updates both queue and appointment)
+router.post('/:id/complete', [
+  param('id').isInt().withMessage('Queue ID must be a valid integer')
+], markPatientCompletedController);
 
 // Update queue entry status
 router.put('/:id', [

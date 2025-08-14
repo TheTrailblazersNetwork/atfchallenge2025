@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DashboardPageHeader from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
@@ -8,29 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import PatientDetailsDialog from "@/components/opd/PatientDetailsDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { 
-  Search, 
-  Filter, 
-  Users, 
+import {
+  Search,
+  Filter,
+  Users,
   Calendar,
   ChevronLeft,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import {
   fetchAllPatients,
@@ -44,14 +45,10 @@ import DashboardStatCard from "@/components/DashboardStatCard";
 
 export default function OPDPatientsPage() {
   const dispatch = useDispatch();
-  const {
-    allPatients,
-    filteredPatients,
-    loading,
-    error,
-    filters,
-    pagination,
-  } = useSelector((state: any) => state.patients);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { allPatients, filteredPatients, loading, error, filters, pagination } =
+    useSelector((state: any) => state.patients);
 
   useEffect(() => {
     dispatch(fetchAllPatients() as any);
@@ -90,6 +87,16 @@ export default function OPDPatientsPage() {
     dispatch(setItemsPerPage(parseInt(items)));
   };
 
+  const handlePatientClick = (patient: any) => {
+    setSelectedPatient(patient);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setSelectedPatient(null);
+  };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
@@ -107,14 +114,11 @@ export default function OPDPatientsPage() {
       inactive: { variant: "secondary", label: "Inactive" },
       pending: { variant: "outline", label: "Pending" },
     };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
-    
-    return (
-      <Badge variant={config.variant as any}>
-        {config.label}
-      </Badge>
-    );
+
+    const config =
+      statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
+
+    return <Badge variant={config.variant as any}>{config.label}</Badge>;
   };
 
   if (loading && (!Array.isArray(allPatients) || allPatients.length === 0)) {
@@ -143,12 +147,34 @@ export default function OPDPatientsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <DashboardStatCard text="Total Patients" value={Array.isArray(allPatients) ? allPatients.length.toString() : "0"} />
-        <DashboardStatCard text="Filtered Patients" value={Array.isArray(filteredPatients) ? filteredPatients.length.toString() : "0"} />
-        <DashboardStatCard text="New Today" value={Array.isArray(allPatients) ? allPatients.filter(
-          (p: any) =>
-            new Date(p.created_at).toDateString() === new Date().toDateString()
-        ).length.toString() : "0"} />
+        <DashboardStatCard
+          text="Total Patients"
+          value={
+            Array.isArray(allPatients) ? allPatients.length.toString() : "0"
+          }
+        />
+        <DashboardStatCard
+          text="Filtered Patients"
+          value={
+            Array.isArray(filteredPatients)
+              ? filteredPatients.length.toString()
+              : "0"
+          }
+        />
+        <DashboardStatCard
+          text="New Today"
+          value={
+            Array.isArray(allPatients)
+              ? allPatients
+                  .filter(
+                    (p: any) =>
+                      new Date(p.created_at).toDateString() ===
+                      new Date().toDateString()
+                  )
+                  .length.toString()
+              : "0"
+          }
+        />
       </div>
 
       {/* Filters */}
@@ -224,7 +250,6 @@ export default function OPDPatientsPage() {
                   <SelectItem value="all">All Genders</SelectItem>
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -262,12 +287,17 @@ export default function OPDPatientsPage() {
       {/* Patients Table */}
       <Card className="p-4">
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>
-              Patients ({filteredPatients.length}{" "}
-              {filteredPatients.length === 1 ? "patient" : "patients"})
-            </CardTitle>
-            <div className="flex items-center gap-2">
+          <div className="flex max-sm:flex-col justify-between items-center">
+            <div>
+              <CardTitle>
+                Patients ({filteredPatients.length}{" "}
+                {filteredPatients.length === 1 ? "patient" : "patients"})
+              </CardTitle>
+              <p className="text-sm text-gray-500 mt-1">
+                Click on any row to view detailed patient information
+              </p>
+            </div>
+            <div className="flex items-center gap-2 max-sm:ml-auto">
               <Label htmlFor="itemsPerPage">Show:</Label>
               <Select
                 value={pagination.itemsPerPage.toString()}
@@ -304,42 +334,44 @@ export default function OPDPatientsPage() {
             </div>
           ) : (
             <>
-              <div className="relative max-sm:w-svw max-sm:max-w-svw">
-                <Table className="!w-full overflow-scroll">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Age</TableHead>
-                      <TableHead>Gender</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Registration Date</TableHead>
+              <Table className="w-full overflow-x-auto">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[150px]">Name</TableHead>
+                    <TableHead className="min-w-[200px]">Email</TableHead>
+                    <TableHead className="min-w-[120px]">Phone</TableHead>
+                    <TableHead className="min-w-[60px]">Age</TableHead>
+                    <TableHead className="min-w-[80px]">Gender</TableHead>
+                    <TableHead className="min-w-[80px]">Status</TableHead>
+                    <TableHead className="min-w-[120px]">Registration Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentPagePatients.map((patient: any) => (
+                    <TableRow 
+                      key={patient.id || patient._id}
+                      className="cursor-pointer hover:bg-gray-50 transition-colors"
+                      onClick={() => handlePatientClick(patient)}
+                    >
+                      <TableCell className="font-medium">
+                        {patient.first_name} {patient.last_name}
+                      </TableCell>
+                      <TableCell>{patient.email || "N/A"}</TableCell>
+                      <TableCell>{patient.phone_number || "N/A"}</TableCell>
+                      <TableCell>
+                        {calculateAge(patient.date_of_birth)}
+                      </TableCell>
+                      <TableCell className="capitalize">
+                        {patient.gender || "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(patient.status || "active")}
+                      </TableCell>
+                      <TableCell>{formatDate(patient.created_at)}</TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentPagePatients.map((patient: any) => (
-                      <TableRow key={patient.id || patient._id}>
-                        <TableCell className="font-medium">
-                          {patient.first_name} {patient.last_name}
-                        </TableCell>
-                        <TableCell>{patient.email || "N/A"}</TableCell>
-                        <TableCell>{patient.phone_number || "N/A"}</TableCell>
-                        <TableCell>
-                          {calculateAge(patient.date_of_birth)}
-                        </TableCell>
-                        <TableCell className="capitalize">
-                          {patient.gender || "N/A"}
-                        </TableCell>
-                        <TableCell>
-                          {getStatusBadge(patient.status || "active")}
-                        </TableCell>
-                        <TableCell>{formatDate(patient.created_at)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
@@ -389,6 +421,13 @@ export default function OPDPatientsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Patient Details Dialog */}
+      <PatientDetailsDialog
+        patient={selectedPatient}
+        open={isDialogOpen}
+        onOpenChange={handleDialogClose}
+      />
     </div>
   );
 }

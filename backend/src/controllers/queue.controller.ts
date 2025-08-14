@@ -6,6 +6,7 @@ import {
   getNextPatientInQueue,
   getCurrentPatientBeingServed
 } from '../services/queue.service';
+import { updateAppointmentStatus } from '../services/appointment.service';
 
 /**
  * Gets the current queue for today
@@ -167,6 +168,58 @@ export const callNextPatientController = async (req: Request, res: Response) => 
     res.status(500).json({
       success: false,
       error: 'Failed to call next patient'
+    });
+  }
+};
+
+/**
+ * Marks a patient as completed and updates both queue and appointment status
+ */
+export const markPatientCompletedController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // queue entry id
+
+    // First get the queue entry to get the appointment_id
+    const currentQueue = await getCurrentQueue();
+    const queueEntry = currentQueue.find(entry => entry.id === parseInt(id));
+    
+    if (!queueEntry) {
+      return res.status(404).json({
+        success: false,
+        error: 'Queue entry not found'
+      });
+    }
+
+    // Update queue entry status to completed and set completed_time
+    const updatedQueueEntry = await updateQueueEntryStatus(parseInt(id), 'completed');
+    
+    if (!updatedQueueEntry) {
+      return res.status(404).json({
+        success: false,
+        error: 'Failed to update queue entry'
+      });
+    }
+
+    // Update corresponding appointment status to completed
+    const updatedAppointment = await updateAppointmentStatus(queueEntry.appointment_id, 'completed');
+    
+    if (!updatedAppointment) {
+      console.warn(`Warning: Could not update appointment status for appointment ${queueEntry.appointment_id}`);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Patient marked as completed successfully',
+      data: {
+        queueEntry: updatedQueueEntry,
+        appointment: updatedAppointment
+      }
+    });
+  } catch (error: any) {
+    console.error('Mark patient completed error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to mark patient as completed'
     });
   }
 };

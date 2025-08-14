@@ -20,7 +20,7 @@ const DashboardPageHeader = ({
       <div className="float-left">
         <SidebarTrigger />
       </div>
-      <h2 className={`text-2xl font-bold ${titleClassName}`}>{title}</h2>
+      <h2 className={`text-2xl font-bold text-blue-600 ${titleClassName}`}>{title}</h2>
       <p className={`text-muted-foreground ${subtitleClassName}`}>{subtitle}</p>
     </div>
   );

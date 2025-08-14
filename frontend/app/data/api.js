@@ -44,6 +44,7 @@ const system_api = {
         queue: {
             getAll: `${host}/api/queue`,
             update: `${host}/api/queue/`,     // append queue ID
+            complete: `${host}/api/queue/`,   // append queue ID + '/complete'
         },
     },
 };

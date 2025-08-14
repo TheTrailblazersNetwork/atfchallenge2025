@@ -27,6 +27,19 @@ export const createAppointment = async (req: Request, res: Response) => {
       });
     }
 
+    // Check for existing pending appointment
+    const existingAppointments = await getPatientAppointments(patientId);
+    const pendingAppointment = existingAppointments.find(
+      appointment => appointment.status === 'pending'
+    );
+
+    if (pendingAppointment) {
+      return res.status(400).json({
+        success: false,
+        error: 'Pending appointment already exists'
+      });
+    }
+
     const appointment = await createNewAppointment({
       patient_id: patientId,
       medical_description,
