@@ -186,8 +186,8 @@ const Page = () => {
             {/* In Progress - First item */}
             <div className="grid grid-cols-2 gap-4">
               {queue.length > 0 && (
-                <div key={queue[0].appointment_id} className="my-6">
-                  <div className="p-4 border rounded-lg bg-white shadow-md">
+                <div key={queue[0].appointment_id} className="my-5">
+                  <div className="p-4 border rounded-lg nf-glass-bg shadow-md">
                     <h2 className="float-right uppercase text-sm ml-auto border-2 bg-cyan-200 text-cyan-800 rounded font-medium py-1 px-3 w-max mb-3">
                       In Progress
                     </h2>
@@ -344,9 +344,9 @@ const Page = () => {
 
               {/* Next Up - Second item */}
               {queue.length > 1 && (
-                <div key={queue[1].appointment_id} className="my-auto">
-                  <div className="p-4 border rounded-lg bg-white shadow-md">
-                    <h2 className="float-right text-sm ml-auto border-2 bg-cyan-200 text-cyan-800 rounded font-medium py-1 px-3 w-max mb-3">
+                <div key={queue[1].appointment_id} className="my-auto opacity-80">
+                  <div className="p-4 border rounded-lg nf-glass-bg h-full shadow-md">
+                    <h2 className="float-right text-sm ml-auto border-2 bg-cyan-200 text-cyan-800 rounded font-medium py-1 px-3 w-max">
                       Up Next
                     </h2>
                     <div className="flex justify-between items-start mb-3">

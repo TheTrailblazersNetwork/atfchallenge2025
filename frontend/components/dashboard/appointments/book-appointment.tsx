@@ -93,7 +93,7 @@ export default function BookAppointment({ onAppointmentCreated }: BookAppointmen
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="mb-4">
+        <Button>
           <Plus className="w-4 h-4 mr-2" />
           Book New Appointment
         </Button>

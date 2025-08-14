@@ -135,5 +135,5 @@
   * This section styles the dashboard page layout.
 */
 .dashboard-page {
-  @apply grid gap-6 py-5 w-full;
+  @apply grid gap-6 pb-5 w-full;
 }

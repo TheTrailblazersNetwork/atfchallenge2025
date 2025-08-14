@@ -84,7 +84,7 @@ const AppointmentFilters = ({
   const hasActiveFilters = statusFilter || dateFilter || descriptionFilter;
 
   return (
-    <div className="w-full md:w-max grid grid-cols-2 md:flex gap-2 mb-6">
+    <div className="w-full md:w-max grid grid-cols-2 md:grid-cols-3 lg:flex gap-2">
       <Button 
         className="max-sm:col-span-2" 
         onClick={clearFilters} 

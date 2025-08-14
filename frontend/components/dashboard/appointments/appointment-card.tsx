@@ -43,14 +43,14 @@ const AppointmentCard = ({
     <div
       key={appointment.id}
       className={clsx(
-        "cursor-default bg-white/50 p-4 rounded-lg border-2 m-2 duration-300 transition-all",
+        "cursor-default bg-white p-4 rounded-lg border-2 m-2 duration-300 transition-all",
         color === "green"
-          ? "hover:bg-green-600/5 hover:border-green-600"
+          ? "hover:bg-green-50/90 hover:border-green-600"
           : color === "yellow"
-          ? "hover:bg-yellow-500/5 hover:border-yellow-600"
+          ? "hover:bg-yellow-50/90 hover:border-yellow-600"
           : color === "red"
-          ? "hover:bg-red-500/5 hover:border-red-600"
-          : "hover:bg-blue-500/5 hover:border-blue-600"
+          ? "hover:bg-red-50/90 hover:border-red-600"
+          : "hover:bg-blue-50/90 hover:border-blue-600"
       )}
     >
       <Button
