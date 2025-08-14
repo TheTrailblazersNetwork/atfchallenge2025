@@ -41,7 +41,9 @@ const Page = () => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [currentPatient, setCurrentPatient] = useState<QueueItem | null>(null);
   const [completedPatients, setCompletedPatients] = useState<QueueItem[]>([]);
-  const [unavailablePatients, setUnavailablePatients] = useState<QueueItem[]>([]);
+  const [unavailablePatients, setUnavailablePatients] = useState<QueueItem[]>(
+    []
+  );
   const [isUnavailableDialogOpen, setIsUnavailableDialogOpen] = useState(false);
   const [isCompletedDialogOpen, setIsCompletedDialogOpen] = useState(false);
 
@@ -71,27 +73,27 @@ const Page = () => {
       setCurrentPatient(queue[1]);
     }
   };
-  
+
   const markAsUnavailable = () => {
     if (queue.length > 0) {
       const unavailablePatient = queue[0]; // Get the first patient
-      
+
       // Update the patient's status
       const updatedUnavailablePatient = {
         ...unavailablePatient,
-        status: "unavailable"
+        status: "unavailable",
       };
-      
+
       // Remove first patient from queue
       setQueue((prevQueue) => {
         const newQueue = [...prevQueue];
         newQueue.shift(); // Remove first patient
         return newQueue;
       });
-      
+
       // Add to unavailable patients
       setUnavailablePatients((prev) => [...prev, updatedUnavailablePatient]);
-      
+
       // Update current patient
       setCurrentPatient(queue[1] || null);
       setIsUnavailableDialogOpen(false); // Close dialog after action
@@ -101,24 +103,24 @@ const Page = () => {
   const markAsCompleted = () => {
     if (queue.length > 0) {
       const completedPatient = queue[0]; // Get the first patient
-      
+
       // Update the patient's status and completion time
       const updatedCompletedPatient = {
         ...completedPatient,
         status: "completed",
-        completed_time: new Date().toISOString()
+        completed_time: new Date().toISOString(),
       };
-      
+
       // Remove first patient from queue
       setQueue((prevQueue) => {
         const newQueue = [...prevQueue];
         newQueue.shift(); // Remove first patient
         return newQueue;
       });
-      
+
       // Add to completed patients
       setCompletedPatients((prev) => [...prev, updatedCompletedPatient]);
-      
+
       // Update current patient
       setCurrentPatient(queue[1] || null);
       setIsCompletedDialogOpen(false); // Close dialog after action
@@ -127,17 +129,19 @@ const Page = () => {
 
   const markAsAvailable = (patientId: number) => {
     // Find the patient in unavailable list
-    const patientToRestore = unavailablePatients.find(p => p.id === patientId);
+    const patientToRestore = unavailablePatients.find(
+      (p) => p.id === patientId
+    );
     if (!patientToRestore) return;
 
     // Update patient status back to original
     const restoredPatient = {
       ...patientToRestore,
-      status: "approved" // or whatever the original status should be
+      status: "approved", // or whatever the original status should be
     };
 
     // Remove from unavailable patients
-    setUnavailablePatients((prev) => prev.filter(p => p.id !== patientId));
+    setUnavailablePatients((prev) => prev.filter((p) => p.id !== patientId));
 
     // Add to queue at position 1 (next up) and shift others
     setQueue((prevQueue) => {
@@ -166,7 +170,7 @@ const Page = () => {
   };
 
   return (
-    <>
+    <div className="dashboard-page">
       {loading ? (
         <PageFull>
           <PageLoading title="Getting Queue" />
@@ -180,234 +184,211 @@ const Page = () => {
             />
 
             {/* In Progress - First item */}
-            {queue.length > 0 && (
-              <div key={queue[0].appointment_id} className="mb-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-3">
-                  In Progress
-                </h2>
-                <div className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {queue[0].patient_first_name}{" "}
-                        {queue[0].patient_last_name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {queue[0].patient_gender} • Age {queue[0].patient_age}
+            <div className="grid grid-cols-2 gap-4">
+              {queue.length > 0 && (
+                <div key={queue[0].appointment_id} className="my-6">
+                  <div className="p-4 border rounded-lg bg-white shadow-md">
+                    <h2 className="float-right uppercase text-sm ml-auto border-2 bg-cyan-200 text-cyan-800 rounded font-medium py-1 px-3 w-max mb-3">
+                      In Progress
+                    </h2>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {queue[0].patient_first_name}{" "}
+                          {queue[0].patient_last_name}
+                        </h3>
+                        <p className="capitalize text-base text-gray-600">
+                          {queue[0].patient_gender} • Age {queue[0].patient_age}
+                        </p>
+                        <div className="flex items-center gap-2 my-2">
+                          <span
+                            className={`capitalize px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                              queue[0].status
+                            )}`}
+                          >
+                            Queue Position: #{queue[0].queue_position}
+                          </span>
+                          <span
+                            className={`capitalize px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                              queue[0].status
+                            )}`}
+                          >
+                            {queue[0].status}
+                          </span>
+                          <span
+                            className={`capitalize px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                              queue[0].status
+                            )}`}
+                          >
+                            {queue[0].visiting_status.replace("_", " ")} Patient
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="font-semibold text-sm text-muted-foreground">
+                        Medical Description:
                       </p>
+                      <p className="">{queue[0].medical_description}</p>
                     </div>
-                    <div className="text-right">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          queue[0].status
-                        )}`}
-                      >
-                        {queue[0].status}
-                      </span>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Position: {queue[0].queue_position}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <p className="text-sm font-medium text-gray-700">
-                      Medical Description:
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {queue[0].medical_description}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-4">
-                    <div>
-                      <span className="font-medium">Visit Status:</span>
-                      <p>{queue[0].visiting_status.replace("_", " ")}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Priority:</span>
-                      <p>{queue[0].priority_rank}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Severity:</span>
-                      <p>{queue[0].severity_score}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Created:</span>
-                      <p>
-                        {new Date(queue[0].created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="mr-auto">
-                      <Button
-                        onClick={skipPatient}
-                        className="cursor-pointer"
-                        variant="outline"
-                      >
-                        Skip Patient
-                      </Button>
-                    </div>
-
-                    <Dialog
-                      open={isUnavailableDialogOpen}
-                      onOpenChange={setIsUnavailableDialogOpen}
-                    >
-                      <DialogTrigger asChild>
+                    <div className="flex gap-3">
+                      <div className="mr-auto">
                         <Button
-                          className="flex items-center justify-center gap-2 cursor-pointer"
-                          variant="destructive"
+                          onClick={skipPatient}
+                          className="cursor-pointer"
+                          variant="outline"
+                          size={"sm"}
                         >
-                          <Ban />
-                          Mark as unavailable
+                          Skip Patient
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Mark Patient as Unavailable</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to mark{" "}
-                            <strong>
-                              {queue[0]?.patient_first_name}{" "}
-                              {queue[0]?.patient_last_name}
-                            </strong>{" "}
-                            as unavailable? This will move them to the end of
-                            the queue.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <Button
-                            variant="outline"
-                            onClick={() => setIsUnavailableDialogOpen(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={markAsUnavailable}
-                            className="flex items-center gap-2"
-                          >
-                            <Ban className="h-4 w-4" />
-                            Mark as Unavailable
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                      </div>
 
-                    <Dialog
-                      open={isCompletedDialogOpen}
-                      onOpenChange={setIsCompletedDialogOpen}
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          className="flex items-center justify-center gap-2 cursor-pointer"
-                          variant="default"
-                        >
-                          <CheckCheck />
-                          Mark as completed
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Mark Patient as Completed</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to mark{" "}
-                            <strong>
-                              {queue[0]?.patient_first_name}{" "}
-                              {queue[0]?.patient_last_name}
-                            </strong>{" "}
-                            as completed? This will move them to the served
-                            patients list.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <Button
-                            variant="outline"
-                            onClick={() => setIsCompletedDialogOpen(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            variant="default"
-                            onClick={markAsCompleted}
-                            className="flex items-center gap-2"
-                          >
-                            <CheckCheck className="h-4 w-4" />
-                            Mark as Completed
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Next Up - Second item */}
-            {queue.length > 1 && (
-              <div key={queue[1].appointment_id} className="mb-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-3">
-                  Next Up
-                </h2>
-                <div className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {queue[1].patient_first_name}{" "}
-                        {queue[1].patient_last_name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {queue[1].patient_gender} • Age {queue[1].patient_age}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          queue[1].status
-                        )}`}
+                      <Dialog
+                        open={isUnavailableDialogOpen}
+                        onOpenChange={setIsUnavailableDialogOpen}
                       >
-                        {queue[1].status}
-                      </span>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Position: {queue[1].queue_position}
-                      </p>
-                    </div>
-                  </div>
+                        <DialogTrigger asChild>
+                          <Button
+                            className="flex items-center justify-center gap-2 cursor-pointer"
+                            variant="outline"
+                            size={"sm"}
+                          >
+                            <Ban />
+                            Unavailable
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Mark Patient as Unavailable
+                            </DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to mark{" "}
+                              <strong>
+                                {queue[0]?.patient_first_name}{" "}
+                                {queue[0]?.patient_last_name}
+                              </strong>{" "}
+                              as unavailable? This will move them to the end of
+                              the queue.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsUnavailableDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={markAsUnavailable}
+                              className="flex items-center gap-2"
+                            >
+                              <Ban className="h-4 w-4" />
+                              Mark as Unavailable
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
 
-                  <div className="mb-3">
-                    <p className="text-sm font-medium text-gray-700">
-                      Medical Description:
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {queue[1].medical_description}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
-                    <div>
-                      <span className="font-medium">Visit Status:</span>
-                      <p>{queue[1].visiting_status.replace("_", " ")}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Priority:</span>
-                      <p>{queue[1].priority_rank}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Severity:</span>
-                      <p>{queue[1].severity_score}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium">Created:</span>
-                      <p>
-                        {new Date(queue[1].created_at).toLocaleDateString()}
-                      </p>
+                      <Dialog
+                        open={isCompletedDialogOpen}
+                        onOpenChange={setIsCompletedDialogOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <Button
+                            className="flex items-center justify-center gap-2 cursor-pointer"
+                            variant="outline"
+                            size={"sm"}
+                          >
+                            <CheckCheck />
+                            Completed
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Mark Patient as Completed</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to mark{" "}
+                              <strong>
+                                {queue[0]?.patient_first_name}{" "}
+                                {queue[0]?.patient_last_name}
+                              </strong>{" "}
+                              as completed? This will move them to the served
+                              patients list.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsCompletedDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="default"
+                              onClick={markAsCompleted}
+                              className="flex items-center gap-2"
+                            >
+                              <CheckCheck className="h-4 w-4" />
+                              Mark as Completed
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Next Up - Second item */}
+              {queue.length > 1 && (
+                <div key={queue[1].appointment_id} className="my-auto">
+                  <div className="p-4 border rounded-lg bg-white shadow-md">
+                    <h2 className="float-right text-sm ml-auto border-2 bg-cyan-200 text-cyan-800 rounded font-medium py-1 px-3 w-max mb-3">
+                      Up Next
+                    </h2>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {queue[1].patient_first_name}{" "}
+                          {queue[1].patient_last_name}
+                        </h3>
+                        <p className="capitalize text-base text-gray-600">
+                          {queue[1].patient_gender} • Age {queue[1].patient_age}
+                        </p>
+                        <div className="flex items-center gap-2 my-2">
+                          <span
+                            className={`capitalize px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                              queue[1].status
+                            )}`}
+                          >
+                            {queue[1].status}
+                          </span>
+                          <span
+                            className={`capitalize px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                              queue[1].status
+                            )}`}
+                          >
+                            {queue[1].visiting_status.replace("_", " ")} Patient
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="font-semibold text-sm text-muted-foreground">
+                        Medical Description:
+                      </p>
+                      <p className="">{queue[0].medical_description}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Upcoming Patients - First two items */}
 
             {/* Upcoming Patients - Rest of the items */}
             {queue.length > 2 && (
@@ -625,7 +606,7 @@ const Page = () => {
       ) : (
         <p>No Items in the queue</p>
       )}
-    </>
+    </div>
   );
 };
 

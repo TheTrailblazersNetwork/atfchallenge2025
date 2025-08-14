@@ -15,10 +15,10 @@ export default function OPDDashboardLayout({ children }: { children: ReactNode }
     <OPDAuthGuard>
       <SidebarProvider>
         <OPDSidebar />
-        <main className={`${inter.className} w-full p-3 md:p-5`}>
+        <div className={`${inter.className} p-5 h-svh w-full overflow-y-scroll`}>
           <SidebarTrigger />
           {children}
-        </main>
+        </div>
       </SidebarProvider>
       <Toaster />
     </OPDAuthGuard>
