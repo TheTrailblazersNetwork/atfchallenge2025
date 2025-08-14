@@ -142,8 +142,14 @@ export default function OPDPatientsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 h-max p-5">
+          <p>Total Patients</p>
+          <p className="text-3xl font-bold">
+            {Array.isArray(allPatients) ? allPatients.length : 0}
+          </p>
+        </div>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p2-2">
             <CardTitle className="text-sm font-medium">
               Total Patients
             </CardTitle>
