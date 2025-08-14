@@ -40,6 +40,7 @@ import {
   setItemsPerPage,
   applyFilters,
 } from "@/store/features/patientsSlice";
+import DashboardStatCard from "@/components/DashboardStatCard";
 
 export default function OPDPatientsPage() {
   const dispatch = useDispatch();
@@ -141,77 +142,19 @@ export default function OPDPatientsPage() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 h-max p-5">
-          <p>Total Patients</p>
-          <p className="text-3xl font-bold">
-            {Array.isArray(allPatients) ? allPatients.length : 0}
-          </p>
-        </div>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p2-2">
-            <CardTitle className="text-sm font-medium">
-              Total Patients
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Array.isArray(allPatients) ? allPatients.length : 0}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Filtered Results
-            </CardTitle>
-            <Filter className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Array.isArray(filteredPatients) ? filteredPatients.length : 0}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Today</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Array.isArray(allPatients)
-                ? allPatients.filter(
-                    (p: any) =>
-                      new Date(p.created_at).toDateString() ===
-                      new Date().toDateString()
-                  ).length
-                : 0}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Patients
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {Array.isArray(allPatients)
-                ? allPatients.filter((p: any) => p.status === "active").length
-                : 0}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <DashboardStatCard text="Total Patients" value={Array.isArray(allPatients) ? allPatients.length.toString() : "0"} />
+        <DashboardStatCard text="Filtered Patients" value={Array.isArray(filteredPatients) ? filteredPatients.length.toString() : "0"} />
+        <DashboardStatCard text="New Today" value={Array.isArray(allPatients) ? allPatients.filter(
+          (p: any) =>
+            new Date(p.created_at).toDateString() === new Date().toDateString()
+        ).length.toString() : "0"} />
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
+      <Card className="p-4">
         <CardHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center">
             <CardTitle className="text-lg">Filter Patients</CardTitle>
             <div className="flex gap-2">
               <Button
@@ -232,7 +175,7 @@ export default function OPDPatientsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:flex gap-4">
             {/* Search */}
             <div className="grid gap-2 lg:col-span-2">
               <Label htmlFor="search">Search</Label>
@@ -317,7 +260,7 @@ export default function OPDPatientsPage() {
       )}
 
       {/* Patients Table */}
-      <Card>
+      <Card className="p-4">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>
@@ -361,8 +304,8 @@ export default function OPDPatientsPage() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="relative max-sm:w-svw max-sm:max-w-svw">
+                <Table className="!w-full overflow-scroll">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
