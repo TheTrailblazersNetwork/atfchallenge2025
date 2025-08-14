@@ -1,344 +1,632 @@
 "use client";
-
-import React from "react";
-import { Patient, samplePatients } from "@/types/patient";
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/opdbadge";
-import { OPDButton } from "@/components/ui/opdbutton";
-import { EndOfQueue } from "@/components/ui/end-of-queue";
+import system_api from "@/app/data/api";
 import DashboardPageHeader from "@/components/dashboard/page-header";
+import PageFull from "@/components/Page-Full";
+import PageLoading from "@/components/Page-Loading";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import axiosInstance from "@/lib/axiosInstance";
+import { Ban, CheckCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 
-type PatientsState = {
-  currentPatient: Patient | null;
-  nextPatient: Patient | null;
-  upcomingPatients: Patient[];
-};
+interface QueueItem {
+  id: number;
+  appointment_id: string;
+  patient_id: string;
+  queue_position: number;
+  status: string;
+  completed_time: string | null;
+  created_at: string;
+  updated_at: string;
+  patient_first_name: string;
+  patient_last_name: string;
+  patient_gender: string;
+  patient_age: string;
+  medical_description: string;
+  visiting_status: string;
+  priority_rank: number;
+  severity_score: string;
+}
 
-export default function OPDQueueDashboard() {
-  const [patients, setPatients] = useState<PatientsState>({
-    currentPatient: null,
-    nextPatient: null,
-    upcomingPatients: [],
-  });
+const Page = () => {
+  const [loading, setLoading] = useState(true);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [currentPatient, setCurrentPatient] = useState<QueueItem | null>(null);
+  const [completedPatients, setCompletedPatients] = useState<QueueItem[]>([]);
+  const [unavailablePatients, setUnavailablePatients] = useState<QueueItem[]>([]);
+  const [isUnavailableDialogOpen, setIsUnavailableDialogOpen] = useState(false);
+  const [isCompletedDialogOpen, setIsCompletedDialogOpen] = useState(false);
 
   useEffect(() => {
-    const sortedPatients = [...samplePatients].sort((a, b) => 
-      parseInt(a.queueNumber) - parseInt(b.queueNumber)
-    );
-
-    const currentPatient = sortedPatients.length > 0 
-      ? { ...sortedPatients[0], visitStatus: 'In Progress' } 
-      : null;
-
-    const nextPatient = sortedPatients.length > 1 
-      ? { ...sortedPatients[1], visitStatus: 'Waiting' } 
-      : null;
-
-    const upcomingPatients = sortedPatients.length > 2 
-      ? sortedPatients.slice(2).map(p => ({ ...p, visitStatus: 'Waiting' }))
-      : [];
-
-    setPatients({
-      currentPatient,
-      nextPatient,
-      upcomingPatients
-    });
+    axiosInstance
+      .get(system_api.opd.queue.getAll)
+      .then((res) => {
+        console.log(res);
+        setQueue(res.data.data);
+        setCurrentPatient(res.data.data[0] || null);
+      })
+      .catch((err) => {
+        console.error("Error fetching queue:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const handleSkipPatient = () => {
-    if (!patients.currentPatient || !patients.nextPatient) return;
-  
-    setPatients(prev => ({
-      ...prev,
-      currentPatient: { ...prev.nextPatient as Patient, visitStatus: 'In Progress' },
-      nextPatient: { ...prev.currentPatient as Patient, visitStatus: 'Waiting' },
-    }));
+  const skipPatient = () => {
+    if (queue.length > 1) {
+      setQueue((prevQueue) => {
+        const newQueue = [...prevQueue];
+        [newQueue[0], newQueue[1]] = [newQueue[1], newQueue[0]];
+        return newQueue;
+      });
+      setCurrentPatient(queue[1]);
+    }
   };
-
-  const handleUnavailablePatient = () => {
-    if (!patients.currentPatient) return;
   
-    setPatients(prev => {
-      const unavailablePatient = { 
-        ...prev.currentPatient as Patient, 
-        visitStatus: 'Unavailable' 
-      };
-
-      // Get all waiting patients (excluding unavailable ones)
-      const waitingPatients = [
-        ...(prev.nextPatient ? [prev.nextPatient] : []),
-        ...prev.upcomingPatients.filter(p => p.visitStatus !== 'Unavailable')
-      ].sort((a, b) => parseInt(a.queueNumber) - parseInt(b.queueNumber));
-
-      const newCurrent = waitingPatients.length > 0
-        ? { ...waitingPatients[0], visitStatus: 'In Progress' }
-        : null;
-
-      const newNext = waitingPatients.length > 1
-        ? { ...waitingPatients[1], visitStatus: 'Waiting' }
-        : null;
-
-      // Get all unavailable patients (including the new one)
-      const unavailablePatients = [
-        ...prev.upcomingPatients.filter(p => p.visitStatus === 'Unavailable'),
-        unavailablePatient
-      ];
-
-      return {
-        currentPatient: newCurrent,
-        nextPatient: newNext,
-        upcomingPatients: [
-          ...waitingPatients.slice(2),
-          ...unavailablePatients
-        ]
-      };
-    });
-  };
-
-  const handleCompletePatient = () => {
-    if (!patients.currentPatient) return;
-  
-    setPatients(prev => {
-      const waitingPatients = [
-        ...(prev.nextPatient ? [prev.nextPatient] : []),
-        ...prev.upcomingPatients.filter(p => p.visitStatus !== 'Unavailable')
-      ].sort((a, b) => parseInt(a.queueNumber) - parseInt(b.queueNumber));
-
-      const newCurrent = waitingPatients.length > 0
-        ? { ...waitingPatients[0], visitStatus: 'In Progress' }
-        : null;
-
-      const newNext = waitingPatients.length > 1
-        ? { ...waitingPatients[1], visitStatus: 'Waiting' }
-        : null;
-
-      return {
-        currentPatient: newCurrent,
-        nextPatient: newNext,
-        upcomingPatients: [
-          ...waitingPatients.slice(2),
-          ...prev.upcomingPatients.filter(p => p.visitStatus === 'Unavailable')
-        ]
-      };
-    });
-  };
-
-  const handleRestorePatient = (patient: Patient) => {
-    setPatients(prev => {
-      const restoredPatient = { ...patient, visitStatus: 'Waiting' };
+  const markAsUnavailable = () => {
+    if (queue.length > 0) {
+      const unavailablePatient = queue[0]; // Get the first patient
       
-      // Remove from unavailable list
-      const unavailablePatients = prev.upcomingPatients.filter(
-        p => p.id !== patient.id || p.visitStatus !== 'Unavailable'
-      );
-
-      // Add to waiting list and sort
-      const waitingPatients = [
-        ...(prev.nextPatient ? [prev.nextPatient] : []),
-        ...unavailablePatients,
-        restoredPatient
-      ].sort((a, b) => parseInt(a.queueNumber) - parseInt(b.queueNumber));
-
-      // If current slot is empty and we have waiting patients, promote first to current
-      const needsPromotion = !prev.currentPatient && waitingPatients.length > 0;
-      const newCurrent = needsPromotion
-        ? { ...waitingPatients[0], visitStatus: 'In Progress' }
-        : prev.currentPatient;
-
-      const remainingPatients = needsPromotion 
-        ? waitingPatients.slice(1)
-        : waitingPatients;
-
-      return {
-        currentPatient: newCurrent,
-        nextPatient: remainingPatients.length > 0
-          ? { ...remainingPatients[0], visitStatus: 'Waiting' }
-          : null,
-        upcomingPatients: remainingPatients.slice(1)
+      // Update the patient's status
+      const updatedUnavailablePatient = {
+        ...unavailablePatient,
+        status: "unavailable"
       };
-    });
-  };
-
-  const handleConfirmUnavailability = (patient: Patient) => {
-    setPatients(prev => ({
-      ...prev,
-      upcomingPatients: prev.upcomingPatients.filter(p => p.id !== patient.id)
-    }));
-  };
-
-  const isQueueEmpty = !patients.currentPatient && 
-                      !patients.nextPatient && 
-                      patients.upcomingPatients.length === 0;
-
-  return (
-    <div className="dashboard-page">
-      <DashboardPageHeader
-        title="Queue Dashboard"
-        subtitle="Monitor patient queue and manage appointments in real-time"
-      />
       
-      <div className="p-4">
-        {isQueueEmpty ? (
-          <EndOfQueue />
-        ) : (
-          <>
-            {/* Current Patient */}
-            <div className="grid gap-4">
-              {patients.currentPatient && (
-                <PatientCard 
-                  patient={patients.currentPatient} 
-                  highlight 
-                  actions={
-                    <div className="flex gap-2">
-                      <OPDButton 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleSkipPatient}
-                      >
-                        Skip
-                      </OPDButton>
-                      <OPDButton 
-                        variant="warning" 
-                        size="sm"
-                        onClick={handleUnavailablePatient}
-                      >
-                        Unavailable
-                      </OPDButton>
-                      <OPDButton 
-                        variant="success" 
-                        size="sm"
-                        onClick={handleCompletePatient}
-                      >
-                        Complete
-                      </OPDButton>
-                    </div>
-                  }
-                />
-              )}
-            </div>
+      // Remove first patient from queue
+      setQueue((prevQueue) => {
+        const newQueue = [...prevQueue];
+        newQueue.shift(); // Remove first patient
+        return newQueue;
+      });
+      
+      // Add to unavailable patients
+      setUnavailablePatients((prev) => [...prev, updatedUnavailablePatient]);
+      
+      // Update current patient
+      setCurrentPatient(queue[1] || null);
+      setIsUnavailableDialogOpen(false); // Close dialog after action
+    }
+  };
 
-            {/* Next Patient */}
-            <h2 className="text-xl font-semibold mt-8 mb-4">Next Up</h2>
-            <div className="grid gap-4">
-              {patients.nextPatient && (
-                <PatientCard 
-                  patient={patients.nextPatient} 
-                />
-              )}
-            </div>
+  const markAsCompleted = () => {
+    if (queue.length > 0) {
+      const completedPatient = queue[0]; // Get the first patient
+      
+      // Update the patient's status and completion time
+      const updatedCompletedPatient = {
+        ...completedPatient,
+        status: "completed",
+        completed_time: new Date().toISOString()
+      };
+      
+      // Remove first patient from queue
+      setQueue((prevQueue) => {
+        const newQueue = [...prevQueue];
+        newQueue.shift(); // Remove first patient
+        return newQueue;
+      });
+      
+      // Add to completed patients
+      setCompletedPatients((prev) => [...prev, updatedCompletedPatient]);
+      
+      // Update current patient
+      setCurrentPatient(queue[1] || null);
+      setIsCompletedDialogOpen(false); // Close dialog after action
+    }
+  };
 
-            {/* Upcoming Patients */}
-            <h2 className="text-xl font-semibold mt-8 mb-4">Upcoming Patients</h2>
-            <div className="grid gap-4">
-              {patients.upcomingPatients.map(patient => (
-                <PatientCard 
-                  key={patient.id}
-                  patient={patient}
-                  actions={patient.visitStatus === 'Unavailable' && (
-                    <div className="flex gap-2">
-                      <OPDButton 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleRestorePatient(patient)}
-                      >
-                        Restore
-                      </OPDButton>
-                      <OPDButton 
-                        variant="danger" 
-                        size="sm"
-                        onClick={() => handleConfirmUnavailability(patient)}
-                      >
-                        Confirm Unavailability
-                      </OPDButton>
-                    </div>
-                  )}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
+  const markAsAvailable = (patientId: number) => {
+    // Find the patient in unavailable list
+    const patientToRestore = unavailablePatients.find(p => p.id === patientId);
+    if (!patientToRestore) return;
 
-interface PatientCardProps {
-  patient: Patient;
-  highlight?: boolean;
-  actions?: React.ReactNode;
-}
+    // Update patient status back to original
+    const restoredPatient = {
+      ...patientToRestore,
+      status: "approved" // or whatever the original status should be
+    };
 
-function PatientCard({ patient, highlight = false, actions }: PatientCardProps) {
-  // Determine recommended doctors based on patientStatus
-  const getRecommendedDoctors = () => {
-    // Check if patientStatus contains "1st Timers"
-    const isFirstTimer = patient.patientStatus.includes("1st Timers");
-    
-    if (isFirstTimer) {
-      return "Resident and Consultant";
-    } else {
-      // For all other cases (Review, Follow-up, etc.)
-      return "Consultant Only";
+    // Remove from unavailable patients
+    setUnavailablePatients((prev) => prev.filter(p => p.id !== patientId));
+
+    // Add to queue at position 1 (next up) and shift others
+    setQueue((prevQueue) => {
+      const newQueue = [...prevQueue];
+      newQueue.splice(1, 0, restoredPatient); // Insert at position 1
+      return newQueue;
+    });
+
+    // Update current patient if queue was empty
+    if (queue.length === 0) {
+      setCurrentPatient(restoredPatient);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved":
+        return "text-green-600 bg-green-100";
+      case "pending":
+        return "text-yellow-600 bg-yellow-100";
+      case "completed":
+        return "text-blue-600 bg-blue-100";
+      default:
+        return "text-gray-600 bg-gray-100";
     }
   };
 
   return (
-    <div className={`flex items-center gap-4 p-4 rounded-lg border
-      ${highlight ? 'bg-primary/5 border-primary' : 'bg-background'}`}>
-      <div className="size-10 rounded-full bg-muted/20 flex items-center justify-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      </div>
-      <div className="flex-1">
-        <div className="flex justify-between items-start">
+    <>
+      {loading ? (
+        <PageFull>
+          <PageLoading title="Getting Queue" />
+        </PageFull>
+      ) : queue && queue.length > 0 ? (
+        <>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <p className="font-medium">#{patient.queueNumber}</p>
-              <Badge variant={getStatusVariant(patient.visitStatus)}>
-                {patient.visitStatus}
-              </Badge>
-            </div>
-            <p className="font-medium text-lg">{patient.name}</p>
-            <div className="text-sm text-muted-foreground mt-1">
-              <p>{patient.gender} • {patient.age} years</p>
-              <p className="font-medium mt-1">Condition: {patient.medicalCondition}</p>
-              {patient.patientStatus && (
-                <p className="mt-1">Patient Status: {patient.patientStatus}</p>
-              )}
-            </div>
-          </div>
-          {actions && (
-            <div className="ml-4">
-              {actions}
-            </div>
-          )}
-          <div className="text-xs text-muted-foreground text-right">
-              <p className="font-medium">Recommended Doctor(s):</p>
-              <p>{getRecommendedDoctors()}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+            <DashboardPageHeader
+              title="Queue Dashboard"
+              subtitle="Manage and monitor patient queue"
+            />
 
-function getStatusVariant(status: Patient['visitStatus']) {
-  switch (status) {
-    case 'In Progress': return 'default';
-    case 'Completed': return 'success';
-    case 'Unavailable': return 'destructive';
-    default: return 'secondary';
-  }
-}
+            {/* In Progress - First item */}
+            {queue.length > 0 && (
+              <div key={queue[0].appointment_id} className="mb-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-3">
+                  In Progress
+                </h2>
+                <div className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {queue[0].patient_first_name}{" "}
+                        {queue[0].patient_last_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {queue[0].patient_gender} • Age {queue[0].patient_age}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          queue[0].status
+                        )}`}
+                      >
+                        {queue[0].status}
+                      </span>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Position: {queue[0].queue_position}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="text-sm font-medium text-gray-700">
+                      Medical Description:
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {queue[0].medical_description}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-4">
+                    <div>
+                      <span className="font-medium">Visit Status:</span>
+                      <p>{queue[0].visiting_status.replace("_", " ")}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Priority:</span>
+                      <p>{queue[0].priority_rank}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Severity:</span>
+                      <p>{queue[0].severity_score}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Created:</span>
+                      <p>
+                        {new Date(queue[0].created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="mr-auto">
+                      <Button
+                        onClick={skipPatient}
+                        className="cursor-pointer"
+                        variant="outline"
+                      >
+                        Skip Patient
+                      </Button>
+                    </div>
+
+                    <Dialog
+                      open={isUnavailableDialogOpen}
+                      onOpenChange={setIsUnavailableDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          className="flex items-center justify-center gap-2 cursor-pointer"
+                          variant="destructive"
+                        >
+                          <Ban />
+                          Mark as unavailable
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Mark Patient as Unavailable</DialogTitle>
+                          <DialogDescription>
+                            Are you sure you want to mark{" "}
+                            <strong>
+                              {queue[0]?.patient_first_name}{" "}
+                              {queue[0]?.patient_last_name}
+                            </strong>{" "}
+                            as unavailable? This will move them to the end of
+                            the queue.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsUnavailableDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={markAsUnavailable}
+                            className="flex items-center gap-2"
+                          >
+                            <Ban className="h-4 w-4" />
+                            Mark as Unavailable
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Dialog
+                      open={isCompletedDialogOpen}
+                      onOpenChange={setIsCompletedDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          className="flex items-center justify-center gap-2 cursor-pointer"
+                          variant="default"
+                        >
+                          <CheckCheck />
+                          Mark as completed
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Mark Patient as Completed</DialogTitle>
+                          <DialogDescription>
+                            Are you sure you want to mark{" "}
+                            <strong>
+                              {queue[0]?.patient_first_name}{" "}
+                              {queue[0]?.patient_last_name}
+                            </strong>{" "}
+                            as completed? This will move them to the served
+                            patients list.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsCompletedDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="default"
+                            onClick={markAsCompleted}
+                            className="flex items-center gap-2"
+                          >
+                            <CheckCheck className="h-4 w-4" />
+                            Mark as Completed
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Next Up - Second item */}
+            {queue.length > 1 && (
+              <div key={queue[1].appointment_id} className="mb-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-3">
+                  Next Up
+                </h2>
+                <div className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {queue[1].patient_first_name}{" "}
+                        {queue[1].patient_last_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {queue[1].patient_gender} • Age {queue[1].patient_age}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          queue[1].status
+                        )}`}
+                      >
+                        {queue[1].status}
+                      </span>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Position: {queue[1].queue_position}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="text-sm font-medium text-gray-700">
+                      Medical Description:
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {queue[1].medical_description}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
+                    <div>
+                      <span className="font-medium">Visit Status:</span>
+                      <p>{queue[1].visiting_status.replace("_", " ")}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Priority:</span>
+                      <p>{queue[1].priority_rank}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Severity:</span>
+                      <p>{queue[1].severity_score}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium">Created:</span>
+                      <p>
+                        {new Date(queue[1].created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Upcoming Patients - Rest of the items */}
+            {queue.length > 2 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-3">
+                  Upcoming Patients
+                </h2>
+                {queue.slice(2).map((item) => (
+                  <div
+                    key={item.appointment_id}
+                    className="my-3 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {item.patient_first_name} {item.patient_last_name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {item.patient_gender} • Age {item.patient_age}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            item.status
+                          )}`}
+                        >
+                          {item.status}
+                        </span>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Position: {item.queue_position}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="text-sm font-medium text-gray-700">
+                        Medical Description:
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {item.medical_description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
+                      <div>
+                        <span className="font-medium">Visit Status:</span>
+                        <p>{item.visiting_status.replace("_", " ")}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Priority:</span>
+                        <p>{item.priority_rank}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Severity:</span>
+                        <p>{item.severity_score}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Created:</span>
+                        <p>{new Date(item.created_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Served Patients - Completed patients */}
+            {completedPatients.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-3">
+                  Served Patients
+                </h2>
+                {completedPatients.map((item) => (
+                  <div
+                    key={`completed-${item.appointment_id}`}
+                    className="my-3 p-4 border rounded-lg bg-green-50 border-green-200 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {item.patient_first_name} {item.patient_last_name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {item.patient_gender} • Age {item.patient_age}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            item.status
+                          )}`}
+                        >
+                          {item.status}
+                        </span>
+                        {item.completed_time && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Completed:{" "}
+                            {new Date(item.completed_time).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="text-sm font-medium text-gray-700">
+                        Medical Description:
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {item.medical_description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
+                      <div>
+                        <span className="font-medium">Visit Status:</span>
+                        <p>{item.visiting_status.replace("_", " ")}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Priority:</span>
+                        <p>{item.priority_rank}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Severity:</span>
+                        <p>{item.severity_score}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Original Position:</span>
+                        <p>{item.queue_position}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Unavailable Patients */}
+            {unavailablePatients.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-3">
+                  Unavailable Patients
+                </h2>
+                {unavailablePatients.map((item) => (
+                  <div
+                    key={`unavailable-${item.id}`}
+                    className="my-3 p-4 border rounded-lg bg-red-50 border-red-200 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {item.patient_first_name} {item.patient_last_name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {item.patient_gender} • Age {item.patient_age}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            item.status
+                          )}`}
+                        >
+                          {item.status}
+                        </span>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Original Position: {item.queue_position}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="text-sm font-medium text-gray-700">
+                        Medical Description:
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {item.medical_description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500 mb-4">
+                      <div>
+                        <span className="font-medium">Visit Status:</span>
+                        <p>{item.visiting_status.replace("_", " ")}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Priority:</span>
+                        <p>{item.priority_rank}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Severity:</span>
+                        <p>{item.severity_score}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Created:</span>
+                        <p>{new Date(item.created_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => markAsAvailable(item.id)}
+                        className="flex items-center justify-center gap-2 cursor-pointer"
+                        variant="default"
+                      >
+                        <CheckCheck className="h-4 w-4" />
+                        Mark as Available
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <p>No Items in the queue</p>
+      )}
+    </>
+  );
+};
+
+export default Page;
