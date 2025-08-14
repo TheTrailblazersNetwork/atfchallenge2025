@@ -98,8 +98,11 @@ export default function PatientPage() {
 
   // Only show loading if we're actually fetching data and patient is authenticated
   // For new accounts with no data, we should show the dashboard with empty state
-  const isActuallyLoading = (patient.loading && patient.isAuthenticated) || 
-                           (appointments.loading && appointments.data.length === 0 && patient.isAuthenticated);
+  const isActuallyLoading =
+    (patient.loading && patient.isAuthenticated) ||
+    (appointments.loading &&
+      appointments.data.length === 0 &&
+      patient.isAuthenticated);
 
   if (isActuallyLoading) {
     return (
@@ -116,7 +119,7 @@ export default function PatientPage() {
   }
 
   return (
-    <div className="dashboard-page space-y-6">
+    <div className="dashboard-page">
       <DashboardPageHeader
         title="Patient Dashboard"
         subtitle="Your health information at a glance"

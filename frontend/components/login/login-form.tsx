@@ -122,7 +122,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="nf-glass-bg">
         <TLHeader title="Login" desc="Connect to your account to continue" />
         <CardContent>
           <form onSubmit={handleSubmit}>

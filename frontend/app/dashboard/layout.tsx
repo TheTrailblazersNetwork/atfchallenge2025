@@ -1,4 +1,4 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
 import { AppSidebar } from "@/components/Sidebar";
 import AuthGuard from "@/components/AuthGuard";
@@ -8,8 +8,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <AuthGuard>
       <SidebarProvider>
         <AppSidebar />
-        <main className="w-full p-3 md:p-5">
-          <SidebarTrigger />
+        <main className="w-full p-2 px-4">
           {children}
         </main>
       </SidebarProvider>

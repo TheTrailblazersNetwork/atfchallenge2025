@@ -21,6 +21,8 @@ const system_api = {
         smsVerify: `${host}/api/auth/verify/sms/`,
         // Verification status
         getVerificationStatus: `${host}/api/auth/verify/status/`,
+        // Get all patients for OPD
+        getAllPatients: `${host}/api/patient/all`,
     },
     appointments: {
         create: `${host}/api/appointments`,
@@ -29,6 +31,21 @@ const system_api = {
         update: `${host}/api/appointments/`,   // append appointment ID
         cancel: `${host}/api/appointments/`,   // append appointment ID
         testBatch: `${host}/api/appointments/test-run-batch`,
+    },
+    opd: {
+        login: `${host}/api/opd/login`,
+        signup: `${host}/api/opd/signup`,
+        logout: `${host}/api/opd/logout`,
+        patients: {
+            getAll: `${host}/api/opd/patients`,
+            getById: `${host}/api/opd/patients/`,  // append patient ID
+            search: `${host}/api/opd/patients`,    // use ?q=query parameter
+        },
+        queue: {
+            getAll: `${host}/api/queue`,
+            update: `${host}/api/queue/`,     // append queue ID
+            complete: `${host}/api/queue/`,   // append queue ID + '/complete'
+        },
     },
 };
 export default system_api;

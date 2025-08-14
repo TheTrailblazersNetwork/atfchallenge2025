@@ -218,3 +218,26 @@ export const updateAppointmentsAfterAI = async (
     client.release();
   }
 };
+
+/**
+ * Updates the status of an appointment
+ */
+export const updateAppointmentStatus = async (
+  appointmentId: string,
+  status: string
+): Promise<Appointment | null> => {
+  try {
+    const result = await pool.query(
+      `UPDATE appointments 
+       SET status = $1, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING *`,
+      [status, appointmentId]
+    );
+
+    return result.rows[0] || null;
+  } catch (error) {
+    console.error('Error updating appointment status:', error);
+    throw error;
+  }
+};

@@ -7,6 +7,7 @@ import system_api from "@/app/data/api";
 import PageLoading from "@/components/Page-Loading";
 import PageError from "@/components/Page-Error";
 import PageFull from "@/components/Page-Full";
+import PageMain from "@/components/PageMain";
 
 const Page = () => {
   const { slug } = useParams();
@@ -38,11 +39,9 @@ const Page = () => {
           text="Please wait while we verify your request."
         />
       ) : isValid ? (
-        <div className="flex h-full w-full items-center justify-center p-6 md:p-10">
-          <div className="w-full max-w-sm">
-            <ChangeForm token={Array.isArray(slug) ? slug[0] : slug ?? ""} />
-          </div>
-        </div>
+        <PageMain>
+          <ChangeForm token={Array.isArray(slug) ? slug[0] : slug ?? ""} />
+        </PageMain>
       ) : (
         invalidSlug()
       )}

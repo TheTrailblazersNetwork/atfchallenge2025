@@ -132,7 +132,7 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="nf-glass-bg">
         <TLHeader title="Sign Up" desc="Create your account to continue" />
         <CardContent>
           <form onSubmit={handleSubmit}>

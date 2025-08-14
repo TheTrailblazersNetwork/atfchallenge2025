@@ -71,7 +71,7 @@ export function ChangeForm({
       className={cn("flex flex-col gap-6 select-none", className)}
       {...props}
     >
-      <Card>
+      <Card className="nf-glass-bg">
         <CardHeader>
           <CardTitle>{system_data.name} Password Recovery</CardTitle>
           <CardDescription>Set a new password</CardDescription>

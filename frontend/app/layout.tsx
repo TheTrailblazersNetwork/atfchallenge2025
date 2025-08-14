@@ -22,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <ReduxProvider>
-        <body className={`${interFont.className} bg-zinc-100 antialiased`}>
+        <body
+          className={`${interFont.className} bg-gradient-to-br from-cyan-300 via-zinc-300 to-cyan-300 antialiased`}
+        >
           <Toaster />
           {children}
         </body>
