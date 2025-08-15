@@ -1,5 +1,12 @@
 # ATFChallenge2025 – AI-Assisted OPD Scheduling & Patient Flow Management System
-<img width="1536" height="1023" alt="image" src="https://github.com/user-attachments/assets/96185d23-f52b-4703-9d3f-38dd6c74b923" />
+<img width="1536" height="1023" alt="image" src="https://github.com/user-attachments/assets/96185d23-f52b-4703-9d3f-38dd6c74b923" /> 
+
+---
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Issues](https://img.shields.io/github/issues/TheTrailblazersNetwork/atfchallenge2025)
+![PRs](https://img.shields.io/github/issues-pr/TheTrailblazersNetwork/atfchallenge2025)
+
+---
 
 **Problem Statement Six (6)** - ATF AI Challenge
 **Team:** TRAILBLAZERS
@@ -8,6 +15,7 @@ This project proposes an **AI-driven solution to revolutionize Outpatient Depart
 
 ## Table of Contents
 - [Project Overview](#project-overview)
+- [Demo Video](#demo-video)
 - [Problem Statement](#problem-statement)
 - [Proposed Solution](#proposed-solution)
 - [Technical Architecture](#technical-architecture)
@@ -37,13 +45,19 @@ This comprehensive README, submitted by **TRAILBLAZERS** for the **ATF AI Challe
 The initiative aims to **transform current manual OPD operations** by automating scheduling, enhancing patient prioritization, and providing real-time queue transparency. This will ultimately lead to **reduced wait times, improved patient satisfaction, and optimized staff efficiency**. The solution leverages **advanced AI technologies**, including **open-source models hosted on the Groq platform**. .
 
 ---
+ ## Demo Video
+[![Watch the Demo Video](https://img.youtube.com/vi/TAvrJp9Nrf0/0.jpg)](https://youtu.be/TAvrJp9Nrf0)
+
+---
 
 ## Problem Statement
 
 Korle Bu Teaching Hospital, a leading healthcare institution in Ghana, faces significant operational inefficiencies in its Neurological Clinic due to a **current manual scheduling system**. These inefficiencies severely impact both patient experience and staff productivity.
 
 ---
-<img width="1536" height="550" alt="image" src="https://github.com/user-attachments/assets/0c4e03b9-3af4-4d1e-8d68-9cc0f424d589" />
+![Overcrowded Clinic at Korle Bu](https://github.com/user-attachments/assets/0c4e03b9-3af4-4d1e-8d68-9cc0f424d589)  
+**Figure:** Overcrowded clinic environment at Korle Bu Neurological Centre.
+
 
 ---
 
@@ -55,7 +69,10 @@ The **key challenges identified** are:
 *   **Inadequate Prioritization of Vulnerable Patients**: There is a **lack of automated prioritization**, meaning patients requiring urgent care (e.g., elderly, wheelchair users, or those with acute conditions) are not seen promptly.
 *   **Inefficient Tracking and Follow-Up Management**: Without real-time registration and tracking, patients are often missed, and **follow-up appointments are poorly managed**, disrupting continuity of care.
 *   **Limited Administrative Oversight**: The **absence of real-time data and analytics** prevents administrators from effectively monitoring no-shows, defaulters, or high-risk patients, hindering strategic resource allocation.
-<img width="1000" height="667" alt="image" src="https://github.com/user-attachments/assets/91e14edc-9471-4cc2-8773-843c72759c8f" />
+  
+![Korle Bu OPD Corridor – Waiting Area](https://github.com/user-attachments/assets/91e14edc-9471-4cc2-8773-843c72759c8f)  
+**Figure:** Patients awaiting their turn in the busy OPD corridor of Korle Bu Teaching Hospital's Neurological Centre.
+
 
 
 The project's objective is to address these challenges by implementing an AI-driven system that automates scheduling, prioritizes patients based on medical urgency, provides real-time queue updates, and enables administrative oversight.
@@ -68,7 +85,6 @@ The proposed solution is a **comprehensive, AI-driven OPD Scheduling and Patient
 
 The system comprises several interconnected modules:
 
-*   **
 *   **Online Patient Registration & Verification** — Patients register via a simple interface, verify their phone/email, and create a digital profile.
 *    **Appointment Booking** — Patients select their visiting status, describe their condition, and submit a booking.
 *    **Batch AI Scheduling** — Every Wednesday at midday, all pending bookings are sent to the AI triage service in a single batch for:
@@ -77,7 +93,7 @@ The system comprises several interconnected modules:
 *   **Staff Notification System**: Doctors and administrative staff will receive **real-time alerts via a web-based dashboard** about schedule changes, urgent cases, and queue statuses, enabling proactive management.
 *   **Administrative Dashboard**: A comprehensive dashboard will provide administrators with **real-time insights** into slot usage, no-show rates, and other data, facilitating data-driven decision-making.
 *   **EMR Integration Layer**: The system will **sync patient visit logs** with Korle Bu’s Electronic Medical Records (EMR) system for seamless follow-up scheduling and neurological research initiatives.
-*   **Automates the prioritization of patient appointments based on urgency and severity.
+*   Automates the prioritization of patient appointments based on urgency and severity.
 - Processes appointment requests in bulk at scheduled intervals (e.g., Wednesdays).
 - Updates patients in real-time via their preferred communication channels (SMS, Email, or both).
 - Reduces manual workload for healthcare staff and increases operational efficiency.
@@ -89,7 +105,7 @@ The system comprises several interconnected modules:
 ## Technical Architecture
 
  <img width="1650" height="880" alt="image" src="https://github.com/user-attachments/assets/a9b41be4-524a-413f-83fa-2784f214d661" />
-    https://app.eraser.io/workspace/ZPz0cNtGVELpPFJ5svtm?origin=share&elements=4kDWu6OS1cz0pY4dFUCD4g
+    (https://app.eraser.io/workspace/ZPz0cNtGVELpPFJ5svtm?origin=share&elements=4kDWu6OS1cz0pY4dFUCD4g)
 ---
 
 ## Key Features
@@ -307,7 +323,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
-- 🧠 NeuroQueue API: `http://127.0.0.1:8000/sort or https://atfchallenge2025.onrender.com/sort/`
+- 🧠 NeuroQueue API: `http://127.0.0.1:8000/sort` or [https://atfchallenge2025.onrender.com/sort/](https://atfchallenge2025.onrender.com/sort/)
 
 ---
 
