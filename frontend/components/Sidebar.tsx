@@ -71,9 +71,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup className={"h-full"}>
           <SidebarGroupLabel
-            className={
-              "flex items-center justify-center flex-col py-10 my-5"
-            }
+            className={"flex items-center justify-center flex-col py-10 my-5"}
           >
             <Logo width={100} height={100} />
             <TextLogo size="text-2xl" classname="my-1" />
@@ -82,20 +80,20 @@ export function AppSidebar() {
             <SidebarMenu className={"relative h-full space-y-1"}>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton className="hover:bg-blue-900/70 hover:text-white transition-all" asChild>
+                  <SidebarMenuButton
+                    className="hover:bg-zinc-200 transition-all"
+                    asChild
+                  >
                     <Link
-                      className={clsx("!text-base !py-5", {
-                        "bg-zinc-200 font-medium ":
-                          pathname === item.url ||
-                          pathname.startsWith(item.url),
+                      className={clsx("!text-base border !py-5", {
+                        "!bg-blue-100 !text-blue-600 font-medium":
+                          pathname === item.url,
                       })}
                       href={item.url}
                     >
                       <item.icon
                         strokeWidth={clsx({
-                          "2px":
-                            pathname === item.url ||
-                            pathname.startsWith(item.url),
+                          "2px": pathname === item.url,
                         })}
                       />
                       <span>{item.title}</span>

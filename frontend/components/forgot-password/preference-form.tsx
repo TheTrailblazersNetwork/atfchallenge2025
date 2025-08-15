@@ -61,7 +61,7 @@ export function PreferenceForm({
       {...props}
     >
       {error ? (
-        <Card className="gl-container">
+        <Card className="nf-glass-bg">
           <div className="flex items-center justify-center">
             <MailWarning className="text-red-700" size={70} />
           </div>
@@ -91,7 +91,7 @@ export function PreferenceForm({
           </div>
         </Card>
       ) : completed ? (
-        <Card className="gl-container">
+        <Card className="nf-glass-bg">
           <div className="flex items-center justify-center">
             <MailCheck className="text-green-700" size={70} />
           </div>
@@ -110,7 +110,7 @@ export function PreferenceForm({
           </p>
         </Card>
       ) : (
-        <Card className="text-center">
+        <Card className="text-center nf-glass-bg">
           <TLHeader
             title="Password Recovery"
             desc="Choose your recovery method"

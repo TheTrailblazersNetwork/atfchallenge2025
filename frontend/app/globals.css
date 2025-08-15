@@ -126,8 +126,8 @@
   * Global Styles
   * This section contains global styles for the application.
 */
-.gl-container{
-  @apply bg-white rounded-lg p-5 md:p-10 shadow border-2
+.nf-glass-bg{
+  @apply bg-white/90 backdrop-blur-lg border-2 border-gray-300 shadow-lg rounded-lg p-5;
 }
 
 /*
@@ -135,5 +135,5 @@
   * This section styles the dashboard page layout.
 */
 .dashboard-page {
-  @apply grid gap-6 py-5 w-full;
+  @apply grid gap-6 pb-5 w-full;
 }

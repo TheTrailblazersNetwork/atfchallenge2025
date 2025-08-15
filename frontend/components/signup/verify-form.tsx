@@ -269,7 +269,7 @@ export function VerifyForm({
           linkText="Go to Login"
         />
       ) : (
-        <Card>
+        <Card className="nf-glass-bg">
           <TLHeader
             title="Account Verification"
             desc="Verify your email and mobile number"
