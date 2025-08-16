@@ -20,7 +20,7 @@ app.use(
   cors({
     origin:
       process.env.CORS_ENV === "production"
-        ? "https://your-production-domain.com"
+        ? "https://atfchallenge2025-frontend.vercel.app"
         : "http://localhost:3000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

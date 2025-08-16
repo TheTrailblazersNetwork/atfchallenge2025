@@ -1,5 +1,5 @@
 const server = {
-    remote: "https://ourbackend.com",
+    remote: "https://atfchallenge2025-backend.vercel.app",
     local: "http://localhost:5000",
 }
 const host = process.env.NODE_ENV === "production" ? server.remote : server.local;
