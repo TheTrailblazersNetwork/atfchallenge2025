@@ -86,7 +86,7 @@ function PatientCard({ patient, highlight = false }: PatientCardProps) {
     <div
       className={`
         flex items-center gap-4 p-4 rounded-lg border
-        ${highlight ? 'bg-primary/5 border-primary' : 'bg-background'}
+        ${highlight ? "bg-primary/5 border-primary" : "bg-background"}
       `}
     >
       <div className="size-10 rounded-full bg-muted/20 flex items-center justify-center">
@@ -110,14 +110,18 @@ function PatientCard({ patient, highlight = false }: PatientCardProps) {
           <div>
             <div className="flex items-center gap-2">
               <p className="font-medium">#{patient.queueNumber}</p>
-              <Badge variant={getStatusVariant(patient.visitStatus)}>
+              <Badge variant={`${getStatusVariant(patient.visitStatus)}`}>
                 {patient.visitStatus}
               </Badge>
             </div>
             <p className="font-medium">{patient.name}</p>
             <div className="text-sm text-muted-foreground">
-              <p>{patient.gender} • {patient.age} years</p>
-              <p className="font-medium">Condition: {patient.medicalCondition}</p>
+              <p>
+                {patient.gender} • {patient.age} years
+              </p>
+              <p className="font-medium">
+                Condition: {patient.medicalCondition}
+              </p>
               {patient.estimatedWaitTime && (
                 <p>Estimated Wait: {patient.estimatedWaitTime}</p>
               )}
@@ -134,7 +138,7 @@ function getStatusVariant(status: Patient['visitStatus']) {
     case 'In Progress':
       return 'default';
     case 'Completed':
-      return 'success';
+      return 'outline';
     default:
       return 'secondary';
   }

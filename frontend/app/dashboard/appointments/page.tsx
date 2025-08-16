@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -67,7 +66,7 @@ const Page = () => {
     if (!appointments || appointments.length === 0) {
       fetchAppointments();
     }
-  }, []); // Empty dependency array to run only once on mount
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Separate useEffect to handle authentication state
   useEffect(() => {
@@ -79,7 +78,7 @@ const Page = () => {
     if (lastUpdated && now - parseInt(lastUpdated) > fiveMinutes) {
       fetchAppointments();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAppointmentCreated = () => {
     fetchAppointments(false);
