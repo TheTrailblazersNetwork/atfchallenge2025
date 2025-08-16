@@ -1,53 +1,169 @@
 # ATFChallenge2025 – AI-Assisted OPD Scheduling & Patient Flow Management System
+<img width="1536" height="1023" alt="image" src="https://github.com/user-attachments/assets/96185d23-f52b-4703-9d3f-38dd6c74b923" /> 
 
-🧠 **Think Fast. Treat Faster.**
-
-A full-stack, AI-powered Outpatient Department (OPD) scheduling and patient flow management system designed specifically for neurosurgery clinics.
+---
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Issues](https://img.shields.io/github/issues/TheTrailblazersNetwork/atfchallenge2025)
+![PRs](https://img.shields.io/github/issues-pr/TheTrailblazersNetwork/atfchallenge2025)
 
 ---
 
-## 🔍 Overview
+**Problem Statement Six (6)** - ATF AI Challenge
+**Team:** TRAILBLAZERS
 
-ATFChallenge2025 is a comprehensive monorepo solution that transforms manual, unstructured patient flow into an intelligent, capacity-aware scheduling system. It combines:
+This project proposes an **AI-driven solution to revolutionize Outpatient Department (OPD) operations** at Korle Bu Teaching Hospital's Neurological Centre, addressing critical challenges such as extended wait times and inefficient patient management.
 
-- 🌐 **Next.js 15 Frontend** (App Router) - Registration, queue visualization, staff/admin dashboards
-- 🔧 **Express.js Backend** - Authentication, user management, booking orchestration
-- 🧠 **NeuroQueue API** (FastAPI) - AI-powered triage, severity scoring, and smart scheduling
-- 📦 **Monorepo Architecture** - Powered by `pnpm` workspaces for seamless development
-
-**Goal**: Transform chaotic clinic workflows into structured, fair, explainable patient scheduling while maintaining extensibility for EMR integrations.
-
----
-
-## 📋 Problem Statement
-
-### Current Challenges in Neurosurgical OPD
-
-In our neurosurgical outpatient clinic at KBTH, patient flow is largely unstructured and manual, leading to:
-
-- ⏰ **Long queues and waiting times**
-- 📈 **Overbooking beyond allowable limits** determined by available doctors
-- 😤 **Overcrowding and tension** in clinic environments
-- 🦽 **Lost opportunities** to prioritize vulnerable patients (wheelchair-bound, elderly)
-- 🔄 **Poor case distinction** between new, follow-up, post-op, and referral cases
-- 📝 **Missed cases** due to lack of real-time registration tracking
-- 📊 **Limited analytics** on no-shows, defaulters, or high-risk patterns
-
-### Required Solutions
-
-An AI-driven OPD system that can:
-
-- 📱 **QR codes/mobile check-ins** for automatic patient registration
-- 🏷️ **Smart categorization** (new, follow-up, post-op, referral cases)
-- 🎯 **Auto-prioritization** of vulnerable groups (elderly, wheelchair users, urgent referrals)
-- 📺 **Real-time queue display** for staff and patients
-- 🔔 **Smart notifications** for doctors about patient categories and queue positions
-- 📤 **EMR integration** for daily logs and research databases
-- 📈 **Analytics dashboard** for no-shows, repeat defaulters, and risk patterns
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Demo Video](#demo-video)
+- [Problem Statement](#problem-statement)
+- [Proposed Solution](#proposed-solution)
+- [Technical Architecture](#technical-architecture)
+- [Key Features](#key-features)
+  - [Phase One — Patient & Appointment Management](#phase-one--patient--appointment-management)
+  - [Phase Two — AI Triage & OPD Flow](#phase-two--ai-triage--opd-flow)
+- [AI-Powered Triage (NeuroQueue)](#ai-powered-triage-neuroqueue)
+  - [Priority Ranking System](#priority-ranking-system)
+- [Technology Stack](#technology-stack)
+- [System Structure](#system-structure)
+- [Workflow Diagram](#workflow-diagram)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [NeuroQueue API Documentation](#neuroqueue-api-documentation)
+- [Environment Variables](#environment-variables)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Support](#support)
 
 ---
 
-## 🏗️ System Architecture
+## Project Overview
+
+This comprehensive README, submitted by **TRAILBLAZERS** for the **ATF AI Challenge**, specifically targets **Problem Statement 6** from Korle Bu Teaching Hospital. The core objective is to develop an **AI-Assisted Outpatient Department (OPD) Scheduling and Patient Flow Management System** for the Korle Bu Neurological Centre.
+
+The initiative aims to **transform current manual OPD operations** by automating scheduling, enhancing patient prioritization, and providing real-time queue transparency. This will ultimately lead to **reduced wait times, improved patient satisfaction, and optimized staff efficiency**. The solution leverages **advanced AI technologies**, including **open-source models hosted on the Groq platform**. .
+
+---
+ ## Demo Video
+[![Watch the Demo Video](https://img.youtube.com/vi/TAvrJp9Nrf0/0.jpg)](https://youtu.be/TAvrJp9Nrf0)
+
+---
+
+## Problem Statement
+
+Korle Bu Teaching Hospital, a leading healthcare institution in Ghana, faces significant operational inefficiencies in its Neurological Clinic due to a **current manual scheduling system**. These inefficiencies severely impact both patient experience and staff productivity.
+
+---
+![Overcrowded Clinic at Korle Bu](https://github.com/user-attachments/assets/0c4e03b9-3af4-4d1e-8d68-9cc0f424d589)  
+**Figure:** Overcrowded clinic environment at Korle Bu Neurological Centre.
+
+
+---
+
+The **key challenges identified** are:
+
+*   **Extended Waiting Times and Long Queues**: Patients frequently endure **hours of waiting** because of unstructured scheduling processes, leading to frustration and dissatisfaction.
+*   **Overbooking Beyond Capacity**: The manual system often schedules **more patients than doctors can accommodate**, resulting in significant delays and overburdened healthcare providers.
+*   **Overcrowding and Tension in the Clinic Environment**: High patient volumes create a **chaotic atmosphere**, disproportionately affecting vulnerable groups like the elderly and those with mobility challenges.
+*   **Inadequate Prioritization of Vulnerable Patients**: There is a **lack of automated prioritization**, meaning patients requiring urgent care (e.g., elderly, wheelchair users, or those with acute conditions) are not seen promptly.
+*   **Inefficient Tracking and Follow-Up Management**: Without real-time registration and tracking, patients are often missed, and **follow-up appointments are poorly managed**, disrupting continuity of care.
+*   **Limited Administrative Oversight**: The **absence of real-time data and analytics** prevents administrators from effectively monitoring no-shows, defaulters, or high-risk patients, hindering strategic resource allocation.
+  
+![Korle Bu OPD Corridor – Waiting Area](https://github.com/user-attachments/assets/91e14edc-9471-4cc2-8773-843c72759c8f)  
+**Figure:** Patients awaiting their turn in the busy OPD corridor of Korle Bu Teaching Hospital's Neurological Centre.
+
+
+
+The project's objective is to address these challenges by implementing an AI-driven system that automates scheduling, prioritizes patients based on medical urgency, provides real-time queue updates, and enables administrative oversight.
+
+---
+
+## Proposed Solution
+
+The proposed solution is a **comprehensive, AI-driven OPD Scheduling and Patient Flow Management System** designed to transform Korle Bu’s outpatient operations. It incorporates advanced technologies to streamline processes, enhance transparency, and improve overall efficiency, specifically for the Neurological Centre.
+
+The system comprises several interconnected modules:
+
+*   **Online Patient Registration & Verification** — Patients register via a simple interface, verify their phone/email, and create a digital profile.
+*    **Appointment Booking** — Patients select their visiting status, describe their condition, and submit a booking.
+*    **Batch AI Scheduling** — Every Wednesday at midday, all pending bookings are sent to the AI triage service in a single batch for:
+            - Priority ranking (1–4)
+            - Severity scoring (0–10)
+*   **Staff Notification System**: Doctors and administrative staff will receive **real-time alerts via a web-based dashboard** about schedule changes, urgent cases, and queue statuses, enabling proactive management.
+*   **Administrative Dashboard**: A comprehensive dashboard will provide administrators with **real-time insights** into slot usage, no-show rates, and other data, facilitating data-driven decision-making.
+*   **EMR Integration Layer**: The system will **sync patient visit logs** with Korle Bu’s Electronic Medical Records (EMR) system for seamless follow-up scheduling and neurological research initiatives.
+*   Automates the prioritization of patient appointments based on urgency and severity.
+- Processes appointment requests in bulk at scheduled intervals (e.g., Wednesdays).
+- Updates patients in real-time via their preferred communication channels (SMS, Email, or both).
+- Reduces manual workload for healthcare staff and increases operational efficiency.
+---
+<img width="1536" height="1023" alt="image" src="https://github.com/user-attachments/assets/01a50375-c6d6-4cc3-b10e-4e785b82e0cc" />
+
+---
+
+## Technical Architecture
+
+ <img width="1650" height="880" alt="image" src="https://github.com/user-attachments/assets/a9b41be4-524a-413f-83fa-2784f214d661" />
+    (https://app.eraser.io/workspace/ZPz0cNtGVELpPFJ5svtm?origin=share&elements=4kDWu6OS1cz0pY4dFUCD4g)
+---
+
+## Key Features
+
+### **Phase One — Patient & Appointment Management**
+- **Patient Registration**
+  - Collects first & last name, gender, date of birth (calculates age), phone, email, password, preferred communication type.
+  - Email/phone OTP verification.
+- **Login & Authentication**
+  - Secure JWT-based login.
+- **Appointment Booking**
+  - Stepper form with visiting status, medical description, preview & confirmation.
+- **Database Storage**
+  - PostgreSQL database with relational structure for patients & appointments.
+- **Password Reset**
+  - Via email or SMS based on communication preference.
+
+### **Phase Two — AI Triage & OPD Flow**
+- **Batch AI Scheduling**
+  - Triggered automatically every Wednesday 12 PM.
+  - Sends only required details (Appointment ID, age, gender, visiting status, medical description) to AI API.
+  - AI returns priority rank & severity score.
+- **OPD Queue Dashboard**
+  - Displays all approved patients for the day.
+  - Actions: Skip, Mark Unavailable, Complete.
+  - Unavailable patients pushed to the back of the queue.
+- **Real-time Status Updates**
+  - Patient statuses: Pending → Approved/Rebooked → Completed/Unavailable.
+
+---
+
+## AI-Powered Triage (NeuroQueue)
+The AI system uses a **FastAPI service** integrated with a **Groq/LLaMA model**.  
+The AI:
+- Assigns **priority rank** based on clinic guidelines.
+- Calculates **severity score** using condition, age, urgency.
+- Generates appointment order, starting at 8 AM in 30-minute slots.
+- Approves first N patients (e.g., 170 capacity), others remain pending/rebook.
+
+---
+
+## Technology Stack
+
+| Component          | Technology |
+|--------------------|------------|
+| Frontend           | Next.js (React) |
+| Backend API        | Node.js + Express |
+| Database           | PostgreSQL |
+| AI Triage Service  | FastAPI + Groq/LLaMA |
+| Email Service      | Nodemailer (Gmail) |
+| SMS Service        | TXT Connect |
+| Auth               | JWT |
+| Deployment         | Render / Vercel |
+
+---
+
+
+## 🏗️ System Structure
 
 ```
 ATFChallenge2025 Monorepo
@@ -75,57 +191,40 @@ ATFChallenge2025 Monorepo
     └── Environment Variables
 ```
 
-### 📊 Data Flow
+## Workflow Diagram
 
-1. **Patient Arrival** → QR/Mobile/Reception Registration
-2. **Frontend** → Posts registration to Express Backend
-3. **Backend** → Assigns provisional category → Calls NeuroQueue API
-4. **NeuroQueue** → Returns severity_score, priority_rank, schedule_date
-5. **Backend** → Persists booking, enforces capacity limits
-6. **Frontend** → Updates real-time queue displays
-7. **Staff** → Receives notifications with patient context
-
----
-
-## ✨ Key Features
-
-### 🏥 Patient Flow & Registration
-- 📱 Multiple registration pathways (QR codes, mobile app, reception desk)
-- 🏷️ Automatic categorization and vulnerability detection
-- 🔄 Clear distinction between case types:
-  - 🆕 New patients
-  - 🔄 Follow-up appointments
-  - 🏥 Post-operative reviews
-  - 📋 Internal/External referrals
-  - 💰 Private patients
-  - 🏥 Discharged inpatients
-
-### 🧠 AI-Powered Triage (NeuroQueue)
-- 🤖 LLM-assisted symptom interpretation using Groq
-- 📊 Severity scoring (0-10 scale) with explainable results
-- 🎯 Deterministic priority ranking via hospital rule matrix
-- 📅 Thursday-only clinic scheduling (configurable)
-- ⚖️ Capacity-aware approval (APPROVED/WAITLIST/DEFERRED)
-
-### 📅 Smart Scheduling & Capacity Management
-- 👨‍⚕️ Per-session maximum slots to prevent overbooking
-- 📈 Rule-based priority adjustments for high-severity cases
-- 🔄 Rolling Thursday scheduling system
-- ⚠️ Real-time capacity monitoring
-
-### 📺 Real-Time Queue Visualization
-- 🔴 Live queue updates with category badges
-- 🦽 Vulnerability indicators (elderly, wheelchair users)
-- 👨‍⚕️ Separate staff and patient-optimized views
-- 📱 Mobile-responsive design
-
-### 📊 Analytics & Reporting
-- 📈 No-show tracking and pattern analysis
-- 🔄 Repeat defaulter identification
-- 📋 Risk pattern detection
-- 📤 EMR export capabilities (CSV/FHIR)
-- 📊 Attendance trend analytics
-
+```text
++-------------------------------------+
+| Registration & OTP Verification     |
++----------------------+--------------+
+                       |
+                       v
+                +------+------+
+                |    Login     |
+                +------+------+
+                       |
+                       v
+      +----------------+------------------+
+      |   Book Appointment → Pending DB   |
+      +----------------+------------------+
+                       |
+                       | (Wed 12 PM CRON)
+                       v
++----------------------+-------------------------+
+|    Batch Send to AI → Update Appointment Status|
++----------------------+-------------------------+
+                       |
+                       v
+          +------------+-------------+
+          | Notify Patients of Outcome |
+          +------------+-------------+
+                       |
+                       | (Thu)
+                       v
+        +--------------+----------------+
+        | Approved → Proceed to OPD     |
+        +-------------------------------+
+```
 ---
 
 ## 🧩 Project Structure
@@ -224,7 +323,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
-- 🧠 NeuroQueue API: http://127.0.0.1:8000/sort or https://atfchallenge2025.onrender.com/sort/
+- 🧠 NeuroQueue API: `http://127.0.0.1:8000/sort` or [https://atfchallenge2025.onrender.com/sort/](https://atfchallenge2025.onrender.com/sort/)
 
 ---
 
@@ -295,38 +394,6 @@ VIRTUAL_KEY=your_groq_api_key_here
 
 ---
 
-## 💾 Technology Stack
-
-### 🌐 Frontend Technologies
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS (assumed)
-- **State Management**: React Context/Zustand
-- **Authentication**: NextAuth.js (planned)
-
-### 🔧 Backend Technologies  
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Development**: ts-node-dev
-- **Database**: (To be configured - Prisma/MongoDB)
-
-### 🧠 AI/ML Technologies
-- **Framework**: FastAPI (Python)
-- **AI Provider**: Groq via LiteLLM
-- **Configuration**: YAML-based rule engine
-- **Deployment**: Render.com (current)
-
-### 🛠️ Development Tools
-- **Monorepo**: pnpm workspaces
-- **TypeScript**: Shared configuration
-- **Linting**: ESLint (configured)
-- **Version Control**: Git
-
----
-
-## 🔧 Development Workflow
-
 ### 📦 Adding Dependencies
 
 **Frontend-only package:**
@@ -351,13 +418,6 @@ pip install <package>
 pip freeze > requirements.txt
 ```
 
-### 🔄 Development Best Practices
-- 🌿 Feature branches: `feature/<feature-name>`
-- 🐛 Bug fixes: `bugfix/<issue-description>`
-- 🏗️ Chores: `chore/<task-description>`
-- 📝 Conventional commits for clear history
-- 🧪 Test changes before pushing
-
 ---
 
 ## 🌍 Environment Variables
@@ -381,31 +441,6 @@ NEXT_PUBLIC_NEUROQUEUE_API=http://127.0.0.1:8000
 LITELLM_ENDPOINT=https://api.litellm.ai
 VIRTUAL_KEY=your_groq_api_key
 ```
-
----
-
-## 🗺️ Roadmap
-
-### 🎯 Phase 1 (Current)
-- ✅ Basic monorepo structure
-- ✅ NeuroQueue AI triage system
-- ✅ Frontend dashboard framework
-- 🔄 Authentication system
-- 🔄 Real-time queue updates
-
-### 🚀 Phase 2 (Next Quarter)
-- 📱 Mobile app for patient check-in
-- 📊 Advanced analytics dashboard
-- 🔔 SMS/Email notification system
-- 🏥 EMR integration adapters
-- 👨‍⚕️ Multi-clinician support
-
-### 🌟 Phase 3 (Future)
-- 🤖 Predictive no-show modeling
-- 🌐 Multi-clinic support
-- 📱 Offline kiosk mode
-- 🔄 Dynamic overbooking algorithms
-- 📊 Research data export pipeline
 
 ---
 
