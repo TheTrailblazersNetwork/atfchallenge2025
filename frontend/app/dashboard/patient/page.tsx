@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import DashboardPageHeader from "@/components/dashboard/page-header";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
