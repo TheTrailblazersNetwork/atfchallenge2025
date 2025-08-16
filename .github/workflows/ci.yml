@@ -1,0 +1,133 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ======================
+  # Frontend (Next.js)
+  # ======================
+  frontend:
+    name: Frontend (Next.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: cd Frontend && npm install
+      - run: cd Frontend && npm run lint
+      - run: cd Frontend && npm run build
+
+  # ======================
+  # Backend (Express.js)
+  # ======================
+  backend:
+    name: Backend (Express.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: cd Backend && npm install
+      - run: cd Backend && npm test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          TXTCONNECT_API_KEY: ${{ secrets.TXTCONNECT_API_KEY }}
+          TXTCONNECT_SECRET_KEY: ${{ secrets.TXTCONNECT_SECRET_KEY }}
+          TXTCONNECT_SENDER_ID: ${{ secrets.TXTCONNECT_SENDER_ID }}
+          NEUROSURGERY_TRIAGE_API_URL: ${{ secrets.NEUROSURGERY_TRIAGE_API_URL }}
+          USE_AI_SIMULATION: ${{ secrets.USE_AI_SIMULATION }}
+          OTP_EXPIRY_MINUTES: ${{ secrets.OTP_EXPIRY_MINUTES }}
+          OTP_LENGTH: ${{ secrets.OTP_LENGTH }}
+          CORS_ENV: ${{ secrets.CORS_ENV }}
+
+  # ======================
+  # NeuroQueue API (FastAPI)
+  # ======================
+  # neuroqueue:
+  #   name: NeuroQueue API (FastAPI)
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: "3.11"
+  #     - run: cd "root" && pip install -r requirements.txt
+  #     - run: cd "root" && pytest
+  #       env:
+  #         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  #         MODEL_PROVIDER: ${{ secrets.MODEL_PROVIDER }}
+  #         TRIAGE_THRESHOLD: ${{ secrets.TRIAGE_THRESHOLD }}
+
+  # ======================
+  # Deploy to Production
+  # ======================
+  deploy:
+    name: Deploy to Production
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v3
+
+      # --- Frontend Deploy (Vercel) ---
+      - name: Deploy Frontend to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./Frontend
+          prod: true
+
+      # --- Backend Deploy (Render) ---
+      - name: Deploy Backend to Render
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          TXTCONNECT_API_KEY: ${{ secrets.TXTCONNECT_API_KEY }}
+          TXTCONNECT_SECRET_KEY: ${{ secrets.TXTCONNECT_SECRET_KEY }}
+          TXTCONNECT_SENDER_ID: ${{ secrets.TXTCONNECT_SENDER_ID }}
+          NEUROSURGERY_TRIAGE_API_URL: ${{ secrets.NEUROSURGERY_TRIAGE_API_URL }}
+          USE_AI_SIMULATION: ${{ secrets.USE_AI_SIMULATION }}
+          OTP_EXPIRY_MINUTES: ${{ secrets.OTP_EXPIRY_MINUTES }}
+          OTP_LENGTH: ${{ secrets.OTP_LENGTH }}
+          CORS_ENV: ${{ secrets.CORS_ENV }}
+
+      # # --- NeuroQueue API Deploy (Render) ---
+      # - name: Deploy NeuroQueue API to Render
+      #   run: |
+      #     curl -X POST "https://api.render.com/deploy/srv-${{ secrets.RENDER_API_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}"
+      #   env:
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #     MODEL_PROVIDER: ${{ secrets.MODEL_PROVIDER }}
+      #     TRIAGE_THRESHOLD: ${{ secrets.TRIAGE_THRESHOLD }}
