@@ -18,10 +18,10 @@ const PORT: number = parseInt(process.env.PORT || '5000', 10);
 // Middleware
 app.use(
   cors({
-    origin:
-      process.env.CORS_ENV === "production"
-        ? "https://atfchallenge2025-frontend.vercel.app"
-        : "http://localhost:3000",
+    origin: [
+      "https://atfchallenge2025-frontend.vercel.app",
+      "http://localhost:3000"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
