@@ -2,12 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Backend API for patient booking system",
-  "main": "dist/server.js",
+  "main": "dist/Server.js",
   "scripts": {
-    "dev": "ts-node-dev src/server.ts",
+    "dev": "ts-node-dev src/Server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
-    "serve": "nodemon src/server.ts"
+    "start": "node dist/Server.js",
+    "serve": "nodemon src/Server.ts"
   },
   "keywords": [],
   "author": "",
