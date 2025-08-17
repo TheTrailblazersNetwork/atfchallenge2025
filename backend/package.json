@@ -4,7 +4,7 @@
   "description": "Backend API for patient booking system",
   "main": "dist/Server.js",
   "scripts": {
-    "dev": "ts-node-dev src/Server.ts",
+    "dev": "ts-node src/Server.ts",
     "build": "tsc",
     "start": "node dist/Server.js",
     "serve": "nodemon src/Server.ts"
