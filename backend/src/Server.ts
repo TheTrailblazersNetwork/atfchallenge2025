@@ -25,8 +25,22 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 200
   })
 );
+
+// Handle preflight requests explicitly
+app.options('*', cors({
+  origin: [
+    "https://atfchallenge2025-frontend.vercel.app",
+    "http://localhost:3000"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200
+}));
+
 app.use(express.json());
 
 // Routes
@@ -50,10 +64,14 @@ pool.connect()
   .catch((err: Error) => {
     console.error('❌ Database connection error:', err);
   });
-    
-// Start the server
-app.listen(PORT, () => {
-  console.log(`✅ Backend running on http://localhost:${PORT}`);
-});
 
+// For Vercel deployment
 export default app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT: number = parseInt(process.env.PORT || '5000', 10);
+  app.listen(PORT, () => {
+    console.log(`✅ Backend running on http://localhost:${PORT}`);
+  });
+}
