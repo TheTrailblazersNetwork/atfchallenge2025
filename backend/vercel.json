@@ -9,7 +9,13 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/Server.js"
+      "dest": "dist/Server.js",
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     }
-  ]
+  ],
+  "functions": {
+    "dist/Server.js": {
+      "maxDuration": 10
+    }
+  }
 }
